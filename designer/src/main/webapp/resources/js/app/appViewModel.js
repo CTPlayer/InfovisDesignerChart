@@ -424,7 +424,7 @@ define(['knockout', 'infovis'],function(ko, infovis){
                 option.textColor = self.subGroupTextColor();
                 option.textFont = option.textFont.split(" ")[0] + " " +self.subGroupFontSize()+ "px " + option.textFont.split(" ")[2];
                 option.width = self.subGroupImageWidth();
-                option.height = self.subGroupImageHeight();
+                option.width = self.subGroupImageHeight();
                 $("#subGroupFontSize").text(self.subGroupFontSize());
 
                 engine.render(id,"",option);

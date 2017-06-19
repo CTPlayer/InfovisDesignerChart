@@ -1,22 +1,20 @@
 /**
  * Created by ct on 2016/9/7.
  */
-define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', 'app/appViewModel','zrender','CanvasTag','CanvasTagOfImage',
+define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', 'app/appViewModel','zrender','CanvasTag','CanvasTagOfImage','echarts',
     'bootstrap', 'gridstack', 'spectrum'],
-    function($, infovis, ko, kb, baseOptions, formatData, appViewModel,zrender,CanvasTag,CanvasTagOfImage){
+    function($, infovis, ko, kb, baseOptions, formatData, appViewModel,zrender,CanvasTag,CanvasTagOfImage,echarts){
     /**
      * 渲染设计面板图表菜单
      * @param target
      */
-    var renderMenu = function(target){
-        var allOptions = baseOptions.makeAllOptions();
-        var engine = infovis.init(allOptions || {});
+    var renderMenu = function(target,chartName){
         //根据target判断不同的渲染方式以及事件绑定
         var charttype = target.attr("chartType");
         if(charttype.indexOf("text") < 0) {
             target.append('<div id="operate" style="width:100%;height:0px;background-color:rgb(53,61,71);position:absolute;top:0px;opacity:0.8">' +
                 '<span style="display:none;">' +
-                '<span id="chartTitle"></span>' +
+                '<span id="chartTitle">'+chartName+'</span>' +
                 '<a href="#"><i class="glyphicon glyphicon-remove" style="color: white"></i></a>' +
                 '<a href="#" data-toggle="modal" data-target="#optionModal"><i class="glyphicon glyphicon-pencil" style="color: white"></i></a>' +
                 '<a href="#"><i class="fa fa-cog" style="color: white"></i></a>' +
@@ -25,7 +23,7 @@ define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', '
         }else{
             target.append('<div id="operate" style="width:100%;height:0px;background-color:rgb(53,61,71);position:absolute;top:0px;opacity:0.8">' +
                 '<span style="display:none;">' +
-                '<span id="chartTitle"></span>' +
+                '<span id="chartTitle">'+chartName+'</span>' +
                 '<a href="#"><i class="glyphicon glyphicon-remove" style="color: white"></i></a>' +
                 '<a href="#" data-toggle="modal" data-target="#textOptionModal"><i class="glyphicon glyphicon-pencil" style="color: white"></i></a>' +
                 '</span>' +
@@ -49,8 +47,8 @@ define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', '
 
         //删除当前容器
         target.find('a').eq(0).click(function(){
-            $("title").html("*Infovis-Designer");                                     //改动标记
-            window.isSave = false;
+            app.isSave = true;
+            $("title").html("*Infovis-Designer");
             var area = $(this).parent().parent().parent();
             $(area).parent().remove();
         });
@@ -62,7 +60,7 @@ define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', '
             // var instance;
             // var type;
             target.find('a').eq(1).click(function () {
-                var instance = engine.chart.getInstanceByDom($(this).parent().parent().parent()[0]);
+                var instance = echarts.getInstanceByDom($(this).parent().parent().parent()[0]);
                 var type = instance.getOption().series[0].type;
 
                 $("#loading").css("display", "block");

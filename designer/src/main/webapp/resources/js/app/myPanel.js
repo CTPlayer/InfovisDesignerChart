@@ -102,7 +102,7 @@ require(['jquery','validate','bootstrap'], function($,validate){
     $("#addPanelModal .btn-success").click(function(){
         $("#addPanelForm").submit();
     });
-    
+
     $("#addPanelForm").validate({
         errorElement : 'div',
         errorClass : 'warning-block',
