@@ -249,6 +249,10 @@
         .draggable {
             background: white;
         }
+
+        [v-cloak] {
+            display: none;
+        }
     </style>
 </head>
 
@@ -487,17 +491,9 @@
         <!-- Main Content -->
         <div class="container-fluid">
             <div class="grid-stack">
-                <div v-for="item in widgetParam" @mouseenter="chartMenuMouseEnter" @mouseleave="chartMenuMouseLeave" v-bind:style="{ width:item.width + 'px', height:item.height + 'px' }" class="draggable" v-bind:chartType="item.chartType" v-bind:id="item.id" v-bind:chartId="item.chartId" >
+                <div v-for="item in widgetParam" v-bind:style="{ width:item.width + 'px', height:item.height + 'px' }" class="draggable" v-bind:chartType="item.chartType" v-bind:id="item.id" v-bind:chartId="item.chartId" >
                     <img style="display: none" v-if="item.chartType === 'text:subGroupOfImage' " v-bind:src="item.hideImg">
-                    <div v-if="isRenderFail" style="text-align: center;padding-top: 40%;"><span class="glyphicon glyphicon-flash" style="font-size: 40px;display:block" aria-hidden="true"></span><span class="glyphicon-class" style="font-size:25px;">当前图表渲染失败，请检查数据库链接是否正常!</span></div>
-                    <div id="operate" style="width:100%;height:0px;background-color:rgb(53,61,71);position:absolute;top:0px;opacity:0.8">
-                        <span style="display:block;">
-                        <span id="chartTitle">{{ item.chartName }}</span>
-                            <a href="#"><i class="glyphicon glyphicon-remove" style="color: white"></i></a>
-                            <a href="#" data-toggle="modal" data-target="#optionModal"><i class="glyphicon glyphicon-pencil" style="color: white"></i></a>
-                            <a href="#" v-if="item.chartType === 'chart' "><i class="fa fa-cog" style="color: white"></i></a>
-                        </span>
-                    </div>
+                    <div v-if="isRenderFail" v-cloak style="text-align: center;padding-top: 40%;"><span class="glyphicon glyphicon-flash" style="font-size: 40px;display:block" aria-hidden="true"></span><span class="glyphicon-class" style="font-size:25px;">当前图表渲染失败，请检查数据库链接是否正常!</span></div>
                 </div>
                 ${htmlCode}
             </div>
@@ -520,6 +516,10 @@
                     <div id="optionContainer" style="width:40%;height:410px;float:left;">
                     </div>
                     <div id="optionPanel" style="width:50%;height:410px;float:left;margin-left:50px;">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#param" data-toggle="tab">配置项</a></li>
+                        </ul>
+                        <chart-option-component v-bind:chart-option="chartOption"></chart-option-component>
                     </div>
                 </div>
                 <div class="modal-footer" style="clear:both">

@@ -54,9 +54,70 @@ function overloadItemStyle(optItem, theme) {
     }
 }
 
-require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','interact',
-    'bootstrapFileStyle','spectrum','confirmModal'], function ($,domReady,vue,CanvasTagOfImage,renderMenu,echarts,interact) {
+require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','interact','formatData',
+    'bootstrapFileStyle','spectrum','confirmModal'], function ($,domReady,vue,CanvasTagOfImage,renderMenu,echarts,interact,formatData) {
     domReady(function () {
+        vue.component('chart-option-component',{
+            template: formatData.tableAndConfigOfBarAndLine(),
+            props: ['chartOption'],
+            data: function(){
+                return {
+                    titleContent: '',
+                    titleTop: '',
+                    titleX: '',
+                    titleFontFamily: '',
+                    titleFontSize: '',
+                    titleFontWeight: '',
+                    titleFontStyle: '',
+                    titleFontColor: ''
+                }
+            },
+            watch: {
+                chartOption: function(){
+                    var self  = this;
+                    //颜色选择器初始化
+                    $("#titleFontColor").spectrum({
+                        showInput: true,
+                        allowEmpty:true,
+                        color: this.chartOption.title[0].textStyle.color,
+                        change: function(color, self){
+                            self.titleFontColor = color.toHexString();
+                        }
+                    });
+                    if(this.chartOption.title[0].text){
+                        this.titleContent = this.chartOption.title[0].text
+                    }
+                    if(this.chartOption.title[0].top){
+                        this.titleTop = this.chartOption.title[0].top
+                    }
+                    if(this.chartOption.title[0].left){
+                        this.titleX = this.chartOption.title[0].left
+                    }
+                    if(this.chartOption.title[0].textStyle.fontFamily){
+                        this.titleFontFamily = this.chartOption.title[0].textStyle.fontFamily
+                    }
+                    if(this.chartOption.title[0].textStyle.fontSize){
+                        this.titleFontSize = this.chartOption.title[0].textStyle.fontSize
+                    }
+                    if(this.chartOption.title[0].textStyle.fontWeight){
+                        this.titleFontWeight = this.chartOption.title[0].textStyle.fontWeight
+                    }
+                    if(this.chartOption.title[0].textStyle.fontStyle){
+                        this.titleFontStyle = this.chartOption.title[0].textStyle.fontStyle
+                    }
+                    if(this.chartOption.title[0].textStyle.color){
+                        this.titleFontColor = this.chartOption.title[0].textStyle.color
+                    }
+                }
+                // titleContent: function(){
+                //     console.log(123);
+                // },
+                // titleTop: function(){
+                //     console.log(456);
+                // }
+            }
+        });
+
         var app = new vue({
             el: '#app',
             data: {
@@ -87,7 +148,8 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                 //选中渲染是否失败
                 isRenderFail: false,
                 //当前页是否保存
-                isSave: true
+                isSave: true,
+                chartOption: ''
             },
             methods: {
                 //背景样式切换
@@ -259,20 +321,6 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                         this.currentSelectedIndex = index;
                     }
                 },
-                //图表菜单鼠标滑入动画
-                chartMenuMouseEnter: function(event){
-                    $(event.target).stop();
-                    $(event.target).children().css("display","block");
-                    $(event.target).animate({height:'40px'});
-                },
-                //图表菜单鼠标滑出动画
-                chartMenuMouseLeave: function(){
-                    $(event.target).stop();
-                    $(event.target).children().css("display","none");
-                    if($(event.target).css('height') != '0px') {
-                        $(event.target).animate({height: '40px'});
-                    }
-                },
                 //图表，组件选中渲染
                 renderSelected: function(){
                     var defer = $.ajax({
@@ -301,7 +349,8 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                 if(parseInt(data.isRealTime) == 0){
                                     $targetDiv = $("#"+app.order);
                                     echarts.init($targetDiv[0]).setOption(JSON.parse(data.jsCode));
-                                    // renderMenu.renderMenu($targetDiv, data.chartName);
+                                    renderMenu.renderMenu($targetDiv, data.chartName);
+                                    app.chartOption = JSON.parse(data.jsCode);
                                 }else if(parseInt(data.isRealTime) == 1){
                                     $.ajax({
                                         async: false,

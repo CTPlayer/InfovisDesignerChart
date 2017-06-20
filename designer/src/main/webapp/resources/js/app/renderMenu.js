@@ -54,128 +54,128 @@ define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', '
         });
 
         //根据target判断不同的渲染方式以及事件绑定
-        if(charttype.indexOf("text") < 0) {
-            //将选中即将配置的图表渲染到配置面板
-            //双向绑定
-            // var instance;
-            // var type;
-            target.find('a').eq(1).click(function () {
-                var instance = echarts.getInstanceByDom($(this).parent().parent().parent()[0]);
-                var type = instance.getOption().series[0].type;
-
-                $("#loading").css("display", "block");
-                $("#optionContainer").empty();
-                $("#optionPanel").empty();
-
-                $("#optionModal").unbind("shown.bs.modal");
-                $("#optionModal").on("shown.bs.modal", function (e) {
-                    $("#loading").css("display", "none");
-                    if (type == "bar" || type == "line") {
-                        $("#optionPanel").html(formatData.tableAndConfigOfBarAndLine());
-                        ko.applyBindings(appViewModel.bindTableAndConfigOfBarAndLine(instance.getOption(), engine), $("#optionPanel").children()[1]);  //开启双向绑定监听
-                    } else if (type == "pie") {
-                        $("#optionPanel").html(formatData.tableAndConfigOfPie());
-                        ko.applyBindings(appViewModel.bindTableAndConfigOfPie(instance.getOption(), engine), $("#optionPanel").children()[1]);  //开启双向绑定监听
-                    }
-                });
-            });
-
-            target.find('a').eq(2).click(function () {
-                $("title").html("Infovis-Designer");
-
-                $(".grid-stack-placeholder").remove();
-
-                $(".app-container").addClass("loader");
-                $(".loader-container").css("display", "block");
-
-                var index = $(this).parent().parent().parent().attr("chartId");
-                var arr = window.location.href.split("/");
-                var exportId = $("#exportId").val();
-                var shareHref = arr[0] + "//" + arr[2] + "/" + arr[3] + "/share.page?exportId=" + exportId;
-                if (window.isSave == false) {
-                    $.ajax({
-                        type: 'POST',
-                        url: "export",
-                        data: {
-                            "htmlCode": $(".grid-stack").html().trim(),
-                            "exportId": exportId,
-                            "extraMsg": shareHref
-                        },
-                        success: function () {
-                            window.isSave = true;                     //点击导出后表明已保存
-
-                            $("body").removeClass("loader");
-                            $(".loader-container").css("display", "none");
-                            top.window.location = "dataAnalysis.page?chartId=" + index + "&exportId=" + exportId;
-                        },
-                        error: function () {
-                            alert("保存失败，请重试！");
-                        }
-                    });
-
-                    var containers = $(".grid-stack").children();
-                    var chartIds = [];          //保存图表id
-                    var containerIds = [];           //保存容器id
-                    for(var i=0;i<containers.length-1;i++) {
-                        var chartId = $(containers[i]).children().attr("chartId");
-                        var containerId = $(containers[i]).children().attr("id");
-                        chartIds.push(chartId);
-                        containerIds.push(containerId);
-                    }
-                    $.ajax({
-                        type: 'POST',
-                        url: "panelChartsWrapper/updateWrapper",
-                        data: "chartIds="+chartIds+"&containerIds="+containerIds+"&exportId="+exportId
-                    });
-                } else {
-                    top.window.location = "dataAnalysis.page?chartId=" + index + "&exportId=" + exportId;
-                }
-            });
-        }else{
-            target.find('a').eq(1).click(function () {
-                    $("#textOptionContainer").empty();
-                    $("#textOptionPanel").empty();
-
-                    var pzr = zrender.getInstance(target.attr("zid"));//原控件
-                    var option = $.extend(true, {}, pzr.storage.getShapeList()[0].style);
-
-                    $("#textOptionModal").unbind("shown.bs.modal");
-                    $("#textOptionModal .btn-primary").unbind("click");
-                    $("#textOptionModal").on("shown.bs.modal", function (e) {
-                        $("#textOptionPanel").html(formatData.tableAndConfigOfText);
-                        if(charttype.indexOf("subGroupOfImage") < 0){
-                            var canvasTag = CanvasTag().render("textOptionContainer",option);
-                            ko.applyBindings(appViewModel.bindTableAndConfigOfText(option, canvasTag), $("#textOptionPanel").children()[1]);  //开启双向绑定监听
-                        }else{
-                            $("#textOptionPanel").find("#chartConfig").html(formatData.tableAndConfigOfSubGroup);
-                            option.image = target.parent().find("img")[0];
-                            var canvasTagOfImage = CanvasTagOfImage().render("textOptionContainer","",option);
-                            ko.applyBindings(appViewModel.bindTableAndConfigOfSubGroup("textOptionContainer",option,canvasTagOfImage),$("#textOptionPanel").children()[1]);
-                        }
-                    });
-                    $("#textOptionModal .btn-primary").on("click",function () {
-                        if(charttype.indexOf("subGroupOfImage") < 0){
-                            CanvasTag().render(target.attr("id"),option);
-                        }else{
-                            CanvasTagOfImage().render(target.attr("id"),"",option);
-                            option.image = target.parent().find("img").attr("src").split(",")[1].replace('"','');
-                        }
-
-                        $.ajax({
-                            type: 'POST',
-                            url: 'updateChartInfo',
-                            data: {
-                                'id': target.attr("chartId"),
-                                'jsCode': JSON.stringify(option)
-                            },
-                            error: function(){
-                                alert("保存时失败，请重试!");
-                            }
-                        });
-                        renderMenu(target);
-                    });
-            });
-        }
+        // if(charttype.indexOf("text") < 0) {
+        //     //将选中即将配置的图表渲染到配置面板
+        //     //双向绑定
+        //     // var instance;
+        //     // var type;
+        //     target.find('a').eq(1).click(function () {
+        //         var instance = echarts.getInstanceByDom($(this).parent().parent().parent()[0]);
+        //         var type = instance.getOption().series[0].type;
+        //
+        //         $("#loading").css("display", "block");
+        //         $("#optionContainer").empty();
+        //         $("#optionPanel").empty();
+        //
+        //         $("#optionModal").unbind("shown.bs.modal");
+        //         $("#optionModal").on("shown.bs.modal", function (e) {
+        //             $("#loading").css("display", "none");
+        //             if (type == "bar" || type == "line") {
+        //                 $("#optionPanel").html(formatData.tableAndConfigOfBarAndLine());
+        //                 ko.applyBindings(appViewModel.bindTableAndConfigOfBarAndLine(instance.getOption(), engine), $("#optionPanel").children()[1]);  //开启双向绑定监听
+        //             } else if (type == "pie") {
+        //                 $("#optionPanel").html(formatData.tableAndConfigOfPie());
+        //                 ko.applyBindings(appViewModel.bindTableAndConfigOfPie(instance.getOption(), engine), $("#optionPanel").children()[1]);  //开启双向绑定监听
+        //             }
+        //         });
+        //     });
+        //
+        //     target.find('a').eq(2).click(function () {
+        //         $("title").html("Infovis-Designer");
+        //
+        //         $(".grid-stack-placeholder").remove();
+        //
+        //         $(".app-container").addClass("loader");
+        //         $(".loader-container").css("display", "block");
+        //
+        //         var index = $(this).parent().parent().parent().attr("chartId");
+        //         var arr = window.location.href.split("/");
+        //         var exportId = $("#exportId").val();
+        //         var shareHref = arr[0] + "//" + arr[2] + "/" + arr[3] + "/share.page?exportId=" + exportId;
+        //         if (window.isSave == false) {
+        //             $.ajax({
+        //                 type: 'POST',
+        //                 url: "export",
+        //                 data: {
+        //                     "htmlCode": $(".grid-stack").html().trim(),
+        //                     "exportId": exportId,
+        //                     "extraMsg": shareHref
+        //                 },
+        //                 success: function () {
+        //                     window.isSave = true;                     //点击导出后表明已保存
+        //
+        //                     $("body").removeClass("loader");
+        //                     $(".loader-container").css("display", "none");
+        //                     top.window.location = "dataAnalysis.page?chartId=" + index + "&exportId=" + exportId;
+        //                 },
+        //                 error: function () {
+        //                     alert("保存失败，请重试！");
+        //                 }
+        //             });
+        //
+        //             var containers = $(".grid-stack").children();
+        //             var chartIds = [];          //保存图表id
+        //             var containerIds = [];           //保存容器id
+        //             for(var i=0;i<containers.length-1;i++) {
+        //                 var chartId = $(containers[i]).children().attr("chartId");
+        //                 var containerId = $(containers[i]).children().attr("id");
+        //                 chartIds.push(chartId);
+        //                 containerIds.push(containerId);
+        //             }
+        //             $.ajax({
+        //                 type: 'POST',
+        //                 url: "panelChartsWrapper/updateWrapper",
+        //                 data: "chartIds="+chartIds+"&containerIds="+containerIds+"&exportId="+exportId
+        //             });
+        //         } else {
+        //             top.window.location = "dataAnalysis.page?chartId=" + index + "&exportId=" + exportId;
+        //         }
+        //     });
+        // }else{
+        //     target.find('a').eq(1).click(function () {
+        //             $("#textOptionContainer").empty();
+        //             $("#textOptionPanel").empty();
+        //
+        //             var pzr = zrender.getInstance(target.attr("zid"));//原控件
+        //             var option = $.extend(true, {}, pzr.storage.getShapeList()[0].style);
+        //
+        //             $("#textOptionModal").unbind("shown.bs.modal");
+        //             $("#textOptionModal .btn-primary").unbind("click");
+        //             $("#textOptionModal").on("shown.bs.modal", function (e) {
+        //                 $("#textOptionPanel").html(formatData.tableAndConfigOfText);
+        //                 if(charttype.indexOf("subGroupOfImage") < 0){
+        //                     var canvasTag = CanvasTag().render("textOptionContainer",option);
+        //                     ko.applyBindings(appViewModel.bindTableAndConfigOfText(option, canvasTag), $("#textOptionPanel").children()[1]);  //开启双向绑定监听
+        //                 }else{
+        //                     $("#textOptionPanel").find("#chartConfig").html(formatData.tableAndConfigOfSubGroup);
+        //                     option.image = target.parent().find("img")[0];
+        //                     var canvasTagOfImage = CanvasTagOfImage().render("textOptionContainer","",option);
+        //                     ko.applyBindings(appViewModel.bindTableAndConfigOfSubGroup("textOptionContainer",option,canvasTagOfImage),$("#textOptionPanel").children()[1]);
+        //                 }
+        //             });
+        //             $("#textOptionModal .btn-primary").on("click",function () {
+        //                 if(charttype.indexOf("subGroupOfImage") < 0){
+        //                     CanvasTag().render(target.attr("id"),option);
+        //                 }else{
+        //                     CanvasTagOfImage().render(target.attr("id"),"",option);
+        //                     option.image = target.parent().find("img").attr("src").split(",")[1].replace('"','');
+        //                 }
+        //
+        //                 $.ajax({
+        //                     type: 'POST',
+        //                     url: 'updateChartInfo',
+        //                     data: {
+        //                         'id': target.attr("chartId"),
+        //                         'jsCode': JSON.stringify(option)
+        //                     },
+        //                     error: function(){
+        //                         alert("保存时失败，请重试!");
+        //                     }
+        //                 });
+        //                 renderMenu(target);
+        //             });
+        //     });
+        // }
     };
 
     var renderFailMenu = function(target){
