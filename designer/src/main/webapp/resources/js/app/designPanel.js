@@ -62,6 +62,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
             props: ['chartOption'],
             data: function(){
                 return {
+                    option: '',
                     titleContent: '',
                     titleTop: '',
                     titleX: '',
@@ -84,34 +85,29 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             self.titleFontColor = color.toHexString();
                         }
                     });
-                    if(this.chartOption.title[0].text){
+                    if(this.chartOption.title[0]){
                         this.titleContent = this.chartOption.title[0].text
-                    }
-                    if(this.chartOption.title[0].top){
                         this.titleTop = this.chartOption.title[0].top
-                    }
-                    if(this.chartOption.title[0].left){
                         this.titleX = this.chartOption.title[0].left
-                    }
-                    if(this.chartOption.title[0].textStyle.fontFamily){
                         this.titleFontFamily = this.chartOption.title[0].textStyle.fontFamily
-                    }
-                    if(this.chartOption.title[0].textStyle.fontSize){
                         this.titleFontSize = this.chartOption.title[0].textStyle.fontSize
-                    }
-                    if(this.chartOption.title[0].textStyle.fontWeight){
                         this.titleFontWeight = this.chartOption.title[0].textStyle.fontWeight
-                    }
-                    if(this.chartOption.title[0].textStyle.fontStyle){
                         this.titleFontStyle = this.chartOption.title[0].textStyle.fontStyle
-                    }
-                    if(this.chartOption.title[0].textStyle.color){
                         this.titleFontColor = this.chartOption.title[0].textStyle.color
                     }
+                    this.option = this.chartOption;
+                    $("#optionModal").unbind("shown.bs.modal");
+                    $("#optionModal").on("shown.bs.modal", function (e) {
+                        var myChart = echarts.init(document.getElementById("optionContainer"));
+                        myChart.setOption(self.option,true);
+                    });
+                },
+                titleContent: function(){
+                    if(this.option.title[0].text){
+                        this.option.title[0].text = this.titleContent
+                        console.log('Im running');
+                    }
                 }
-                // titleContent: function(){
-                //     console.log(123);
-                // },
                 // titleTop: function(){
                 //     console.log(456);
                 // }
