@@ -57,20 +57,41 @@ function overloadItemStyle(optItem, theme) {
 require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','interact','formatData',
     'bootstrapFileStyle','spectrum','confirmModal'], function ($,domReady,vue,CanvasTagOfImage,renderMenu,echarts,interact,formatData) {
     domReady(function () {
-        vue.component('chart-option-component',{
+        //bar & line 类型配置双向绑定组件
+        vue.component('chart-option-component-bar',{
             template: formatData.tableAndConfigOfBarAndLine(),
             props: ['chartOption'],
             data: function(){
                 return {
                     option: '',
-                    titleContent: '',
-                    titleTop: '',
-                    titleX: '',
-                    titleFontFamily: '',
-                    titleFontSize: '',
-                    titleFontWeight: '',
-                    titleFontStyle: '',
-                    titleFontColor: ''
+                    myChart: '',
+                    optionSetting: {
+                        titleContent: '',
+                        titleTop: '',
+                        titleX: '',
+                        titleFontFamily: '',
+                        titleFontSize: '',
+                        titleFontWeight: '',
+                        titleFontStyle: '',
+                        titleFontColor: '',
+                        subtitleContent: '',
+                        subtitleFontFamily: '',
+                        subtitleFontSize: '',
+                        subtitleFontWeight: '',
+                        subtitleFontStyle: '',
+                        subtitleFontColor: '',
+                        tooltipShow: '',
+                        tooltipBorderColor: '',
+                        tooltipBorderWidth: '',
+                        tooltipBackgroundColor: '',
+                        tooltipFontFamily: '',
+                        tooltipFontSize: '',
+                        tooltipFontWeight: '',
+                        tooltipFontColor: '',
+                        backgroundOpacity: '',
+                        xRotate: '',
+                        yAxisContent: ''
+                    }
                 }
             },
             watch: {
@@ -81,36 +102,130 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                         showInput: true,
                         allowEmpty:true,
                         color: this.chartOption.title[0].textStyle.color,
-                        change: function(color, self){
-                            self.titleFontColor = color.toHexString();
+                        change: function(color){
+                            self.optionSetting.titleFontColor = color.toHexString();
                         }
                     });
-                    if(this.chartOption.title[0]){
-                        this.titleContent = this.chartOption.title[0].text
-                        this.titleTop = this.chartOption.title[0].top
-                        this.titleX = this.chartOption.title[0].left
-                        this.titleFontFamily = this.chartOption.title[0].textStyle.fontFamily
-                        this.titleFontSize = this.chartOption.title[0].textStyle.fontSize
-                        this.titleFontWeight = this.chartOption.title[0].textStyle.fontWeight
-                        this.titleFontStyle = this.chartOption.title[0].textStyle.fontStyle
-                        this.titleFontColor = this.chartOption.title[0].textStyle.color
+                    $("#subtitleFontColor").spectrum({
+                        showInput: true,
+                        allowEmpty:true,
+                        color: this.chartOption.title[0].subtextStyle.color,
+                        change: function(color) {
+                            self.optionSetting.subtitleFontColor = color.toHexString();
+                        }
+                    });
+                    $("#tooltipBorderColor").spectrum({
+                        showInput: true,
+                        allowEmpty:true,
+                        color: this.chartOption.tooltip[0].borderColor,
+                        change: function(color) {
+                            self.optionSetting.tooltipBorderColor = color.toHexString();
+                        }
+                    });
+                    $("#tooltipBackgroundColor").spectrum({
+                        showInput: true,
+                        allowEmpty:true,
+                        color: this.chartOption.tooltip[0].backgroundColor,
+                        change: function(color) {
+                            self.optionSetting.tooltipBackgroundColor = color.toHexString();
+                        }
+                    });
+                    $("#tooltipFontColor").spectrum({
+                        showInput: true,
+                        allowEmpty:true,
+                        color: this.chartOption.tooltip[0].textStyle.color,
+                        change: function(color) {
+                            self.optionSetting.tooltipFontColor = color.toHexString();
+                        }
+                    });
+                    if(JSON.stringify(this.chartOption.backgroundColor).split(",").length<4){
+                        this.chartOption.backgroundColor = 'rgba(255,255,255,1)';
+                    }
+                    if(this.chartOption.title[0] || this.chartOption.tooltip[0]){
+                        var settings = {
+                            titleContent: this.chartOption.title[0].text,
+                            titleTop: this.chartOption.title[0].top,
+                            titleX: this.chartOption.title[0].left,
+                            titleFontFamily: this.chartOption.title[0].textStyle.fontFamily,
+                            titleFontSize: this.chartOption.title[0].textStyle.fontSize,
+                            titleFontWeight: this.chartOption.title[0].textStyle.fontWeight,
+                            titleFontStyle: this.chartOption.title[0].textStyle.fontStyle,
+                            titleFontColor: this.chartOption.title[0].textStyle.color,
+                            subtitleContent: this.chartOption.title[0].subtext,
+                            subtitleFontFamily: this.chartOption.title[0].subtextStyle.fontFamily,
+                            subtitleFontSize: this.chartOption.title[0].subtextStyle.fontSize,
+                            subtitleFontWeight: this.chartOption.title[0].subtextStyle.fontWeight,
+                            subtitleFontStyle: this.chartOption.title[0].subtextStyle.fontStyle,
+                            subtitleFontColor: this.chartOption.title[0].subtextStyle.color,
+                            tooltipShow: this.chartOption.tooltip[0].show,
+                            tooltipBorderColor: this.chartOption.tooltip[0].borderColor,
+                            tooltipBorderWidth: this.chartOption.tooltip[0].borderWidth,
+                            tooltipBackgroundColor: this.chartOption.tooltip[0].backgroundColor,
+                            tooltipFontFamily: this.chartOption.tooltip[0].textStyle.fontFamily,
+                            tooltipFontSize: this.chartOption.tooltip[0].textStyle.fontSize,
+                            tooltipFontWeight: this.chartOption.tooltip[0].textStyle.fontWeight,
+                            tooltipFontColor: this.chartOption.tooltip[0].textStyle.color,
+                            backgroundOpacity: JSON.stringify(this.chartOption.backgroundColor).split(",")[3].replace(')"','')*100,
+                            xRotate: this.chartOption.xAxis[0].axisLabel.rotate ? this.chartOption.xAxis[0].axisLabel.rotate : 0,
+                            yAxisContent: ''
+                        };
+                        this.optionSetting = settings;
                     }
                     this.option = this.chartOption;
                     $("#optionModal").unbind("shown.bs.modal");
                     $("#optionModal").on("shown.bs.modal", function (e) {
-                        var myChart = echarts.init(document.getElementById("optionContainer"));
-                        myChart.setOption(self.option,true);
+                        self.myChart = echarts.init(document.getElementById("optionContainer"));
+                        self.myChart.setOption(self.option,true);
                     });
                 },
-                titleContent: function(){
-                    if(this.option.title[0].text){
-                        this.option.title[0].text = this.titleContent
-                        console.log('Im running');
-                    }
+                optionSetting: {
+                    handler: function(val, oldVal){
+                        this.chartOption.title[0].text = this.optionSetting.titleContent;
+                        this.chartOption.title[0].top = this.optionSetting.titleTop;
+                        this.chartOption.title[0].left = this.optionSetting.titleX;
+                        this.chartOption.title[0].textStyle.fontFamily = this.optionSetting.titleFontFamily;
+                        this.chartOption.title[0].textStyle.fontSize = this.optionSetting.titleFontSize;
+                        this.chartOption.title[0].textStyle.fontWeight = this.optionSetting.titleFontWeight;
+                        this.chartOption.title[0].textStyle.fontStyle = this.optionSetting.titleFontStyle;
+                        this.chartOption.title[0].textStyle.color = this.optionSetting.titleFontColor;
+                        this.chartOption.title[0].subtext = this.optionSetting.subtitleContent;
+                        this.chartOption.title[0].subtextStyle.fontFamily = this.optionSetting.subtitleFontFamily;
+                        this.chartOption.title[0].subtextStyle.fontSize = this.optionSetting.subtitleFontSize;
+                        this.chartOption.title[0].subtextStyle.fontWeight = this.optionSetting.subtitleFontWeight;
+                        this.chartOption.title[0].subtextStyle.fontStyle = this.optionSetting.subtitleFontStyle;
+                        this.chartOption.title[0].subtextStyle.color = this.optionSetting.subtitleFontColor;
+                        this.chartOption.tooltip[0].show = 'false' == this.optionSetting.tooltipShow ? false : true;
+                        this.chartOption.tooltip[0].borderColor = this.optionSetting.tooltipBorderColor;
+                        this.chartOption.tooltip[0].borderWidth = this.optionSetting.tooltipBorderWidth;
+                        this.chartOption.tooltip[0].backgroundColor = this.optionSetting.tooltipBackgroundColor;
+                        this.chartOption.tooltip[0].textStyle.fontFamily = this.optionSetting.tooltipFontFamily;
+                        this.chartOption.tooltip[0].textStyle.fontSize = this.optionSetting.tooltipFontSize;
+                        this.chartOption.tooltip[0].textStyle.fontWeight = this.optionSetting.tooltipFontWeight;
+                        this.chartOption.tooltip[0].textStyle.color = this.optionSetting.tooltipFontColor;
+                        if(JSON.stringify(this.chartOption.backgroundColor).split(",").length == 4){
+                            this.chartOption.backgroundColor = this.chartOption.backgroundColor.split(",")[0]+","+this.chartOption.backgroundColor.split(",")[1]+","+this.chartOption.backgroundColor.split(",")[2]+","+this.optionSetting.backgroundOpacity*0.01+")";
+                        }
+                        this.chartOption.xAxis[0].axisLabel.rotate = this.optionSetting.xRotate;
+                        this.chartOption.yAxis[0].name = this.optionSetting.yAxisContent;
+                        if(this.myChart != ''){
+                            this.myChart.setOption(this.option,true);
+                        }
+                    },
+                    deep: true
                 }
-                // titleTop: function(){
-                //     console.log(456);
-                // }
+            }
+        });
+        //pie 类型配置双向绑定
+        vue.component('chart-option-component-pie',{
+            template: formatData.tableAndConfigOfPie,
+            props: ['chartOption'],
+            data: function(){
+                return {
+
+                }
+            },
+            watch: {
+
             }
         });
 
@@ -345,8 +460,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                 if(parseInt(data.isRealTime) == 0){
                                     $targetDiv = $("#"+app.order);
                                     echarts.init($targetDiv[0]).setOption(JSON.parse(data.jsCode));
-                                    renderMenu.renderMenu($targetDiv, data.chartName);
-                                    app.chartOption = JSON.parse(data.jsCode);
+                                    renderMenu.renderMenu($targetDiv, data.chartName, app);
                                 }else if(parseInt(data.isRealTime) == 1){
                                     $.ajax({
                                         async: false,
@@ -369,11 +483,10 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                                 newOption.xAxis[0].data = option.xAxis[0].data;
                                             }
                                             echarts.init($targetDiv.get(0)).setOption(newOption);
-                                            // renderMenu.renderMenu($targetDiv, data.chartName);
+                                            renderMenu.renderMenu($targetDiv, data.chartName, app);
                                         },
                                         error: function(){
                                             app.isRenderFail = true;
-                                            // renderMenu.renderFailMenu($("#"+order));
                                         }
                                     });
                                 }

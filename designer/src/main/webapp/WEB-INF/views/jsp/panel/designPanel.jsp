@@ -519,7 +519,7 @@
                         <ul class="nav nav-tabs" role="tablist">
                             <li role="presentation" class="active"><a href="#param" data-toggle="tab">配置项</a></li>
                         </ul>
-                        <chart-option-component v-bind:chart-option="chartOption"></chart-option-component>
+                        <chart-option-component-bar v-bind:chart-option="chartOption"></chart-option-component-bar>
                     </div>
                 </div>
                 <div class="modal-footer" style="clear:both">
