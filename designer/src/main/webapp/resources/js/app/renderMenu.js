@@ -47,8 +47,7 @@ define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', '
 
         //删除当前容器
         target.find('a').eq(0).click(function(){
-            app.isSave = true;
-            $("title").html("*Infovis-Designer");
+            app.isSave = false;
             var area = $(this).parent().parent().parent();
             $(area).parent().remove();
         });
@@ -59,13 +58,8 @@ define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', '
             //双向绑定
             target.find('a').eq(1).click(function () {
                 var instance = echarts.getInstanceByDom($(this).parent().parent().parent()[0]);
-                var type = instance.getOption().series[0].type;
-
-                if (type == "bar" || type == "line") {
-                    app.chartOption = instance.getOption();
-                } else if (type == "pie") {
-
-                }
+                // var type = instance.getOption().series[0].type;
+                app.chartOption = instance.getOption();
             });
 
             // target.find('a').eq(2).click(function () {
@@ -120,51 +114,43 @@ define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', '
             //     }
             // });
         }
-        // else{
-        //     target.find('a').eq(1).click(function () {
-        //             $("#textOptionContainer").empty();
-        //             $("#textOptionPanel").empty();
-        //
-        //             var pzr = zrender.getInstance(target.attr("zid"));//原控件
-        //             var option = $.extend(true, {}, pzr.storage.getShapeList()[0].style);
-        //
-        //             $("#textOptionModal").unbind("shown.bs.modal");
-        //             $("#textOptionModal .btn-primary").unbind("click");
-        //             $("#textOptionModal").on("shown.bs.modal", function (e) {
-        //                 $("#textOptionPanel").html(formatData.tableAndConfigOfText);
-        //                 if(charttype.indexOf("subGroupOfImage") < 0){
-        //                     var canvasTag = CanvasTag().render("textOptionContainer",option);
-        //                     ko.applyBindings(appViewModel.bindTableAndConfigOfText(option, canvasTag), $("#textOptionPanel").children()[1]);  //开启双向绑定监听
-        //                 }else{
-        //                     $("#textOptionPanel").find("#chartConfig").html(formatData.tableAndConfigOfSubGroup);
-        //                     option.image = target.parent().find("img")[0];
-        //                     var canvasTagOfImage = CanvasTagOfImage().render("textOptionContainer","",option);
-        //                     ko.applyBindings(appViewModel.bindTableAndConfigOfSubGroup("textOptionContainer",option,canvasTagOfImage),$("#textOptionPanel").children()[1]);
-        //                 }
-        //             });
-        //             $("#textOptionModal .btn-primary").on("click",function () {
-        //                 if(charttype.indexOf("subGroupOfImage") < 0){
-        //                     CanvasTag().render(target.attr("id"),option);
-        //                 }else{
-        //                     CanvasTagOfImage().render(target.attr("id"),"",option);
-        //                     option.image = target.parent().find("img").attr("src").split(",")[1].replace('"','');
-        //                 }
-        //
-        //                 $.ajax({
-        //                     type: 'POST',
-        //                     url: 'updateChartInfo',
-        //                     data: {
-        //                         'id': target.attr("chartId"),
-        //                         'jsCode': JSON.stringify(option)
-        //                     },
-        //                     error: function(){
-        //                         alert("保存时失败，请重试!");
-        //                     }
-        //                 });
-        //                 renderMenu(target);
-        //             });
-        //     });
-        // }
+        else{
+            target.find('a').eq(1).click(function () {
+                    var pzr = zrender.getInstance(target.attr("zid"));//原控件
+                    var option = $.extend(true, {}, pzr.storage.getShapeList()[0].style);
+                    if(charttype.indexOf("subGroupOfImage") < 0){
+                        // app.textOption = option;
+                        app.currentView = 'text-option-component';
+                    }else {
+                        // app.subGroubOption = option;
+                        app.currentView = 'img-option-component';
+                    }
+                    app.options = option;
+
+                    // $("#textOptionModal .btn-primary").unbind("click");
+                    // $("#textOptionModal .btn-primary").on("click",function () {
+                    //     if(charttype.indexOf("subGroupOfImage") < 0){
+                    //         CanvasTag().render(target.attr("id"),option);
+                    //     }else{
+                    //         CanvasTagOfImage().render(target.attr("id"),"",option);
+                    //         option.image = target.parent().find("img").attr("src").split(",")[1].replace('"','');
+                    //     }
+                    //
+                    //     $.ajax({
+                    //         type: 'POST',
+                    //         url: 'updateChartInfo',
+                    //         data: {
+                    //             'id': target.attr("chartId"),
+                    //             'jsCode': JSON.stringify(option)
+                    //         },
+                    //         error: function(){
+                    //             alert("保存时失败，请重试!");
+                    //         }
+                    //     });
+                    //     renderMenu(target);
+                    // });
+            });
+        }
     };
 
     return {

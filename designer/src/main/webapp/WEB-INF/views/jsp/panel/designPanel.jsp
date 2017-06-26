@@ -248,10 +248,16 @@
 
         .draggable {
             background: white;
+            position: absolute;
+            display: inline-block;
         }
 
         [v-cloak] {
             display: none;
+        }
+
+        #app {
+            overflow: auto;
         }
     </style>
 </head>
@@ -263,7 +269,10 @@
         <div>正在生成外部可访问页面，请稍后...</div>
     </div>
     <div class="row content-container">
-        <nav class="navbar navbar-default navbar-fixed-top navbar-top">
+        <div style="margin-left: 48%;width: 25px;position: absolute" v-cloak v-show="isAllScreen" @click="allScreen" >
+            <a href="javascript:void(0)"><span aria-hidden="true" class="glyphicon glyphicon-chevron-down" style="font-size: 20px;"></span></a>
+        </div>
+        <nav v-show="!isAllScreen" class="navbar navbar-default navbar-fixed-top navbar-top">
             <div class="container-fluid">
                 <div class="navbar-header">
                     <button type="button" class="navbar-expand-toggle" v-bind:class="[{'fa-rotate-90': isExpanded}]" @click="toggleSideMenu">
@@ -298,205 +307,208 @@
                             </li>
                         </ul>
                     </li>
+                    <li class="dropdown" id="allScreen" @click="allScreen" v-bind:class="{danger: dangerIndex == 3}" @mouseenter="topMenuMouseEnter(3)">
+                        <a href="#"  role="button"><i class="glyphicon glyphicon-fullscreen"></i>&nbsp;&nbsp;全屏</a>
+                    </li>
                 </ul>
             </div>
         </nav>
-        <div class="side-menu sidebar-inverse" style="overflow-y:visible">
-            <nav class="navbar navbar-default" role="navigation">
-                <div class="side-menu-container">
-                    <div class="navbar-header">
-                        <a class="navbar-brand" href="#">
-                            <div class="icon fa fa-desktop"></div>
-                            <div class="title">可视化图表设计器</div>
-                        </a>
-                        <%--<button type="button" class="navbar-expand-toggle pull-right visible-xs">--%>
-                            <%--<i class="fa fa-times icon"></i>--%>
-                        <%--</button>--%>
+        <div v-show="!isAllScreen" class="side-menu sidebar-inverse" style="overflow-y:visible">
+                <nav class="navbar navbar-default" role="navigation">
+                    <div class="side-menu-container">
+                        <div class="navbar-header">
+                            <a class="navbar-brand" href="#">
+                                <div class="icon fa fa-desktop"></div>
+                                <div class="title">可视化图表设计器</div>
+                            </a>
+                            <%--<button type="button" class="navbar-expand-toggle pull-right visible-xs">--%>
+                                <%--<i class="fa fa-times icon"></i>--%>
+                            <%--</button>--%>
+                        </div>
+                        <ul class="nav navbar-nav">
+                            <li class="panel-default" @click="toggleSecondMenu(0)" v-bind:class="{active: 0 === currentActiveIndex}">
+                                <a href="dataAnalysis.page?exportId=${exportId}"><span class="icon fa fa-plus"></span><span class="title">新建图表</span></a>
+                            </li>
+                            <li class="panel-default" @click="toggleSecondMenu(1);getAllCharts()" v-bind:class="{active: 1 === currentActiveIndex}">
+                                <a href="#" data-toggle="modal" data-target="#myChart"><span class="icon fa fa-area-chart"></span><span class="title">添加已有图表</span></a>
+                            </li>
+                            <li class="panel panel-default dropdown" @click="toggleSecondMenu(2)" v-bind:class="{active: 2 === currentActiveIndex}">
+                                <a data-toggle="collapse" href="#dropdown-theme-choose">
+                                    <span class="icon fa fa-magic"></span><span class="title">配色设置</span>
+                                </a>
+                                <div id="dropdown-theme-choose" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <ul class="nav navbar-nav">
+                                            <li>
+                                                <div class="vintage col-md-6 theme" title="vintage">
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(216, 124, 124);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(145, 158, 139);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(215, 171, 130);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(110, 112, 116);"></div>
+                                                </div>
+                                                <div class="dark col-md-6 theme" title="dark">
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(221, 107, 102);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(117, 154, 160);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(230, 157, 135);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(141, 193, 169);"></div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="westeros col-md-6 theme" title="westeros">
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(81, 107, 145);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(89, 196, 230);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(237, 175, 218);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(147, 183, 227);"></div>
+                                                </div>
+                                                <div class="essos col-md-6 theme" title="essos">
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(137, 52, 72);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(217, 88, 80);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(235, 129, 70);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(255, 178, 72);"></div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="wonderland col-md-6 theme" title="wonderland">
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(78, 163, 151);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(34, 195, 170);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(123, 217, 165);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(208, 100, 138);"></div>
+                                                </div>
+                                                <div class="walden col-md-6 theme" title="walden">
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(63, 177, 227);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(107, 230, 193);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(98, 108, 145);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(160, 167, 230);"></div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="chalk col-md-6 theme" title="chalk">
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(252, 151, 175);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(135, 247, 207);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(247, 244, 148);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(114, 204, 255);"></div>
+                                                </div>
+                                                <div class="infographic col-md-6 theme" title="infographic">
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(193, 35, 43);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(39, 114, 123);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(252, 206, 16);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(232, 124, 37);"></div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="macarons col-md-6 theme" title="macarons">
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(46, 199, 201);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(182, 162, 222);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(182, 162, 222);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(255, 185, 128);"></div>
+                                                </div>
+                                                <div class="roma col-md-6 theme" title="roma">
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(224, 31, 84);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(0, 24, 82);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(245, 232, 200);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(184, 210, 199);"></div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="shine col-md-6 theme" title="shine">
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(193, 46, 52);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(230, 182, 0);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(0, 152, 217);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(43, 130, 29);"></div>
+                                                </div>
+                                                <div class="purple-passion col-md-6 theme" title="purple-passion">
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(138, 124, 168);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(224, 152, 199);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(143, 211, 232);"></div>
+                                                    <div class="col-md-3 theme-color" style="background-color: rgb(113, 102, 158);"></div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="panel panel-default dropdown" @click="toggleSecondMenu(3)" v-bind:class="{active: 3 === currentActiveIndex}">
+                                <a data-toggle="collapse" href="#dropdown-background-choose">
+                                    <span class="icon glyphicon glyphicon-picture"></span><span class="title">背景设置</span>
+                                </a>
+                                <div id="dropdown-background-choose" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <ul class="nav navbar-nav">
+                                            <li>
+                                                <div class="background-color-pick-block">
+                                                    <span class="background-default img-thumbnail" @click="saveCurrentBackground"></span>
+                                                    <div>默认</div>
+                                                </div>
+                                                <div class="background-color-pick-block">
+                                                    <span class="background-white img-thumbnail" @click="saveCurrentBackground"></span>
+                                                    <div>优雅白</div>
+                                                </div>
+                                                <div class="background-color-pick-block">
+                                                    <span class="background-black img-thumbnail" @click="saveCurrentBackground"></span>
+                                                    <div>高端黑</div>
+                                                </div>
+                                                <div class="background-color-pick-block">
+                                                    <span class="background-env-green img-thumbnail" @click="saveCurrentBackground"></span>
+                                                    <div>环保绿</div>
+                                                </div>
+                                                <div class="background-color-pick-block">
+                                                    <span class="background-business-grey img-thumbnail" @click="saveCurrentBackground"></span>
+                                                    <div>商务灰</div>
+                                                </div>
+                                                <div class="background-color-pick-block">
+                                                    <span class="background-dream-blue img-thumbnail" @click="saveCurrentBackground"></span>
+                                                    <div>梦幻蓝</div>
+                                                </div>
+                                                <div class="background-color-pick-block">
+                                                    <span class="background-dream-sky img-thumbnail" @click="saveCurrentBackground"></span>
+                                                    <div>星空蓝</div>
+                                                </div>
+                                                <div class="background-color-pick-block">
+                                                    <span class="background-dream-purple img-thumbnail" @click="saveCurrentBackground"></span>
+                                                    <div>绚丽紫</div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="panel panel-default dropdown" @click="toggleSecondMenu(4)" v-bind:class="{active: 4 === currentActiveIndex}">
+                                <a data-toggle="collapse" href="#dropdown-text-choose">
+                                    <span class="icon glyphicon glyphicon-text-size"></span><span class="title">文字组件</span>
+                                </a>
+                                <div id="dropdown-text-choose" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <ul class="nav navbar-nav">
+                                            <li>
+                                                <div style="display:inline-block;" class="background-text-pick-block">
+                                                    <span class="background-default img-thumbnail" textType="rectangle"></span>
+                                                    <div>默认</div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="panel-default" @click="toggleSecondMenu(5)" v-bind:class="{active: 5 === currentActiveIndex}">
+                                <a href="#" data-toggle="modal" data-target="#subGroupModal"><span class="icon fa fa-cog"></span><span class="title">新建标题框</span></a>
+                            </li>
+                            <li class="panel-default" @click="toggleSecondMenu(6)" v-bind:class="{active: 6 === currentActiveIndex}">
+                                <a href="#" data-toggle="modal" data-target="#mySubGroup"><span class="icon fa fa-archive"></span><span class="title">我的标题框</span></a>
+                            </li>
+                        </ul>
                     </div>
-                    <ul class="nav navbar-nav">
-                        <li class="panel-default" @click="toggleSecondMenu(0)" v-bind:class="{active: 0 === currentActiveIndex}">
-                            <a href="dataAnalysis.page?exportId=${exportId}"><span class="icon fa fa-plus"></span><span class="title">新建图表</span></a>
-                        </li>
-                        <li class="panel-default" @click="toggleSecondMenu(1);getAllCharts()" v-bind:class="{active: 1 === currentActiveIndex}">
-                            <a href="#" data-toggle="modal" data-target="#myChart"><span class="icon fa fa-area-chart"></span><span class="title">添加已有图表</span></a>
-                        </li>
-                        <li class="panel panel-default dropdown" @click="toggleSecondMenu(2)" v-bind:class="{active: 2 === currentActiveIndex}">
-                            <a data-toggle="collapse" href="#dropdown-theme-choose">
-                                <span class="icon fa fa-magic"></span><span class="title">配色设置</span>
-                            </a>
-                            <div id="dropdown-theme-choose" class="panel-collapse collapse">
-                                <div class="panel-body">
-                                    <ul class="nav navbar-nav">
-                                        <li>
-                                            <div class="vintage col-md-6 theme" title="vintage">
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(216, 124, 124);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(145, 158, 139);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(215, 171, 130);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(110, 112, 116);"></div>
-                                            </div>
-                                            <div class="dark col-md-6 theme" title="dark">
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(221, 107, 102);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(117, 154, 160);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(230, 157, 135);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(141, 193, 169);"></div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="westeros col-md-6 theme" title="westeros">
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(81, 107, 145);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(89, 196, 230);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(237, 175, 218);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(147, 183, 227);"></div>
-                                            </div>
-                                            <div class="essos col-md-6 theme" title="essos">
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(137, 52, 72);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(217, 88, 80);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(235, 129, 70);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(255, 178, 72);"></div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="wonderland col-md-6 theme" title="wonderland">
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(78, 163, 151);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(34, 195, 170);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(123, 217, 165);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(208, 100, 138);"></div>
-                                            </div>
-                                            <div class="walden col-md-6 theme" title="walden">
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(63, 177, 227);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(107, 230, 193);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(98, 108, 145);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(160, 167, 230);"></div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="chalk col-md-6 theme" title="chalk">
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(252, 151, 175);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(135, 247, 207);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(247, 244, 148);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(114, 204, 255);"></div>
-                                            </div>
-                                            <div class="infographic col-md-6 theme" title="infographic">
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(193, 35, 43);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(39, 114, 123);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(252, 206, 16);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(232, 124, 37);"></div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="macarons col-md-6 theme" title="macarons">
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(46, 199, 201);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(182, 162, 222);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(182, 162, 222);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(255, 185, 128);"></div>
-                                            </div>
-                                            <div class="roma col-md-6 theme" title="roma">
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(224, 31, 84);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(0, 24, 82);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(245, 232, 200);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(184, 210, 199);"></div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="shine col-md-6 theme" title="shine">
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(193, 46, 52);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(230, 182, 0);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(0, 152, 217);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(43, 130, 29);"></div>
-                                            </div>
-                                            <div class="purple-passion col-md-6 theme" title="purple-passion">
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(138, 124, 168);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(224, 152, 199);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(143, 211, 232);"></div>
-                                                <div class="col-md-3 theme-color" style="background-color: rgb(113, 102, 158);"></div>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="panel panel-default dropdown" @click="toggleSecondMenu(3)" v-bind:class="{active: 3 === currentActiveIndex}">
-                            <a data-toggle="collapse" href="#dropdown-background-choose">
-                                <span class="icon glyphicon glyphicon-picture"></span><span class="title">背景设置</span>
-                            </a>
-                            <div id="dropdown-background-choose" class="panel-collapse collapse">
-                                <div class="panel-body">
-                                    <ul class="nav navbar-nav">
-                                        <li>
-                                            <div class="background-color-pick-block">
-                                                <span class="background-default img-thumbnail" @click="saveCurrentBackground"></span>
-                                                <div>默认</div>
-                                            </div>
-                                            <div class="background-color-pick-block">
-                                                <span class="background-white img-thumbnail" @click="saveCurrentBackground"></span>
-                                                <div>优雅白</div>
-                                            </div>
-                                            <div class="background-color-pick-block">
-                                                <span class="background-black img-thumbnail" @click="saveCurrentBackground"></span>
-                                                <div>高端黑</div>
-                                            </div>
-                                            <div class="background-color-pick-block">
-                                                <span class="background-env-green img-thumbnail" @click="saveCurrentBackground"></span>
-                                                <div>环保绿</div>
-                                            </div>
-                                            <div class="background-color-pick-block">
-                                                <span class="background-business-grey img-thumbnail" @click="saveCurrentBackground"></span>
-                                                <div>商务灰</div>
-                                            </div>
-                                            <div class="background-color-pick-block">
-                                                <span class="background-dream-blue img-thumbnail" @click="saveCurrentBackground"></span>
-                                                <div>梦幻蓝</div>
-                                            </div>
-                                            <div class="background-color-pick-block">
-                                                <span class="background-dream-sky img-thumbnail" @click="saveCurrentBackground"></span>
-                                                <div>星空蓝</div>
-                                            </div>
-                                            <div class="background-color-pick-block">
-                                                <span class="background-dream-purple img-thumbnail" @click="saveCurrentBackground"></span>
-                                                <div>绚丽紫</div>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="panel panel-default dropdown" @click="toggleSecondMenu(4)" v-bind:class="{active: 4 === currentActiveIndex}">
-                            <a data-toggle="collapse" href="#dropdown-text-choose">
-                                <span class="icon glyphicon glyphicon-text-size"></span><span class="title">文字组件</span>
-                            </a>
-                            <div id="dropdown-text-choose" class="panel-collapse collapse">
-                                <div class="panel-body">
-                                    <ul class="nav navbar-nav">
-                                        <li>
-                                            <div style="display:inline-block;" class="background-text-pick-block">
-                                                <span class="background-default img-thumbnail" textType="rectangle"></span>
-                                                <div>默认</div>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="panel-default" @click="toggleSecondMenu(5)" v-bind:class="{active: 5 === currentActiveIndex}">
-                            <a href="#" data-toggle="modal" data-target="#subGroupModal"><span class="icon fa fa-cog"></span><span class="title">新建标题框</span></a>
-                        </li>
-                        <li class="panel-default" @click="toggleSecondMenu(6)" v-bind:class="{active: 6 === currentActiveIndex}">
-                            <a href="#" data-toggle="modal" data-target="#mySubGroup"><span class="icon fa fa-archive"></span><span class="title">我的标题框</span></a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- /.navbar-collapse -->
-            </nav>
-        </div>
+                    <!-- /.navbar-collapse -->
+                </nav>
+            </div>
         <!-- Main Content -->
         <div class="container-fluid">
-            <div class="grid-stack">
-                <div v-for="item in widgetParam" v-bind:style="{ width:item.width + 'px', height:item.height + 'px' }" class="draggable" v-bind:chartType="item.chartType" v-bind:id="item.id" v-bind:chartId="item.chartId" >
+            <%--<div class="grid-stack">--%>
+                <div v-for="item in widgets" v-bind:style="{ width:item.width + 'px', height:item.height + 'px', transform: 'translate(' + item.datax + 'px,' + item.datay + 'px)' }" class="draggable" v-bind:chartType="item.chartType" v-bind:id="item.id" v-bind:chartId="item.chartId" v-bind:data-x="item.datax" v-bind:data-y="item.datay" >
                     <img style="display: none" v-if="item.chartType === 'text:subGroupOfImage' " v-bind:src="item.hideImg">
                     <div v-if="isRenderFail" v-cloak style="text-align: center;padding-top: 40%;"><span class="glyphicon glyphicon-flash" style="font-size: 40px;display:block" aria-hidden="true"></span><span class="glyphicon-class" style="font-size:25px;">当前图表渲染失败，请检查数据库链接是否正常!</span></div>
                 </div>
-                ${htmlCode}
-            </div>
+                <%--${htmlCode}--%>
+            <%--</div>--%>
         </div>
     </div>
 
@@ -519,7 +531,7 @@
                         <ul class="nav nav-tabs" role="tablist">
                             <li role="presentation" class="active"><a href="#param" data-toggle="tab">配置项</a></li>
                         </ul>
-                        <chart-option-component-bar v-bind:chart-option="chartOption"></chart-option-component-bar>
+                        <chart-option-component v-bind:chart-option="chartOption"></chart-option-component>
                     </div>
                 </div>
                 <div class="modal-footer" style="clear:both">
@@ -577,6 +589,12 @@
                     <div id="textOptionContainer" style="width:40%;height:410px;float:left;">
                     </div>
                     <div id="textOptionPanel" style="width:50%;height:410px;float:left;margin-left:50px;">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#param" data-toggle="tab">配置项</a></li>
+                        </ul>
+                        <%--<text-option-component v-bind:text-option="textOption"></text-option-component>--%>
+                        <%--<img-option-component v-bind:sub-group-option="subGroupOption"></img-option-component>--%>
+                        <component v-bind:is="currentView" v-bind:options="options"></component>
                     </div>
                 </div>
                 <div class="modal-footer" style="clear:both">
@@ -649,7 +667,7 @@
                     </div>
                 </div>
                 <div class="modal-footer" style="clear:both">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">确认</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" @click="renderMySubGroup">确认</button>
                 </div>
             </div>
         </div>
