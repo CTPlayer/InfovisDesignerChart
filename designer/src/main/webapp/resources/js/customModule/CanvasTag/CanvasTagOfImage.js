@@ -2,7 +2,7 @@ define(['jquery', 'zrender', 'zrender/shape/Image'], function($, zrender, imageS
     return function(){
         var zr = {};
         return {
-            render: function(id, imgSrc, option){
+            render: function(id, imgSrc, option, isCenter){
                 var  target = $("#"+id);
                 zr = zrender.init(target[0]);
                 //绑定zrenderid
@@ -30,6 +30,10 @@ define(['jquery', 'zrender', 'zrender/shape/Image'], function($, zrender, imageS
                 }else {
                     option.x = pageX / 8;
                     option.y = pageY / 8;
+                    if(isCenter == false){
+                        option.x = 0;
+                        option.y = 0;
+                    }
                     zr.addShape(
                         new imageShape({
                             style: option,

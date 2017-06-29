@@ -48,8 +48,7 @@ define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', '
         //删除当前容器
         target.find('a').eq(0).click(function(){
             app.isSave = false;
-            var area = $(this).parent().parent().parent();
-            $(area).parent().remove();
+            $(this).parent().parent().parent().remove();
         });
 
         //根据target判断不同的渲染方式以及事件绑定
@@ -58,7 +57,6 @@ define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', '
             //双向绑定
             target.find('a').eq(1).click(function () {
                 var instance = echarts.getInstanceByDom($(this).parent().parent().parent()[0]);
-                // var type = instance.getOption().series[0].type;
                 app.chartOption = instance.getOption();
             });
 
@@ -113,42 +111,18 @@ define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', '
             //         top.window.location = "dataAnalysis.page?chartId=" + index + "&exportId=" + exportId;
             //     }
             // });
-        }
-        else{
+        }else {
             target.find('a').eq(1).click(function () {
-                    var pzr = zrender.getInstance(target.attr("zid"));//原控件
-                    var option = $.extend(true, {}, pzr.storage.getShapeList()[0].style);
-                    if(charttype.indexOf("subGroupOfImage") < 0){
-                        // app.textOption = option;
-                        app.currentView = 'text-option-component';
-                    }else {
-                        // app.subGroubOption = option;
-                        app.currentView = 'img-option-component';
-                    }
-                    app.options = option;
-
-                    // $("#textOptionModal .btn-primary").unbind("click");
-                    // $("#textOptionModal .btn-primary").on("click",function () {
-                    //     if(charttype.indexOf("subGroupOfImage") < 0){
-                    //         CanvasTag().render(target.attr("id"),option);
-                    //     }else{
-                    //         CanvasTagOfImage().render(target.attr("id"),"",option);
-                    //         option.image = target.parent().find("img").attr("src").split(",")[1].replace('"','');
-                    //     }
-                    //
-                    //     $.ajax({
-                    //         type: 'POST',
-                    //         url: 'updateChartInfo',
-                    //         data: {
-                    //             'id': target.attr("chartId"),
-                    //             'jsCode': JSON.stringify(option)
-                    //         },
-                    //         error: function(){
-                    //             alert("保存时失败，请重试!");
-                    //         }
-                    //     });
-                    //     renderMenu(target);
-                    // });
+                var pzr = zrender.getInstance(target.attr("zid"));//原控件
+                var option = $.extend(true, {}, pzr.storage.getShapeList()[0].style);
+                if(charttype.indexOf("subGroupOfImage") < 0){
+                    app.currentView = 'text';
+                    app.textOption = option;
+                }else {
+                    app.currentView = 'img';
+                    app.subGroupOption = option;
+                    console.log(app.subGroupOption);//currentSrc
+                }
             });
         }
     };

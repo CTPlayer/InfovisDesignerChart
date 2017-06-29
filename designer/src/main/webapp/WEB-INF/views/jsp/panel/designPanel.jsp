@@ -262,7 +262,7 @@
     </style>
 </head>
 
-<body class="flat-blue">
+<body class="flat-blue" style="overflow: hidden">
 <div class="app-container" id="app" v-bind:class="[backgroundClass, {expanded: isExpanded}]">
     <div class="loader-container text-center color-white" style="display: none;position :fixed;top:300px;">
         <div><i class="fa fa-spinner fa-pulse fa-3x"></i></div>
@@ -492,7 +492,7 @@
                             <li class="panel-default" @click="toggleSecondMenu(5)" v-bind:class="{active: 5 === currentActiveIndex}">
                                 <a href="#" data-toggle="modal" data-target="#subGroupModal"><span class="icon fa fa-cog"></span><span class="title">新建标题框</span></a>
                             </li>
-                            <li class="panel-default" @click="toggleSecondMenu(6)" v-bind:class="{active: 6 === currentActiveIndex}">
+                            <li class="panel-default" @click="toggleSecondMenu(6);getAllCharts()" v-bind:class="{active: 6 === currentActiveIndex}">
                                 <a href="#" data-toggle="modal" data-target="#mySubGroup"><span class="icon fa fa-archive"></span><span class="title">我的标题框</span></a>
                             </li>
                         </ul>
@@ -547,13 +547,13 @@
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                     <h4 class="modal-title" id="myModalLabel">我的图表</h4>
                 </div>
-                <div class="modal-body" style="height: 386px;overflow-y: scroll">
+                <div class="modal-body" style="height: 386px;overflow-y: auto">
                     <div class=" text-center color-black" v-bind:style="{display : isChartsLoad}">
                         <div><i class="fa fa-spinner fa-pulse fa-3x"></i></div>
                         <div>正在加载,请稍后...</div>
                     </div>
                     <div class="row">
-                        <div class="thumbnail" v-for="(chart, index) in myCharts" :data-cid="chart.chartId" @click="select(chart.chartId)" v-bind:class="{selected: chart.chartId == currentSelectedIndex}" style="width: 200px;height:150px;margin-left: 10px;float: left;position: relative">
+                        <div class="thumbnail" v-for="(chart, index) in myCharts" :key="chart.id" :data-cid="chart.chartId" @click="select(chart.chartId)" v-bind:class="{selected: chart.chartId == currentSelectedIndex}" style="width: 200px;height:150px;margin-left: 10px;float: left;position: relative">
                             <img style="height: 100px" :src="chart.imgSrc" alt="...">
                             <div class="arrow_top"></div>
                             <div class="glyphicon glyphicon-remove deleteOneChart"></div>
@@ -568,7 +568,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" @click="renderSelected">确认</button>
+                    <button type="button" class="btn btn-primary" @click="renderSelected('myChart')">确认</button>
                 </div>
             </div>
         </div>
@@ -592,13 +592,12 @@
                         <ul class="nav nav-tabs" role="tablist">
                             <li role="presentation" class="active"><a href="#param" data-toggle="tab">配置项</a></li>
                         </ul>
-                        <%--<text-option-component v-bind:text-option="textOption"></text-option-component>--%>
-                        <%--<img-option-component v-bind:sub-group-option="subGroupOption"></img-option-component>--%>
-                        <component v-bind:is="currentView" v-bind:options="options"></component>
+                        <text-option-component v-show=" currentView === 'text' " v-bind:text-option="textOption"></text-option-component>
+                        <img-option-component v-show=" currentView === 'img' " v-bind:sub-group-option="subGroupOption"></img-option-component>
                     </div>
                 </div>
                 <div class="modal-footer" style="clear:both">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">确认</button>
+                    <button type="button" @click="saveOptionChange" class="btn btn-primary" data-dismiss="modal">确认</button>
                 </div>
             </div>
         </div>
@@ -614,10 +613,10 @@
                 <div class="modal-body">
                     <div v-html="hideImg" style="display: none"></div>
                     <div id="subGroupContainer" class="thumbnail" style="width:45%;height:410px;float:left;overflow: auto;border:1px dashed rgb(238,238,238);">
-                        <div id="subGroupLoading" class="text-center color-black" v-bind:style="{display : isImgLoad}">
-                            <div><i class="fa fa-spinner fa-pulse fa-3x"></i></div>
-                            <div>正在加载图片...</div>
-                        </div>
+                        <%--<div id="subGroupLoading" class="text-center color-black" v-bind:style="{display : isImgLoad}">--%>
+                            <%--<div><i class="fa fa-spinner fa-pulse fa-3x"></i></div>--%>
+                            <%--<div>正在加载图片...</div>--%>
+                        <%--</div>--%>
                     </div>
                     <div id="subGroupOptionPanel" style="width:50%;height:410px;float:left;margin-left:50px;">
                         <div class="col-xs-11" style="height:350px;overflow:auto;margin-top: 10px;" id="subGroupConfig">
@@ -637,7 +636,7 @@
                                     </div>
                                     <div class="form-group form-group-sm">
                                         <label >文字颜色&nbsp;&nbsp;</label>
-                                        <input id="subGroupTextColor" class="form-control" v-model="subGroupTextColor">
+                                        <input id="subGroupTextColorMounted" class="form-control" v-model="subGroupTextColor">
                                     </div>
                                     <div class="form-group form-group-sm">
                                         <label >文字大小&nbsp;&nbsp;<span id="subGroupFontSize"></span></label>
@@ -652,14 +651,6 @@
                                             <option>top</option>
                                             <option>bottom</option>
                                         </select>
-                                    </div>
-                                    <div class="form-group form-group-sm">
-                                        <label >图片宽度&nbsp;&nbsp;</label>
-                                        <input type="range" min="0" max="448" class="form-control" v-model="subGroupImageWidth">
-                                    </div>
-                                    <div class="form-group form-group-sm">
-                                        <label >图片高度&nbsp;&nbsp;</label>
-                                        <input type="range" min="0" max="410" class="form-control" v-model="subGroupImageHeight">
                                     </div>
                                 </form>
                             </div>
@@ -680,13 +671,13 @@
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                     <h4 class="modal-title">我的组件</h4>
                 </div>
-                <div class="modal-body" style="height: 386px;overflow-y: scroll">
+                <div class="modal-body" style="height: 386px;overflow-y: auto">
                     <div class=" text-center color-black" v-bind:style="{display : isChartsLoad}">
                         <div><i class="fa fa-spinner fa-pulse fa-3x"></i></div>
                         <div>正在加载,请稍后...</div>
                     </div>
                     <div class="row">
-                        <div class="thumbnail" v-for="subGroup in mySubGroup" :data-cid="subGroup.chartId" @click="select" style="width: 200px;height:150px;margin-left: 10px;float: left;position: relative">
+                        <div class="thumbnail" v-for="(subGroup, index) in mySubGroup" :data-cid="subGroup.chartId" @click="select(subGroup.chartId)"  v-bind:class="{selected: subGroup.chartId == currentSelectedIndex}" style="width: 200px;height:150px;margin-left: 10px;float: left;position: relative">
                             <img style="height: 100px" :src="subGroup.base64" alt="...">
                             <div class="arrow_top"></div>
                             <div class="glyphicon glyphicon-remove deleteOneChart"></div>
@@ -700,7 +691,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary">确认</button>
+                    <button type="button" class="btn btn-primary" @click="renderSelected('mySubGroup')">确认</button>
                 </div>
             </div>
         </div>

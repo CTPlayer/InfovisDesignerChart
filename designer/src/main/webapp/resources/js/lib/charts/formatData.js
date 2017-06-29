@@ -252,14 +252,6 @@ define(function(){
                     '<label >文字大小&nbsp;&nbsp;<span id="subGroupFontSize"></span></label>',
                     '<input type="range" class="form-control" v-model="optionSetting.subGroupFontSize">',
                 '</div>',
-                '<div class="form-group form-group-sm">',
-                    '<label >图片宽度&nbsp;&nbsp;</label>',
-                    '<input type="range" min="0" max="448" class="form-control" v-model="optionSetting.subGroupImageWidth">',
-                '</div>',
-                '<div class="form-group form-group-sm">',
-                    '<label >图片高度&nbsp;&nbsp;</label>',
-                    '<input type="range" min="0" max="410" class="form-control" v-model="optionSetting.subGroupImageHeight">',
-                '</div>',
             '</form>'
         ].join("");
 
