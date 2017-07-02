@@ -121,7 +121,7 @@ define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', '
                 }else {
                     app.currentView = 'img';
                     app.subGroupOption = option;
-                    console.log(app.subGroupOption);//currentSrc
+                    console.log(app.subGroupOption);
                 }
             });
         }

@@ -663,11 +663,12 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                 },
                 //修改图表，组件细节后保存
                 saveOptionChange: function(){
+                    var domOption;
                     if(this.chartType.indexOf('text') >= 0){
                         //id为domId div的zid
                         var domZid = $("#"+this.domId).attr("zid");
                         var domPzr = zrender.getInstance(domZid);//原控件
-                        var domOption = $.extend(true, {}, domPzr.storage.getShapeList()[0].style);
+                        domOption = $.extend(true, {}, domPzr.storage.getShapeList()[0].style);
                         //id为textOptionContainer div的zid
                         var zid = $("#textOptionContainer").attr("zid");
                         var pzr = zrender.getInstance(zid);//原控件
@@ -683,22 +684,33 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             domOption.textColor = option.textColor;
                             domOption.textFont = option.textFont;
                         }
+                        //不能直接把option给domPzr实例，有些属性不能同步，例如画布宽高
                         domPzr.storage.getShapeList()[0].style = domOption;
                         domPzr.refresh();
+                        domOption.image = option.image.currentSrc.split(',')[1];
                     }else {
-
+                        var instance = echarts.getInstanceByDom(document.getElementById("optionContainer"));
+                        echarts.getInstanceByDom(document.getElementById(this.domId)).setOption(instance.getOption());
+                        domOption = instance.getOption();
                     }
                     $.ajax({
                         type: 'POST',
                         url: 'updateChartInfo',
                         data: {
                             'id': $("#"+this.domId).attr("chartId"),
-                            'jsCode': JSON.stringify(option)
+                            'jsCode': JSON.stringify(domOption)
+                        },
+                        success: function(){
+                            app.isSave = false;
                         },
                         error: function(){
                             alert("保存时失败，请重试!");
                         }
                     });
+                },
+                //保存当前面板图表
+                saveCurrentPanel: function(){
+
                 }
             },
             mounted: function () {
@@ -1529,22 +1541,22 @@ require(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', 
             //     domId = e.relatedTarget.parentNode.parentNode.parentNode.getAttribute('id');
             // });
 
-            $("#optionModal").find(".btn-primary").click(function(){
-                $("title").html("*Infovis-Designer");                                     //改动标记
-                var instance = engine.chart.getInstanceByDom(document.getElementById("optionContainer"));
-                engine.chart.getInstanceByDom(document.getElementById(domId)).setOption(instance.getOption());
-                $.ajax({
-                   type: 'POST',
-                   url: 'updateChartInfo',
-                   data: {
-                       'id': $("#"+domId).attr("chartId"),
-                       'jsCode': JSON.stringify(instance.getOption())
-                   },
-                   error: function(){
-                       alert("保存时失败，请重试!");
-                   }
-                });
-            });
+            // $("#optionModal").find(".btn-primary").click(function(){
+            //     $("title").html("*Infovis-Designer");                                     //改动标记
+            //     var instance = engine.chart.getInstanceByDom(document.getElementById("optionContainer"));
+            //     engine.chart.getInstanceByDom(document.getElementById(domId)).setOption(instance.getOption());
+            //     $.ajax({
+            //        type: 'POST',
+            //        url: 'updateChartInfo',
+            //        data: {
+            //            'id': $("#"+domId).attr("chartId"),
+            //            'jsCode': JSON.stringify(instance.getOption())
+            //        },
+            //        error: function(){
+            //            alert("保存时失败，请重试!");
+            //        }
+            //     });
+            // });
 
             // 关闭窗口时弹出确认提示
             $(window).bind('beforeunload', function(){
