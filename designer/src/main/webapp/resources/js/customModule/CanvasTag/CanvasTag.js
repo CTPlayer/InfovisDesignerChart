@@ -29,9 +29,9 @@ define(['zrender','zrender/tool/color','zrender/shape/Rectangle','jquery','jquer
                         hoverable: false,
                     }));
                 } else {
-                    option.x = pageX / 8;
+                    // option.x = pageX / 8;
                     // option.y = pageY / 8;
-                    option.width = pageX - (pageX / 5);
+                    // option.width = pageX - (pageX / 5);
                     // option.height = pageY - (pageY / 4);
                     // //option.textFont =  "bold " + pageX / 8 + "px verdana";
                     zr.addShape(new RectangleShape({

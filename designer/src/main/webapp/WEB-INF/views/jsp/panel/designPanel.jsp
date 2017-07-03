@@ -263,8 +263,8 @@
 </head>
 
 <body class="flat-blue" style="overflow: hidden">
-<div class="app-container" id="app" v-bind:class="[backgroundClass, {expanded: isExpanded}]">
-    <div class="loader-container text-center color-white" style="display: none;position :fixed;top:300px;">
+<div class="app-container" id="app" v-bind:class="[backgroundClass, {expanded: isExpanded}, {loader: isLoader}]">
+    <div class="loader-container text-center color-white" style="display: none;position :fixed;top:300px;" v-bind:style="{display : isSaveLoader}">
         <div><i class="fa fa-spinner fa-pulse fa-3x"></i></div>
         <div>正在生成外部可访问页面，请稍后...</div>
     </div>
@@ -286,7 +286,7 @@
                     <li class="dropdown" v-bind:class="{danger: dangerIndex == 0}" @mouseenter="topMenuMouseEnter(0)">
                         <a href="query.page"  role="button"><i class="glyphicon glyphicon-folder-close"></i>&nbsp;&nbsp;我的作品</a>
                     </li>
-                    <li class="dropdown" id="exportHtml" v-bind:class="{danger: dangerIndex == 1}" @mouseenter="topMenuMouseEnter(1)">
+                    <li class="dropdown" id="exportHtml" v-bind:class="{danger: dangerIndex == 1}" @mouseenter="topMenuMouseEnter(1)" @click="saveCurrentPanel" >
                         <a href="#"  role="button"><i class="glyphicon glyphicon-floppy-save"></i>&nbsp;&nbsp;保存</a>
                     </li>
                     <li class="dropdown profile" v-bind:class="{danger: dangerIndex == 2}" @mouseenter="topMenuMouseEnter(2)">
@@ -535,7 +535,7 @@
                     </div>
                 </div>
                 <div class="modal-footer" style="clear:both">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">确认</button>
+                    <button type="button" @click="saveOptionChange" class="btn btn-primary" data-dismiss="modal">确认</button>
                 </div>
             </div>
         </div>

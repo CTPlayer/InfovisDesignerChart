@@ -341,6 +341,8 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
             data: {
                 backgroundClass: 'background-default',
                 isExpanded: false,
+                isLoader: false,
+                isSaveLoader: 'none',
                 currentActiveIndex: -1,
                 currentSelectedIndex: -1,
                 dangerIndex: -1,
@@ -566,7 +568,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             if(data.chartType.indexOf("subGroupOfImage") >= 0){
                                 var imgBase64 = JSON.parse(data.jsCode).image;
                                 var option = JSON.parse(data.jsCode);
-                                app.order ++;
+                                app.order = app.order + 1;
                                 app.widgets.push({ chartType: 'text:subGroupOfImage',id: app.order,chartId: data.id,width: option.width,height: option.height, hideImg: 'data:image/jpg;base64,'+imgBase64, chartName: '' });
                                 setTimeout(function(){
                                     $targetDiv = $("#"+app.order);
@@ -575,7 +577,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                     renderMenu.renderMenu($targetDiv,'',app);
                                 }, 0);
                             }else {
-                                app.order ++;
+                                app.order = app.order + 1;
                                 app.widgets.push({ chartType: 'chart',id: app.order,chartId: data.id,width: 400,height: 400, chartName: data.chartName });
                                 setTimeout(function(){
                                     if(parseInt(data.isRealTime) == 0){
@@ -679,6 +681,9 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             domOption.fontSize = option.fontSize;
                             domOption.color = option.color;
                             domOption.strokeColor = option.strokeColor;
+                            //文字组件不存在复用，不保存到T_MY_CHARTS表中
+                            var index= this.order - 1;
+                            this.widgets[index].option = domOption;
                         }else {
                             domOption.text = option.text;
                             domOption.textColor = option.textColor;
@@ -688,29 +693,94 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                         domPzr.storage.getShapeList()[0].style = domOption;
                         domPzr.refresh();
                         domOption.image = option.image.currentSrc.split(',')[1];
-                    }else {
+                    }else if(this.chartType.indexOf('chart') >= 0){
                         var instance = echarts.getInstanceByDom(document.getElementById("optionContainer"));
                         echarts.getInstanceByDom(document.getElementById(this.domId)).setOption(instance.getOption());
                         domOption = instance.getOption();
                     }
-                    $.ajax({
-                        type: 'POST',
-                        url: 'updateChartInfo',
-                        data: {
-                            'id': $("#"+this.domId).attr("chartId"),
-                            'jsCode': JSON.stringify(domOption)
-                        },
-                        success: function(){
-                            app.isSave = false;
-                        },
-                        error: function(){
-                            alert("保存时失败，请重试!");
-                        }
-                    });
+                    if(this.chartType.indexOf('subGroupOfImage') >= 0 || this.chartType.indexOf('chart') >= 0){
+                        $.ajax({
+                            type: 'POST',
+                            url: 'updateChartInfo',
+                            data: {
+                                'id': $("#"+this.domId).attr("chartId"),
+                                'jsCode': JSON.stringify(domOption)
+                            },
+                            success: function(){
+                                app.isSave = false;
+                            },
+                            error: function(){
+                                alert("保存时失败，请重试!");
+                            }
+                        });
+                    }
                 },
                 //保存当前面板图表
                 saveCurrentPanel: function(){
+                    this.isLoader = true;
+                    this.isSaveLoader = 'block';
 
+                    var arr = window.location.href.split("/");
+                    var exportId = $("#exportId").val();
+                    var shareHref = arr[0]+"//"+arr[2]+"/"+arr[3]+"/share.page?exportId="+exportId;
+
+                    var widgets = this.widgets;
+                    var chartIds = [];          //保存图表id
+                    var containerIds = [];           //保存容器id
+                    // var chartsInfo = [];        //保存图表option和chartId
+                    for(var i=0;i<widgets.length;i++) {
+                        var chartId = widgets[i].chartId;
+                        var containerId = widgets[i].id;
+                        chartIds.push(chartId);
+                        containerIds.push(containerId);
+
+                        // console.log(containerId);
+                        var target = $('#'+containerId);
+                        this.widgets[i].datax = typeof($(target).attr('data-x')) == 'undefined' ? 0 : $(target).attr('data-x');
+                        this.widgets[i].datay = typeof($(target).attr('data-y')) == 'undefined' ? 0 : $(target).attr('data-y');
+                        this.widgets[i].containerWidth = target.css('width');
+                        this.widgets[i].containerHeight = target.css('height');
+                        // if(window.isSaveTheme == true && $("#"+containerId).attr('charttype').indexOf('text') < 0){
+                        //     var instance = engine.chart.getInstanceByDom(document.getElementById(containerId));
+                        //     chartsInfo.push({'id' : chartId, 'jsCode' : JSON.stringify(instance.getOption())});
+                        // }
+                    }
+
+                    $.ajax({
+                        type: 'POST',
+                        url: "panelChartsWrapper/updateWrapper",
+                        data: "chartIds="+chartIds+"&containerIds="+containerIds+"&exportId="+exportId
+                    });
+
+                    // if(chartsInfo.length > 0){
+                    //     $.ajax({
+                    //         type: 'POST',
+                    //         contentType: "application/json; charset=utf-8",
+                    //         url: 'updateChartsInfo',
+                    //         data: JSON.stringify(chartsInfo)
+                    //     });
+                    // }
+
+                    $.ajax({
+                        type: 'POST',
+                        url: "export",
+                        data: {
+                            "htmlCode": JSON.stringify(this.widgets),
+                            "exportId": exportId,
+                            "extraMsg": shareHref
+                        },
+                        success : function(){
+                            app.isSave = true;                           //点击导出后表明已保存
+                            app.isLoader = false;
+                            app.isSaveLoader = 'none';
+                            // location.reload();
+                        },
+                        error : function(){
+                            app.isLoader = false;
+                            app.isSaveLoader = 'none';
+                            alert("保存失败，请重试！");
+                        }
+                    });
                 }
             },
             mounted: function () {
@@ -850,6 +920,88 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                     app.domId = e.relatedTarget.parentNode.parentNode.parentNode.getAttribute('id');
                     app.chartType = e.relatedTarget.parentNode.parentNode.parentNode.getAttribute('charttype');
                 });
+                //显示面板
+                var chartIds = [];
+                deferred = $.ajax({
+                    async: false,
+                    type: 'POST',
+                    dataType: 'json',
+                    url: 'myPanel/crud',
+                    data : {
+                        exportId : $("#exportId").val()
+                    },
+                    headers :{
+                        oper : 'query'
+                    }
+                });
+                deferred.done(function(data){
+                    if(data.myPanel.htmlCode){
+                        // console.log(app.widgets);
+                        // app.widgets = JSON.parse(data.myPanel.htmlCode);
+                        // for(var item in app.widgets){
+                        //     if(app.widgets[item].chartId){
+                        //         chartIds.push(app.widgets[item].chartId);
+                        //     }
+                        // }
+                    }
+                });
+                console.log(chartIds);
+                var defer = $.ajax({
+                    type: 'POST',
+                    url: 'getShareOptions',
+                    data: 'cids='+chartIds
+                });
+                defer.done(function(data) {
+                    for (var i = 0; i < chartIds.length; i++) {
+                        var target = $('#'+app.widgets[i].id);
+                        if (data[i].chartType.indexOf("text") < 0) {
+                            var exportChart = echarts.init($(target)[0]);
+                            if (parseInt(data[i].isRealTime) == 0) {
+                                var chartOption = JSON.parse(data[i].jsCode);
+                                exportChart.setOption(chartOption);
+                                renderMenu.renderMenu($(target), data.chartName, app);
+                            } else if (parseInt(data[i].isRealTime) == 1) {
+                                $.ajax({
+                                    async: false,
+                                    type: 'POST',
+                                    contentType: "application/json; charset=utf-8",
+                                    url: 'render',
+                                    data: JSON.stringify({
+                                        'chartType': data[i].chartType,
+                                        'dataRecordId': data[i].sqlRecordingId,
+                                        'builderModel': JSON.parse(data[i].buildModel)
+                                    }),
+                                    success: function (option) {
+                                        var newOption = JSON.parse(data[i].jsCode);        // 若本图表选择数据获取模式为实时获取，
+                                        newOption.series[0].data = option.series[0].data;  // 在渲染时将数据库中的option中的series部分替换为新生成的option的series部分即可
+                                        if ('legend' in option) {
+                                            newOption.legend.data = option.legend.data;
+                                        }
+                                        if ('xAxis' in option) {
+                                            newOption.xAxis[0].data = option.xAxis[0].data;
+                                        }
+                                        exportChart.setOption(newOption);
+                                        renderMenu.renderMenu($(target), data.chartName, app);
+                                    },
+                                    error: function () {
+                                        app.isRenderFail = true;
+                                    }
+                                });
+                            }
+                        } else {
+                            if (data[i].chartType.indexOf("subGroupOfImage") < 0) {
+                                CanvasTag().render(chartIds[i],app.widgets[i].option);
+                                renderMenu.renderMenu($(target),'',app);
+                            } else {
+                                var option = JSON.parse(data[i].jsCode);
+                                option.image = $(target).find("img")[0];
+                                CanvasTagOfImage().render(chartIds[i],"",option,false);
+                                renderMenu.renderMenu($(target),'',app);
+                            }
+                        }
+                    }
+                })
+
             },
             watch: {
                 subGroupText: function(){
@@ -1303,238 +1455,238 @@ require(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', 
              * 保存当前设计面板
              */
 
-            window.saveCurrentPanel = function () {
-                $("title").html("Infovis-Designer");
+            // window.saveCurrentPanel = function () {
+            //     $("title").html("Infovis-Designer");
+            //
+            //     $(".grid-stack-placeholder").remove();
+            //     $("#fill").parent().remove();
+            //
+            //     $(".app-container").addClass("loader");
+            //     $(".loader-container").css("display","block");
+            //
+            //     var arr = window.location.href.split("/");
+            //     var exportId = $("#exportId").val();
+            //     var shareHref = arr[0]+"//"+arr[2]+"/"+arr[3]+"/share.page?exportId="+exportId;
+            //
+            //     $.ajax({
+            //         type: 'POST',
+            //         url: "export",
+            //         data: {
+            //             "htmlCode": $(".grid-stack").html().trim(),
+            //             "exportId": exportId,
+            //             "extraMsg": shareHref
+            //         },
+            //         success : function(){
+            //             window.isSave = true;                           //点击导出后表明已保存
+            //
+            //             $(".app-container").removeClass("loader");
+            //             $(".loader-container").css("display","none");
+            //             location.reload();
+            //         },
+            //         error : function(){
+            //             $(".app-container").removeClass("loader");
+            //             $(".loader-container").css("display","none");
+            //             alert("保存失败，请重试！");
+            //         }
+            //     });
+            //
+            //     var containers = $(".grid-stack").children();
+            //     var chartIds = [];          //保存图表id
+            //     var containerIds = [];           //保存容器id
+            //     var chartsInfo = [];        //保存图表option和chartId
+            //     for(var i=0;i<containers.length;i++) {
+            //         var chartId = $(containers[i]).children().attr("chartId");
+            //         var containerId = $(containers[i]).children().attr("id");
+            //         chartIds.push(chartId);
+            //         containerIds.push(containerId);
+            //
+            //         if(window.isSaveTheme == true && $("#"+containerId).attr('charttype').indexOf('text') < 0){
+            //             var instance = engine.chart.getInstanceByDom(document.getElementById(containerId));
+            //             chartsInfo.push({'id' : chartId, 'jsCode' : JSON.stringify(instance.getOption())});
+            //         }
+            //     }
+            //
+            //     $.ajax({
+            //        type: 'POST',
+            //        url: "panelChartsWrapper/updateWrapper",
+            //        data: "chartIds="+chartIds+"&containerIds="+containerIds+"&exportId="+exportId
+            //     });
+            //
+            //     if(chartsInfo.length > 0){
+            //         $.ajax({
+            //             type: 'POST',
+            //             contentType: "application/json; charset=utf-8",
+            //             url: 'updateChartsInfo',
+            //             data: JSON.stringify(chartsInfo)
+            //         });
+            //     }
+            // };
 
-                $(".grid-stack-placeholder").remove();
-                $("#fill").parent().remove();
-
-                $(".app-container").addClass("loader");
-                $(".loader-container").css("display","block");
-
-                var arr = window.location.href.split("/");
-                var exportId = $("#exportId").val();
-                var shareHref = arr[0]+"//"+arr[2]+"/"+arr[3]+"/share.page?exportId="+exportId;
-
-                $.ajax({
-                    type: 'POST',
-                    url: "export",
-                    data: {
-                        "htmlCode": $(".grid-stack").html().trim(),
-                        "exportId": exportId,
-                        "extraMsg": shareHref
-                    },
-                    success : function(){
-                        window.isSave = true;                           //点击导出后表明已保存
-
-                        $(".app-container").removeClass("loader");
-                        $(".loader-container").css("display","none");
-                        location.reload();
-                    },
-                    error : function(){
-                        $(".app-container").removeClass("loader");
-                        $(".loader-container").css("display","none");
-                        alert("保存失败，请重试！");
-                    }
-                });
-
-                var containers = $(".grid-stack").children();
-                var chartIds = [];          //保存图表id
-                var containerIds = [];           //保存容器id
-                var chartsInfo = [];        //保存图表option和chartId
-                for(var i=0;i<containers.length;i++) {
-                    var chartId = $(containers[i]).children().attr("chartId");
-                    var containerId = $(containers[i]).children().attr("id");
-                    chartIds.push(chartId);
-                    containerIds.push(containerId);
-
-                    if(window.isSaveTheme == true && $("#"+containerId).attr('charttype').indexOf('text') < 0){
-                        var instance = engine.chart.getInstanceByDom(document.getElementById(containerId));
-                        chartsInfo.push({'id' : chartId, 'jsCode' : JSON.stringify(instance.getOption())});
-                    }
-                }
-
-                $.ajax({
-                   type: 'POST',
-                   url: "panelChartsWrapper/updateWrapper",
-                   data: "chartIds="+chartIds+"&containerIds="+containerIds+"&exportId="+exportId
-                });
-
-                if(chartsInfo.length > 0){
-                    $.ajax({
-                        type: 'POST',
-                        contentType: "application/json; charset=utf-8",
-                        url: 'updateChartsInfo',
-                        data: JSON.stringify(chartsInfo)
-                    });
-                }
-            };
-
-            $("#exportHtml").click(function(){
-                window.saveCurrentPanel();
-            });
+            // $("#exportHtml").click(function(){
+            //     window.saveCurrentPanel();
+            // });
 
             // 为了防止再次进入以后设计面板时先前的图表不能自定义大小，这里获取先前图表的容器属性，重新添加容器并渲染图表
-            var containers = $(".grid-stack").children();
+            // var containers = $(".grid-stack").children();
+            //
+            // containers.remove();
+            // var cids = [];          //保存图表id
+            // var ids = [];           //保存容器id
+            //
+            // for(var i=0;i<containers.length-1;i++) {
+            //     var x = $(containers[i]).attr("data-gs-x");
+            //     var y = $(containers[i]).attr("data-gs-y");
+            //     var width = $(containers[i]).attr("data-gs-width");
+            //     var height = $(containers[i]).attr("data-gs-height");
+            //     var cid = $(containers[i]).children().attr("chartId");
+            //     var id = $(containers[i]).children().attr("id");
+            //     var chartType = $(containers[i]).children().attr("chartType");
+            //     cids.push(cid);
+            //     ids.push(id);
+            //
+            //     if(chartType.indexOf("text") < 0) {
+            //         grid.add_widget($('<div>' +
+            //             '<div class="grid-stack-item-content" chartType="chart" ' + 'id="' + id + '"chartId="' + cid + '">' +
+            //             '</div>' +
+            //             '</div>'), x, y, width, height);
+            //     }else{
+            //         grid.add_widget($('<div>'+
+            //             '<div class="grid-stack-item-content" style="overflow: hidden;" chartType="' + chartType+ '" ' + 'id="'+ id + '"chartId="' + cid + '">'+
+            //             '</div>'+
+            //             '</div>'), x, y, width, height);
+            //     }
+            // }
 
-            containers.remove();
-            var cids = [];          //保存图表id
-            var ids = [];           //保存容器id
-
-            for(var i=0;i<containers.length-1;i++) {
-                var x = $(containers[i]).attr("data-gs-x");
-                var y = $(containers[i]).attr("data-gs-y");
-                var width = $(containers[i]).attr("data-gs-width");
-                var height = $(containers[i]).attr("data-gs-height");
-                var cid = $(containers[i]).children().attr("chartId");
-                var id = $(containers[i]).children().attr("id");
-                var chartType = $(containers[i]).children().attr("chartType");
-                cids.push(cid);
-                ids.push(id);
-
-                if(chartType.indexOf("text") < 0) {
-                    grid.add_widget($('<div>' +
-                        '<div class="grid-stack-item-content" chartType="chart" ' + 'id="' + id + '"chartId="' + cid + '">' +
-                        '</div>' +
-                        '</div>'), x, y, width, height);
-                }else{
-                    grid.add_widget($('<div>'+
-                        '<div class="grid-stack-item-content" style="overflow: hidden;" chartType="' + chartType+ '" ' + 'id="'+ id + '"chartId="' + cid + '">'+
-                        '</div>'+
-                        '</div>'), x, y, width, height);
-                }
-            }
-
-            var defer03 = $.ajax({
-                type: 'POST',
-                url: 'getShareOptions',
-                data: 'cids='+cids
-            });
-            defer03.done(function(data){
-                for(var i=0;i<cids.length;i++){
-                    if(data[i].chartType.indexOf("text") < 0) {
-                        var exportChart = engine.chart.init($("#" + ids[i])[0]);
-                        if(parseInt(data[i].isRealTime) == 0){
-                            var chartOption = JSON.parse(data[i].jsCode);
-                            exportChart.setOption(chartOption);
-                            renderMenu.renderMenu($("#"+ids[i]));
-                            $("#"+ids[i]).find("#chartTitle").text(data[i].chartName);
-                        }else if(parseInt(data[i].isRealTime) == 1){
-                            $.ajax({
-                                async: false,
-                                type: 'POST',
-                                contentType: "application/json; charset=utf-8",
-                                url: 'render',
-                                data: JSON.stringify({
-                                    'chartType': data[i].chartType,
-                                    'dataRecordId': data[i].sqlRecordingId,
-                                    'builderModel': JSON.parse(data[i].buildModel)
-                                }),
-                                success: function(option){
-                                    var newOption = JSON.parse(data[i].jsCode);        // 若本图表选择数据获取模式为实时获取，
-                                    newOption.series[0].data = option.series[0].data;  // 在渲染时将数据库中的option中的series部分替换为新生成的option的series部分即可
-                                    if('legend' in option){
-                                        newOption.legend.data = option.legend.data;
-                                    }
-                                    if('xAxis' in option){
-                                        newOption.xAxis[0].data = option.xAxis[0].data;
-                                    }
-                                    exportChart.setOption(newOption);
-                                    renderMenu.renderMenu($("#"+ids[i]));
-                                    $("#"+ids[i]).find("#chartTitle").text(data[i].chartName);
-                                },
-                                error: function(){
-                                    $("#" + ids[i]).text("当前图表渲染失败，请检查数据库连接是否正常。");
-                                    renderMenu.renderFailMenu($("#" + ids[i]));
-                                }
-                            });
-                        }
-                    }else{
-                        if(data[i].chartType.indexOf("subGroupOfImage") < 0) {
-                            CanvasTag().render(ids[i],JSON.parse(data[i].jsCode));
-                            renderMenu.renderMenu($("#"+ids[i]));
-                        }else{
-                            var imgBase64 = JSON.parse(data[i].jsCode).image;
-                            var option = JSON.parse(data[i].jsCode);
-                            $("#"+ids[i]).parent().append([
-                                '<img style="display: none" src=\'data:image/jpg;base64,'+imgBase64+'\' >'
-                            ].join(""));
-                            option.image = $("#"+ids[i]).parent().find("img")[0];
-                            CanvasTagOfImage().render(ids[i],"",option);
-                            renderMenu.renderMenu($("#"+ids[i]));
-                        }
-                    }
-                }
-
-                $("#dropdown-theme-choose").find(".nav").find("div").click(function(){
-                    window.isSaveTheme = true;
-                    for(var i=0;i<cids.length;i++) {
-                        if (data[i].chartType.indexOf("text") < 0) {
-                            engine.chart.dispose($("#" + ids[i])[0]);
-                            var themeName = $(this).attr("class").replace("col-md-6 theme", "").trim();
-                            var exportChart = engine.chart.init($("#" + ids[i])[0], themeName);
-
-                            if(parseInt(data[i].isRealTime) == 0){
-                                var chartOption = JSON.parse(data[i].jsCode);
-                                overloadItemStyle(chartOption, engine.chart.theme[themeName]);       // 主题与图表option合并
-
-                                if(chartOption.series[0].type == 'line' || chartOption.series[0].type == 'bar'){
-                                    chartOption.xAxis[0].axisLine.lineStyle.color = '#999999';
-                                    chartOption.yAxis[0].axisLine.lineStyle.color = '#999999';
-                                    chartOption.xAxis[0].axisTick.lineStyle.color = '#999999';
-                                    chartOption.yAxis[0].axisTick.lineStyle.color = '#999999';
-                                    chartOption.xAxis[0].axisLabel.textStyle.color = '#999999';
-                                    chartOption.yAxis[0].axisLabel.textStyle.color = '#999999';
-                                }
-
-                                exportChart.setOption(chartOption);
-                                renderMenu.renderMenu($("#"+ids[i]));
-                                $("#"+ids[i]).find("#chartTitle").text(data[i].chartName);
-                            }else if(parseInt(data[i].isRealTime) == 1){
-                                $.ajax({
-                                    async: false,
-                                    type: 'POST',
-                                    contentType: "application/json; charset=utf-8",
-                                    url: 'render',
-                                    data: JSON.stringify({
-                                        'chartType': data[i].chartType,
-                                        'dataRecordId': data[i].sqlRecordingId,
-                                        'builderModel': JSON.parse(data[i].buildModel)
-                                    }),
-                                    success: function(option){
-                                        var newOption = JSON.parse(data[i].jsCode);        // 若本图表选择数据获取模式为实时获取，
-                                        newOption.series[0].data = option.series[0].data;                  // 在渲染时将数据库中的option中的series部分替换为新生成的option的series部分即可
-                                        if('legend' in option){
-                                            newOption.legend.data = option.legend.data;
-                                        }
-                                        if('xAxis' in option){
-                                            newOption.xAxis[0].data = option.xAxis[0].data;
-                                        }
-                                        overloadItemStyle(newOption, engine.chart.theme[themeName]);       // 主题与图表option合并
-
-                                        if(newOption.series[0].type == 'line' || newOption.series[0].type == 'bar') {
-                                            newOption.xAxis[0].axisLine.lineStyle.color = '#999999';
-                                            newOption.yAxis[0].axisLine.lineStyle.color = '#999999';
-                                            newOption.xAxis[0].axisTick.lineStyle.color = '#999999';
-                                            newOption.yAxis[0].axisTick.lineStyle.color = '#999999';
-                                            newOption.xAxis[0].axisLabel.textStyle.color = '#999999';
-                                            newOption.yAxis[0].axisLabel.textStyle.color = '#999999';
-                                        }
-
-                                        exportChart.setOption(newOption);
-                                        renderMenu.renderMenu($("#"+ids[i]));
-                                        $("#"+ids[i]).find("#chartTitle").text(data[i].chartName);
-                                    },
-                                    error: function(){
-                                        $("#" + ids[i]).text("当前图表渲染失败，请检查数据库连接是否正常。");
-                                        renderMenu.renderFailMenu($("#" + ids[i]));
-                                    }
-                                });
-                            }
-                        }
-                    }
-                });
-            });
+            // var defer03 = $.ajax({
+            //     type: 'POST',
+            //     url: 'getShareOptions',
+            //     data: 'cids='+cids
+            // });
+            // defer03.done(function(data){
+            //     for(var i=0;i<cids.length;i++){
+            //         if(data[i].chartType.indexOf("text") < 0) {
+            //             var exportChart = engine.chart.init($("#" + ids[i])[0]);
+            //             if(parseInt(data[i].isRealTime) == 0){
+            //                 var chartOption = JSON.parse(data[i].jsCode);
+            //                 exportChart.setOption(chartOption);
+            //                 renderMenu.renderMenu($("#"+ids[i]));
+            //                 $("#"+ids[i]).find("#chartTitle").text(data[i].chartName);
+            //             }else if(parseInt(data[i].isRealTime) == 1){
+            //                 $.ajax({
+            //                     async: false,
+            //                     type: 'POST',
+            //                     contentType: "application/json; charset=utf-8",
+            //                     url: 'render',
+            //                     data: JSON.stringify({
+            //                         'chartType': data[i].chartType,
+            //                         'dataRecordId': data[i].sqlRecordingId,
+            //                         'builderModel': JSON.parse(data[i].buildModel)
+            //                     }),
+            //                     success: function(option){
+            //                         var newOption = JSON.parse(data[i].jsCode);        // 若本图表选择数据获取模式为实时获取，
+            //                         newOption.series[0].data = option.series[0].data;  // 在渲染时将数据库中的option中的series部分替换为新生成的option的series部分即可
+            //                         if('legend' in option){
+            //                             newOption.legend.data = option.legend.data;
+            //                         }
+            //                         if('xAxis' in option){
+            //                             newOption.xAxis[0].data = option.xAxis[0].data;
+            //                         }
+            //                         exportChart.setOption(newOption);
+            //                         renderMenu.renderMenu($("#"+ids[i]));
+            //                         $("#"+ids[i]).find("#chartTitle").text(data[i].chartName);
+            //                     },
+            //                     error: function(){
+            //                         $("#" + ids[i]).text("当前图表渲染失败，请检查数据库连接是否正常。");
+            //                         renderMenu.renderFailMenu($("#" + ids[i]));
+            //                     }
+            //                 });
+            //             }
+            //         }else{
+            //             if(data[i].chartType.indexOf("subGroupOfImage") < 0) {
+            //                 CanvasTag().render(ids[i],JSON.parse(data[i].jsCode));
+            //                 renderMenu.renderMenu($("#"+ids[i]));
+            //             }else{
+            //                 var imgBase64 = JSON.parse(data[i].jsCode).image;
+            //                 var option = JSON.parse(data[i].jsCode);
+            //                 $("#"+ids[i]).parent().append([
+            //                     '<img style="display: none" src=\'data:image/jpg;base64,'+imgBase64+'\' >'
+            //                 ].join(""));
+            //                 option.image = $("#"+ids[i]).parent().find("img")[0];
+            //                 CanvasTagOfImage().render(ids[i],"",option);
+            //                 renderMenu.renderMenu($("#"+ids[i]));
+            //             }
+            //         }
+            //     }
+            //
+            //     $("#dropdown-theme-choose").find(".nav").find("div").click(function(){
+            //         window.isSaveTheme = true;
+            //         for(var i=0;i<cids.length;i++) {
+            //             if (data[i].chartType.indexOf("text") < 0) {
+            //                 engine.chart.dispose($("#" + ids[i])[0]);
+            //                 var themeName = $(this).attr("class").replace("col-md-6 theme", "").trim();
+            //                 var exportChart = engine.chart.init($("#" + ids[i])[0], themeName);
+            //
+            //                 if(parseInt(data[i].isRealTime) == 0){
+            //                     var chartOption = JSON.parse(data[i].jsCode);
+            //                     overloadItemStyle(chartOption, engine.chart.theme[themeName]);       // 主题与图表option合并
+            //
+            //                     if(chartOption.series[0].type == 'line' || chartOption.series[0].type == 'bar'){
+            //                         chartOption.xAxis[0].axisLine.lineStyle.color = '#999999';
+            //                         chartOption.yAxis[0].axisLine.lineStyle.color = '#999999';
+            //                         chartOption.xAxis[0].axisTick.lineStyle.color = '#999999';
+            //                         chartOption.yAxis[0].axisTick.lineStyle.color = '#999999';
+            //                         chartOption.xAxis[0].axisLabel.textStyle.color = '#999999';
+            //                         chartOption.yAxis[0].axisLabel.textStyle.color = '#999999';
+            //                     }
+            //
+            //                     exportChart.setOption(chartOption);
+            //                     renderMenu.renderMenu($("#"+ids[i]));
+            //                     $("#"+ids[i]).find("#chartTitle").text(data[i].chartName);
+            //                 }else if(parseInt(data[i].isRealTime) == 1){
+            //                     $.ajax({
+            //                         async: false,
+            //                         type: 'POST',
+            //                         contentType: "application/json; charset=utf-8",
+            //                         url: 'render',
+            //                         data: JSON.stringify({
+            //                             'chartType': data[i].chartType,
+            //                             'dataRecordId': data[i].sqlRecordingId,
+            //                             'builderModel': JSON.parse(data[i].buildModel)
+            //                         }),
+            //                         success: function(option){
+            //                             var newOption = JSON.parse(data[i].jsCode);        // 若本图表选择数据获取模式为实时获取，
+            //                             newOption.series[0].data = option.series[0].data;                  // 在渲染时将数据库中的option中的series部分替换为新生成的option的series部分即可
+            //                             if('legend' in option){
+            //                                 newOption.legend.data = option.legend.data;
+            //                             }
+            //                             if('xAxis' in option){
+            //                                 newOption.xAxis[0].data = option.xAxis[0].data;
+            //                             }
+            //                             overloadItemStyle(newOption, engine.chart.theme[themeName]);       // 主题与图表option合并
+            //
+            //                             if(newOption.series[0].type == 'line' || newOption.series[0].type == 'bar') {
+            //                                 newOption.xAxis[0].axisLine.lineStyle.color = '#999999';
+            //                                 newOption.yAxis[0].axisLine.lineStyle.color = '#999999';
+            //                                 newOption.xAxis[0].axisTick.lineStyle.color = '#999999';
+            //                                 newOption.yAxis[0].axisTick.lineStyle.color = '#999999';
+            //                                 newOption.xAxis[0].axisLabel.textStyle.color = '#999999';
+            //                                 newOption.yAxis[0].axisLabel.textStyle.color = '#999999';
+            //                             }
+            //
+            //                             exportChart.setOption(newOption);
+            //                             renderMenu.renderMenu($("#"+ids[i]));
+            //                             $("#"+ids[i]).find("#chartTitle").text(data[i].chartName);
+            //                         },
+            //                         error: function(){
+            //                             $("#" + ids[i]).text("当前图表渲染失败，请检查数据库连接是否正常。");
+            //                             renderMenu.renderFailMenu($("#" + ids[i]));
+            //                         }
+            //                     });
+            //                 }
+            //             }
+            //         }
+            //     });
+            // });
 
             // var domId;
             // $("#optionModal").on("show.bs.modal",function(e){
