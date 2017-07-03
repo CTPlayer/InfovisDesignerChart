@@ -340,13 +340,13 @@
                                     <div class="panel-body">
                                         <ul class="nav navbar-nav">
                                             <li>
-                                                <div class="vintage col-md-6 theme" title="vintage">
+                                                <div class="vintage col-md-6 theme" title="vintage" @click="changeTheme('vintage')">
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(216, 124, 124);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(145, 158, 139);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(215, 171, 130);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(110, 112, 116);"></div>
                                                 </div>
-                                                <div class="dark col-md-6 theme" title="dark">
+                                                <div class="dark col-md-6 theme" title="dark" @click="changeTheme(dark)">
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(221, 107, 102);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(117, 154, 160);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(230, 157, 135);"></div>
@@ -354,13 +354,13 @@
                                                 </div>
                                             </li>
                                             <li>
-                                                <div class="westeros col-md-6 theme" title="westeros">
+                                                <div class="westeros col-md-6 theme" title="westeros" @click="changeTheme(westeros)">
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(81, 107, 145);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(89, 196, 230);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(237, 175, 218);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(147, 183, 227);"></div>
                                                 </div>
-                                                <div class="essos col-md-6 theme" title="essos">
+                                                <div class="essos col-md-6 theme" title="essos" @click="changeTheme(essos)">
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(137, 52, 72);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(217, 88, 80);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(235, 129, 70);"></div>
@@ -368,13 +368,13 @@
                                                 </div>
                                             </li>
                                             <li>
-                                                <div class="wonderland col-md-6 theme" title="wonderland">
+                                                <div class="wonderland col-md-6 theme" title="wonderland" @click="changeTheme(wonderland)">
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(78, 163, 151);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(34, 195, 170);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(123, 217, 165);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(208, 100, 138);"></div>
                                                 </div>
-                                                <div class="walden col-md-6 theme" title="walden">
+                                                <div class="walden col-md-6 theme" title="walden" @click="changeTheme(walden)">
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(63, 177, 227);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(107, 230, 193);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(98, 108, 145);"></div>
@@ -382,13 +382,13 @@
                                                 </div>
                                             </li>
                                             <li>
-                                                <div class="chalk col-md-6 theme" title="chalk">
+                                                <div class="chalk col-md-6 theme" title="chalk" @click="changeTheme(chalk)">
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(252, 151, 175);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(135, 247, 207);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(247, 244, 148);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(114, 204, 255);"></div>
                                                 </div>
-                                                <div class="infographic col-md-6 theme" title="infographic">
+                                                <div class="infographic col-md-6 theme" title="infographic" @click="changeTheme(infographic)">
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(193, 35, 43);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(39, 114, 123);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(252, 206, 16);"></div>
@@ -396,13 +396,13 @@
                                                 </div>
                                             </li>
                                             <li>
-                                                <div class="macarons col-md-6 theme" title="macarons">
+                                                <div class="macarons col-md-6 theme" title="macarons" @click="changeTheme(macarons)">
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(46, 199, 201);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(182, 162, 222);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(182, 162, 222);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(255, 185, 128);"></div>
                                                 </div>
-                                                <div class="roma col-md-6 theme" title="roma">
+                                                <div class="roma col-md-6 theme" title="roma" @click="changeTheme(roma)">
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(224, 31, 84);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(0, 24, 82);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(245, 232, 200);"></div>
@@ -410,13 +410,13 @@
                                                 </div>
                                             </li>
                                             <li>
-                                                <div class="shine col-md-6 theme" title="shine">
+                                                <div class="shine col-md-6 theme" title="shine" @click="changeTheme(shine)">
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(193, 46, 52);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(230, 182, 0);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(0, 152, 217);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(43, 130, 29);"></div>
                                                 </div>
-                                                <div class="purple-passion col-md-6 theme" title="purple-passion">
+                                                <div class="purple-passion col-md-6 theme" title="purple-passion" @click="changeTheme(purple-passion)">
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(138, 124, 168);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(224, 152, 199);"></div>
                                                     <div class="col-md-3 theme-color" style="background-color: rgb(143, 211, 232);"></div>

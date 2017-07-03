@@ -381,7 +381,9 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                 subGroupBase64: '',
                 //获取从哪一个图表或者组件菜单进入细节设置模态框
                 domId: 0,
-                chartType: ''
+                chartType: '',
+                //是否切换了主题
+                isChangeTheme: false
             },
             methods: {
                 //背景样式切换
@@ -663,6 +665,16 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                     }
                     $("#subGroupModal").modal('toggle');
                 },
+                //主题切换递归运算
+                overloadItemStyle: function(optItem, theme) {
+                    for(k in theme) {
+                        if(optItem[k] && (typeof theme[k] !== 'object')){
+                            delete optItem[k];
+                        } else if(typeof theme[k] == 'object') {
+                            overloadItemStyle(optItem, theme[k]);
+                        }
+                    }
+                },
                 //修改图表，组件细节后保存
                 saveOptionChange: function(){
                     var domOption;
@@ -688,11 +700,11 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             domOption.text = option.text;
                             domOption.textColor = option.textColor;
                             domOption.textFont = option.textFont;
+                            //不能直接把option给domPzr实例，有些属性不能同步，例如画布宽高
+                            domPzr.storage.getShapeList()[0].style = domOption;
+                            domPzr.refresh();
+                            domOption.image = option.image.currentSrc.split(',')[1];
                         }
-                        //不能直接把option给domPzr实例，有些属性不能同步，例如画布宽高
-                        domPzr.storage.getShapeList()[0].style = domOption;
-                        domPzr.refresh();
-                        domOption.image = option.image.currentSrc.split(',')[1];
                     }else if(this.chartType.indexOf('chart') >= 0){
                         var instance = echarts.getInstanceByDom(document.getElementById("optionContainer"));
                         echarts.getInstanceByDom(document.getElementById(this.domId)).setOption(instance.getOption());
@@ -731,10 +743,11 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                     for(var i=0;i<widgets.length;i++) {
                         var chartId = widgets[i].chartId;
                         var containerId = widgets[i].id;
-                        chartIds.push(chartId);
-                        containerIds.push(containerId);
+                        if(widgets[i].chartType.indexOf('rectangle') < 0){
+                            chartIds.push(chartId);
+                            containerIds.push(containerId);
+                        }
 
-                        // console.log(containerId);
                         var target = $('#'+containerId);
                         this.widgets[i].datax = typeof($(target).attr('data-x')) == 'undefined' ? 0 : $(target).attr('data-x');
                         this.widgets[i].datay = typeof($(target).attr('data-y')) == 'undefined' ? 0 : $(target).attr('data-y');
@@ -773,7 +786,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             app.isSave = true;                           //点击导出后表明已保存
                             app.isLoader = false;
                             app.isSaveLoader = 'none';
-                            // location.reload();
+                            location.reload();
                         },
                         error : function(){
                             app.isLoader = false;
@@ -781,6 +794,35 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             alert("保存失败，请重试！");
                         }
                     });
+                },
+                //改变图表主题
+                changeTheme: function(themeName){
+                    this.isChangeTheme = true;
+                    var widgets = this.widgets;
+                    for(var i=0;i<widgets.length;i++) {
+                        var target = $("#" + widgets[i].id);
+                        if (widgets[i].chartType.indexOf("text") < 0) {
+                            var chartOption = echarts.getInstanceByDom($(target)[0]).getOption();
+                            echarts.dispose($(target)[0]);
+                            // var themeName = $(this).attr("title").trim();
+                            var exportChart = echarts.init($(target)[0], themeName);
+                            // var chartOption = JSON.parse(data[i].jsCode);
+                            console.log(echarts.theme);
+                            this.overloadItemStyle(chartOption, echarts.theme[themeName]);       // 主题与图表option合并
+
+                            if(chartOption.series[0].type == 'line' || chartOption.series[0].type == 'bar'){
+                                chartOption.xAxis[0].axisLine.lineStyle.color = '#999999';
+                                chartOption.yAxis[0].axisLine.lineStyle.color = '#999999';
+                                chartOption.xAxis[0].axisTick.lineStyle.color = '#999999';
+                                chartOption.yAxis[0].axisTick.lineStyle.color = '#999999';
+                                chartOption.xAxis[0].axisLabel.textStyle.color = '#999999';
+                                chartOption.yAxis[0].axisLabel.textStyle.color = '#999999';
+                            }
+
+                            exportChart.setOption(chartOption);
+                            renderMenu.renderMenu($(target), data[i].chartName, app);
+                        }
+                    }
                 }
             },
             mounted: function () {
@@ -922,8 +964,8 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                 });
                 //显示面板
                 var chartIds = [];
+                var textIds = [];
                 deferred = $.ajax({
-                    async: false,
                     type: 'POST',
                     dataType: 'json',
                     url: 'myPanel/crud',
@@ -936,72 +978,75 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                 });
                 deferred.done(function(data){
                     if(data.myPanel.htmlCode){
-                        // console.log(app.widgets);
-                        // app.widgets = JSON.parse(data.myPanel.htmlCode);
-                        // for(var item in app.widgets){
-                        //     if(app.widgets[item].chartId){
-                        //         chartIds.push(app.widgets[item].chartId);
-                        //     }
-                        // }
-                    }
-                });
-                console.log(chartIds);
-                var defer = $.ajax({
-                    type: 'POST',
-                    url: 'getShareOptions',
-                    data: 'cids='+chartIds
-                });
-                defer.done(function(data) {
-                    for (var i = 0; i < chartIds.length; i++) {
-                        var target = $('#'+app.widgets[i].id);
-                        if (data[i].chartType.indexOf("text") < 0) {
-                            var exportChart = echarts.init($(target)[0]);
-                            if (parseInt(data[i].isRealTime) == 0) {
-                                var chartOption = JSON.parse(data[i].jsCode);
-                                exportChart.setOption(chartOption);
-                                renderMenu.renderMenu($(target), data.chartName, app);
-                            } else if (parseInt(data[i].isRealTime) == 1) {
-                                $.ajax({
-                                    async: false,
-                                    type: 'POST',
-                                    contentType: "application/json; charset=utf-8",
-                                    url: 'render',
-                                    data: JSON.stringify({
-                                        'chartType': data[i].chartType,
-                                        'dataRecordId': data[i].sqlRecordingId,
-                                        'builderModel': JSON.parse(data[i].buildModel)
-                                    }),
-                                    success: function (option) {
-                                        var newOption = JSON.parse(data[i].jsCode);        // 若本图表选择数据获取模式为实时获取，
-                                        newOption.series[0].data = option.series[0].data;  // 在渲染时将数据库中的option中的series部分替换为新生成的option的series部分即可
-                                        if ('legend' in option) {
-                                            newOption.legend.data = option.legend.data;
-                                        }
-                                        if ('xAxis' in option) {
-                                            newOption.xAxis[0].data = option.xAxis[0].data;
-                                        }
-                                        exportChart.setOption(newOption);
-                                        renderMenu.renderMenu($(target), data.chartName, app);
-                                    },
-                                    error: function () {
-                                        app.isRenderFail = true;
-                                    }
-                                });
-                            }
-                        } else {
-                            if (data[i].chartType.indexOf("subGroupOfImage") < 0) {
-                                CanvasTag().render(chartIds[i],app.widgets[i].option);
-                                renderMenu.renderMenu($(target),'',app);
-                            } else {
-                                var option = JSON.parse(data[i].jsCode);
-                                option.image = $(target).find("img")[0];
-                                CanvasTagOfImage().render(chartIds[i],"",option,false);
-                                renderMenu.renderMenu($(target),'',app);
+                        app.widgets = JSON.parse(data.myPanel.htmlCode);
+                        for(var item in app.widgets){
+                            if(app.widgets[item].chartId){
+                                chartIds.push(app.widgets[item].chartId);
+                            }else {
+                                textIds.push(app.widgets[item].id);
                             }
                         }
+                        //查询所有chart的option
+                        var defer = $.ajax({
+                            type: 'POST',
+                            url: 'getShareOptions',
+                            data: 'cids='+chartIds
+                        });
+                        defer.done(function(data) {
+                            for (var i = 0; i < chartIds.length; i++) {
+                                app.order = app.widgets[i].id;
+                                var target = $('#'+app.widgets[i].id);
+                                if (data[i].chartType.indexOf("text") < 0) {
+                                    var exportChart = echarts.init($(target)[0]);
+                                    if (parseInt(data[i].isRealTime) == 0) {
+                                        var chartOption = JSON.parse(data[i].jsCode);
+                                        exportChart.setOption(chartOption);
+                                        renderMenu.renderMenu($(target), data[i].chartName, app);
+                                    } else if (parseInt(data[i].isRealTime) == 1) {
+                                        $.ajax({
+                                            async: false,
+                                            type: 'POST',
+                                            contentType: "application/json; charset=utf-8",
+                                            url: 'render',
+                                            data: JSON.stringify({
+                                                'chartType': data[i].chartType,
+                                                'dataRecordId': data[i].sqlRecordingId,
+                                                'builderModel': JSON.parse(data[i].buildModel)
+                                            }),
+                                            success: function (option) {
+                                                var newOption = JSON.parse(data[i].jsCode);        // 若本图表选择数据获取模式为实时获取，
+                                                newOption.series[0].data = option.series[0].data;  // 在渲染时将数据库中的option中的series部分替换为新生成的option的series部分即可
+                                                if ('legend' in option) {
+                                                    newOption.legend.data = option.legend.data;
+                                                }
+                                                if ('xAxis' in option) {
+                                                    newOption.xAxis[0].data = option.xAxis[0].data;
+                                                }
+                                                exportChart.setOption(newOption);
+                                                renderMenu.renderMenu($(target), data[i].chartName, app);
+                                            },
+                                            error: function () {
+                                                app.isRenderFail = true;
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    if (data[i].chartType.indexOf("subGroupOfImage") >= 0) {
+                                        var option = JSON.parse(data[i].jsCode);
+                                        option.image = $(target).find("img")[0];
+                                        CanvasTagOfImage().render(app.widgets[i].id,"",option,false);
+                                        renderMenu.renderMenu($(target),'',app);
+                                    }
+                                }
+                            }
+                            //渲染text:reactange,此类图形option保存在panel表的htmlcode字段中
+                            for(var i=0;i<textIds.length;i++){
+                                CanvasTag().render(textIds[i],app.widgets[item].option);
+                                renderMenu.renderMenu($('#'+textIds[i]),'',app);
+                            }
+                        })
                     }
-                })
-
+                });
             },
             watch: {
                 subGroupText: function(){
@@ -1214,16 +1259,16 @@ require(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', 
             // var engine = infovis.init(allOptions || {});
 
             // window.isSave = true;   //记录页面是否有改动
-            window.isSaveTheme = false;  //是否保存图表主题
+            // window.isSaveTheme = false;  //是否保存图表主题
 
             // var order  = 0;
             //给order赋值，用来在已有面板中继续添加图表时能接着前面已有图表的order顺序
-            var containers = $(".grid-stack").children();
-            for(var i=0;i<containers.length;i++){
-                if($(containers[i]).children().first().attr("id")){
-                    order = $(containers[i]).children().first().attr("id");
-                }
-            }
+            // var containers = $(".grid-stack").children();
+            // for(var i=0;i<containers.length;i++){
+            //     if($(containers[i]).children().first().attr("id")){
+            //         order = $(containers[i]).children().first().attr("id");
+            //     }
+            // }
 
             // var options = {
             //     float: true,
