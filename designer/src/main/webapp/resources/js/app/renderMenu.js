@@ -1,9 +1,8 @@
 /**
  * Created by ct on 2016/9/7.
  */
-define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', 'app/appViewModel','zrender','CanvasTag','CanvasTagOfImage','echarts',
-    'bootstrap', 'gridstack', 'spectrum'],
-    function($, infovis, ko, kb, baseOptions, formatData, appViewModel,zrender,CanvasTag,CanvasTagOfImage,echarts){
+define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'echarts',
+    'bootstrap', 'spectrum'],function($,formatData,zrender,CanvasTag,CanvasTagOfImage,echarts){
     /**
      * 渲染设计面板图表菜单
      * @param target
@@ -60,57 +59,14 @@ define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', '
                 app.chartOption = instance.getOption();
             });
 
-            // target.find('a').eq(2).click(function () {
-            //     $("title").html("Infovis-Designer");
-            //
-            //     $(".grid-stack-placeholder").remove();
-            //
-            //     $(".app-container").addClass("loader");
-            //     $(".loader-container").css("display", "block");
-            //
-            //     var index = $(this).parent().parent().parent().attr("chartId");
-            //     var arr = window.location.href.split("/");
-            //     var exportId = $("#exportId").val();
-            //     var shareHref = arr[0] + "//" + arr[2] + "/" + arr[3] + "/share.page?exportId=" + exportId;
-            //     if (window.isSave == false) {
-            //         $.ajax({
-            //             type: 'POST',
-            //             url: "export",
-            //             data: {
-            //                 "htmlCode": $(".grid-stack").html().trim(),
-            //                 "exportId": exportId,
-            //                 "extraMsg": shareHref
-            //             },
-            //             success: function () {
-            //                 window.isSave = true;                     //点击导出后表明已保存
-            //
-            //                 $("body").removeClass("loader");
-            //                 $(".loader-container").css("display", "none");
-            //                 top.window.location = "dataAnalysis.page?chartId=" + index + "&exportId=" + exportId;
-            //             },
-            //             error: function () {
-            //                 alert("保存失败，请重试！");
-            //             }
-            //         });
-            //
-            //         var containers = $(".grid-stack").children();
-            //         var chartIds = [];          //保存图表id
-            //         var containerIds = [];           //保存容器id
-            //         for(var i=0;i<containers.length-1;i++) {
-            //             var chartId = $(containers[i]).children().attr("chartId");
-            //             var containerId = $(containers[i]).children().attr("id");
-            //             chartIds.push(chartId);
-            //             containerIds.push(containerId);
-            //         }
-            //         $.ajax({
-            //             type: 'POST',
-            //             url: "panelChartsWrapper/updateWrapper",
-            //             data: "chartIds="+chartIds+"&containerIds="+containerIds+"&exportId="+exportId
-            //         });
-            //     } else {
-            //         top.window.location = "dataAnalysis.page?chartId=" + index + "&exportId=" + exportId;
-            //     }
-            // });
+            target.find('a').eq(2).click(function () {
+                var index = $(this).parent().parent().parent().attr("chartId");
+                var exportId = $("#exportId").val();
+                if (app.isSave == false) {
+                    app.saveCurrentPanel();
+                }
+                top.window.location = "dataAnalysis.page?chartId=" + index + "&exportId=" + exportId;
+            });
         }else {
             target.find('a').eq(1).click(function () {
                 var pzr = zrender.getInstance(target.attr("zid"));//原控件
@@ -121,7 +77,6 @@ define(['jquery', 'infovis', 'knockout', 'knockback', 'options', 'formatData', '
                 }else {
                     app.currentView = 'img';
                     app.subGroupOption = option;
-                    console.log(app.subGroupOption);
                 }
             });
         }

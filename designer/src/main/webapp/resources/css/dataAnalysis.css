@@ -4,7 +4,7 @@
 
 #page-wrapper {
     padding: 0 15px;
-    height: 700px;
+    height: 100%;
     min-height: 568px;
     background-color: white;
 }
@@ -184,5 +184,9 @@ form.make-model-region .labelDiv .mark-item-right {
 
 .row-editArea{
     border:1px #ccc dashed;
-    height:536px;
+    height:386px;
+}
+
+body{
+    overflow-y: hidden
 }

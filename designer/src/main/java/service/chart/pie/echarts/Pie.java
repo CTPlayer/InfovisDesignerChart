@@ -44,8 +44,8 @@ public class Pie implements ChartOption {
 
         List<Map<String, Object>> dataSet = dataSetProvider.prepareDataSet(chartBuilderParams);
 
+        dataSet = chartsUtil.dataGroupBy(chartBuilderParams,dataSet,"pie");
         chartsUtil.dataFilter(dataSet,chartBuilderParams,"pie");
-
         // 拆分数据, 结构化
         Option option = new Option();
         // backgroundColor

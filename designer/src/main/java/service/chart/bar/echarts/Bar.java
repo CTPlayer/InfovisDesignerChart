@@ -49,9 +49,8 @@ public class Bar implements ChartOption {
     public Option transform(final ChartBuilderParams chartBuilderParams) throws Exception {
 
         List<Map<String, Object>> dataSet = dataSetProvider.prepareDataSet(chartBuilderParams);
-
+        dataSet = chartsUtil.dataGroupBy(chartBuilderParams,dataSet,"bar");
         chartsUtil.dataFilter(dataSet,chartBuilderParams,"bar");
-
         // 拆分数据, 结构化
         Option option = new Option();
         // backgroundColor
@@ -85,6 +84,7 @@ public class Bar implements ChartOption {
                 return v;
             }
         });
+        series.setName(chartBuilderParams.getBuilderModel().getyAxis().get(0));
         series.data().addAll(seriesData);
         option.series(series);
 

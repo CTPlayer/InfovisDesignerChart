@@ -54,22 +54,28 @@
                 z-index: 99999999;
                 right: 30px;
             }
+
+            [v-cloak] {
+                display: none;
+            }
         </style>
     </head>
     <body>
-        <div class="container">
-            <span class="glyphicon glyphicon-filter filterIcon" aria-hidden="true"></span>
+        <div class="container" id="app" style="width: 100%">
+            <%--<span class="glyphicon glyphicon-filter filterIcon" aria-hidden="true"></span>--%>
 
-            <div class="loader-container text-center color-blue">
-                <div><i class="fa fa-spinner fa-pulse fa-3x"></i></div>
-            </div>
-            <div class="panel-group col-md-3" id="accordion" role="tablist" aria-multiselectable="true" style="z-index: 99999999">
-
-            </div>
+            <%--<div class="loader-container text-center color-blue">--%>
+                <%--<div><i class="fa fa-spinner fa-pulse fa-3x"></i></div>--%>
+            <%--</div>--%>
+            <%--<div class="panel-group col-md-3" id="accordion" role="tablist" aria-multiselectable="true" style="z-index: 99999999">--%>
+            <%--</div>--%>
 
             <input type="hidden" value="${exportId}" id="exportId">
-            <div class="grid-stack" id="exportContainer">
-                ${htmlCode}
+            <div>
+                <div v-for="item in widgets" v-bind:style="{ width:item.width + 'px', height:item.height + 'px', transform: 'translate(' + item.datax + 'px,' + item.datay + 'px)' }" class="draggable" v-bind:chartType="item.chartType" v-bind:id="item.id" v-bind:chartId="item.chartId" v-bind:data-x="item.datax" v-bind:data-y="item.datay" >
+                    <img style="display: none" v-if="item.chartType === 'text:subGroupOfImage' " v-bind:src="item.hideImg">
+                    <div v-if="isRenderFail" v-cloak style="text-align: center;padding-top: 40%;"><span class="glyphicon glyphicon-flash" style="font-size: 40px;display:block" aria-hidden="true"></span><span class="glyphicon-class" style="font-size:25px;">当前图表渲染失败，请检查数据库链接是否正常!</span></div>
+                </div>
             </div>
         </div>
         <script src="resources/js/lib/require.js" defer async="true" data-main="resources/js/app/exportPanel"></script>

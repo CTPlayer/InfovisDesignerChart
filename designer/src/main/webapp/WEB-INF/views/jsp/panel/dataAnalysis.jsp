@@ -38,10 +38,16 @@
     <!--bootstrapDatePicker CSS-->
     <link href="resources/js/lib/bootstrapTimePicker/bootstrap-datetimepicker.min.css" rel="stylesheet">
     <![endif]-->
+
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
 </head>
 
 <body class="flat-blue">
-<div class="app-container">
+<div class="app-container" id="app">
     <div class="row content-container">
         <nav class="navbar navbar-inverse navbar-static-top">
             <div class="container-fluid">
@@ -49,16 +55,16 @@
                     <a class="navbar-brand" href="#" style="color: #ffffff"><i class="glyphicon glyphicon-equalizer" aria-hidden="true"></i> 数据分析</a>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li class="dropdown">
+                    <li class="dropdown" v-bind:class="{danger: dangerIndex == 0}" @mouseenter="topMenuMouseEnter(0)" >
                         <a href="query.page" role="button"><i class="glyphicon glyphicon-folder-close"></i>&nbsp;&nbsp;我的作品</a>
                     </li>
-                    <li class="dropdown">
+                    <li class="dropdown" v-bind:class="{danger: dangerIndex == 1}" @mouseenter="topMenuMouseEnter(1)" >
                         <a href="sqlClient.page"  role="button"><i class="icon fa fa-database"></i>&nbsp;&nbsp;数据源</a>
                     </li>
                 </ul>
             </div>
         </nav>
-        <div class="navbar-default sidebar scrollable" role="navigation" style="height: 700px;">
+        <div class="navbar-default sidebar scrollable" role="navigation" style="height: 550px;">
             <div class="panel panel-default">
                 <div class="panel-heading" role="tab" id="heading">
                     <h4 class="panel-title">
@@ -79,14 +85,30 @@
                             <li class="active">
                                 <a href="#"><b>维度</b> <span class="fa arrow"></span></a>
                                 <ul class="nav nav-third-level">
-
+                                    <li v-cloak v-for="item in dimension">
+                                        <a href="javascript:void(0)">
+                                            <i class="glyphicon glyphicon-text-color leftBarLiIcon"></i>
+                                            <span style="display:inline-block;max-width: 120px;overflow: hidden;vertical-align:bottom">
+                                                {{ item }}
+                                            </span>
+                                            <i class="glyphicon glyphicon-download leftBarLiIcon pull-right" title="转换为度量" @click="changeTagType('text',item)" ></i>
+                                        </a>
+                                    </li>
                                 </ul>
                                 <!-- /.nav-third-level -->
                             </li>
                             <li class="active">
                                 <a href="#"><b>度量</b> <span class="fa arrow"></span></a>
                                 <ul class="nav nav-third-level">
-
+                                    <li v-cloak v-for="item in measure">
+                                        <a href="javascript:void(0)">
+                                            <i class="fa fa-sort-numeric-asc leftBarLiIcon"></i>
+                                            <span style="display:inline-block;max-width: 120px;overflow: hidden;vertical-align:bottom">
+                                                {{ item }}
+                                            </span>
+                                            <i class="glyphicon glyphicon-upload leftBarLiIcon pull-right" title="转换为维度" @click="changeTagType('number',item)" ></i>
+                                        </a>
+                                    </li>
                                 </ul>
                                 <!-- /.nav-third-level -->
                             </li>
@@ -100,6 +122,11 @@
         <div id="page-wrapper">
             <div>
                 <div class="col-lg-11 backUp">
+                    <a v-bind:href="'showPanel.page?exportId=' + exportId" role="button">
+                        <button class="btn btn-info">
+                            <span class="glyphicon glyphicon-menu-left"></span> 返回
+                        </button>
+                    </a>
                 </div>
                 <div class="col-lg-1">
                     <a href="#" data-toggle="modal" data-target="#addChartModal"><button class="btn btn-info saveChartInfo" type="submit"><span class="glyphicon glyphicon-floppy-saved"></span> 保存</button></a>
@@ -111,25 +138,128 @@
                         <div class="form-group">
                             <div class="col-lg-6">
                                 <label class="col-sm-1 control-label">列</label>
-                                <div class="col-sm-11 labelDiv trigger-column xAxis" style="overflow: hidden;"></div>
+                                <div class="col-sm-11 labelDiv trigger-column xAxis" style="overflow: hidden;">
+                                    <div v-for="item in xAxis" v-cloak class="trigger-column-tag trigger-column-tag-text">
+                                        <a>
+                                            <i class="glyphicon glyphicon-text-color" style="display: none;"></i>
+                                            <span class="dragName">
+                                                {{ item }}
+                                            </span>
+                                            <button type="button" class="close trigger-column-tag-close" @click="tagRemove('xAxis',item)" >&times;</button>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-lg-6">
                                 <label class="col-sm-1 control-label">行</label>
-                                <div class="col-sm-11 labelDiv trigger-column yAxis" style="overflow: hidden;"></div>
+                                <div class="col-sm-11 labelDiv trigger-column yAxis" style="overflow: hidden;">
+                                    <div v-for="item in yAxis" v-cloak class="trigger-column-tag trigger-column-tag-number">
+                                        <a>
+                                            <i class="fa fa-sort-numeric-asc" style="display: none;"></i>
+                                            <span class="dragName">
+                                                {{ item }}
+                                            </span>
+                                            <button type="button" class="close trigger-column-tag-close" @click="tagRemove('yAxis',item)" >&times;</button>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="col-lg-6">
                                 <label class="col-sm-1 control-label">标记</label>
                                 <div class="col-sm-11 labelDiv mark-down-column">
-                                    <div class="mark-item col-sm-4 mark-item-color"><i class="fa fa-tachometer"></i> 颜色</div>
-                                    <div class="mark-item col-sm-4 mark-item-corner"><i class="fa fa-clock-o"></i> 角度</div>
-                                    <div class="mark-item-right col-sm-4 mark-item-tag"><i class="fa fa-tags"></i> 标签</div>
+                                    <div class="mark-item col-sm-4 mark-item-color">
+                                        <i class="fa fa-tachometer" v-show="color.length == 0">颜色</i>
+                                        <span v-for="item in color" v-cloak>
+                                            <span style="width:100px;display: inline-block; overflow: hidden;">
+                                                <i v-bind:class="item.iclass" style="display: inline;"></i>&nbsp;
+                                                {{ item.targetNodeText }}
+                                            </span>
+                                            <button type="button" class="close mark-item-close" @click="tagRemove('color')">&times;</button>
+                                        </span>
+                                    </div>
+                                    <div class="mark-item col-sm-4 mark-item-corner">
+                                        <i class="fa fa-clock-o" v-show="corner.length == 0">角度</i>
+                                        <span v-for="item in corner" v-cloak>
+                                            <span style="width:100px;display: inline-block; overflow: hidden;">
+                                                <i v-bind:class="item.iclass" style="display: inline;"></i>&nbsp;
+                                                {{ item.targetNodeText }}
+                                            </span>
+                                            <button type="button" class="close mark-item-close" @click="tagRemove('corner')">&times;</button>
+                                        </span>
+                                    </div>
+                                    <div class="mark-item-right col-sm-4 mark-item-tag">
+                                        <i class="fa fa-tags" v-show="tag.length == 0">标签</i>
+                                        <span v-for="item in tag" v-cloak>
+                                            <span style="width:100px;display: inline-block; overflow: hidden;">
+                                                <i v-bind:class="item.iclass" style="display: inline;"></i>&nbsp;
+                                                {{ item.targetNodeText }}
+                                            </span>
+                                            <button type="button" class="close mark-item-close" @click="tagRemove('tag')">&times;</button>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <label class="col-sm-1 control-label">筛选</label>
-                                <div class="col-sm-11 labelDiv column-filter" style="overflow: hidden;z-index:0"></div>
+                                <div class="col-sm-11 labelDiv column-filter" style="overflow: hidden;z-index:0">
+
+                                    <div v-for="(item,index) in filter" v-if="item.dragDataType === 'text'" v-cloak class="trigger-column-tag trigger-column-tag-text" @click="showFilterContent(index)">
+                                        <a>
+                                            <i class="glyphicon glyphicon-text-color" style="display: none;"></i>
+                                            <span class="dragName">
+                                                {{ item.targetNodeText }}
+                                            </span>
+                                            <button type="button" class="close trigger-column-tag-close" @click="tagRemove('xAxis',item)" >&times;</button>
+                                        </a>
+                                    </div>
+                                    <div v-for="(item,index) in filter" v-if="item.dragDataType === 'number'" v-cloak class="trigger-column-tag trigger-column-tag-number" @click="showFilterContent(index)">
+                                        <a>
+                                            <i class="fa fa-sort-numeric-asc" style="display: none;"></i>
+                                            <span class="dragName">
+                                                {{ item.targetNodeText }}
+                                            </span>
+                                            <button type="button" class="close trigger-column-tag-close" @click="tagRemove('yAxis',item)" >&times;</button>
+                                        </a>
+                                    </div>
+
+                                </div>
+                                <div class="panel fresh-color panel-info col-sm-11" style="position: absolute;right:0px;z-index: 9999999" v-for="(item, index) in filter" v-bind:style="{top: filterHeight}" v-show="showFilterIndex === index" v-cloak @mousedown.stop>
+                                    <div class="panel-heading">{{ item.targetNodeText }}</div>
+                                    <div class="panel-body">
+                                        <div v-if="'text' === filterType">
+                                            <div class="alert fresh-color alert-info" role="alert" style="text-align: center;font-size: 15px;">
+                                                <strong>列选项</strong>
+                                            </div>
+                                            <div class="row textContainer" style="margin-left:30px;height: 100px;overflow: auto">
+                                                <div class="checkbox3 checkbox-inline checkbox-check checkbox-light" v-for="(item,index) in numberResult">
+                                                    <input type="checkbox" v-bind:id="'checkbox-fa-light-'+index">
+                                                    <label v-bind:for="'checkbox-fa-light-'+index" style="padding-left: 30px;line-height: 25px;">
+                                                        {{ item }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div v-if="'number' === filterType">
+                                            <div class="alert fresh-color alert-info" role="alert" style="text-align: center;font-size: 15px;">
+                                                <strong>值范围</strong>
+                                            </div>
+                                            <div class="numberContainer" style="margin-bottom: 20px;text-align: center">
+                                                <div>
+                                                    <input type="number" placeholder="左边界" v-model="rangeMin" style="display: inline-block;float: left">
+                                                    <input type="number" placeholder="右边界" v-model="rangeMax" style="display: inline-block;float: right">
+                                                </div>
+                                                <div style="clear: both"></div>
+                                                <%--<div style="margin-top: 20px;" class="numberRange">--%>
+                                                    <%--<input type="hidden" class="slider-input" value="55,99"/>--%>
+                                                    <%--{{range}}--%>
+                                                <%--</div>--%>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-info col-md-offset-10 doFilter" @click="doFilter">确认</button>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -149,40 +279,40 @@
                         <div class="panel fresh-color panel-default chart-type-select-panel" style="width:100px;top:300px;position: fixed">
                             <div class="panel-heading">图表类型</div>
                             <div class="chart-type">
-                                <span class="bar">
+                                <span class="bar" @click="chartTypeSelect('bar')" v-bind:class="{ active: 'bar' === chartType }">
                                     <img src="resources/img/bar_chart.png">
                                 </span>
-                                <span class="line">
+                                <span class="line" @click="chartTypeSelect('line')" v-bind:class="{ active: 'line' === chartType }">
                                     <img src="resources/img/line_chart.png">
                                 </span>
-                                <span class="pie">
+                                <span class="pie" @click="chartTypeSelect('pie')" v-bind:class="{ active: 'pie' === chartType }">
                                     <img src="resources/img/pie_chart.png">
                                 </span>
-                                <span class="ring">
-                                    <img src="resources/img/ring_chart.png">
-                                </span>
+                                <%--<span class="ring" @click="chartTypeSelect('bar')">--%>
+                                    <%--<img src="resources/img/ring_chart.png">--%>
+                                <%--</span>--%>
                             </div>
                             <div class="drag-tips">
-                                <div class="tips-bar" style="display: none">
+                                <div class="tips-bar" v-cloak v-show= " chartType == 'bar' "  >
                                     <p><b>标准柱状图</b></p>
                                     <p><b>维度</b> 拖入列</p>
                                     <p><b>度量</b> 拖入行</p>
                                 </div>
-                                <div class="tips-line" style="display: none">
+                                <div class="tips-line" v-cloak v-show= " chartType == 'line' ">
                                     <p><b>折线图</b></p>
                                     <p><b>维度</b> 拖入列</p>
                                     <p><b>度量</b> 拖入行</p>
                                 </div>
-                                <div class="tips-pie" style="display: none">
+                                <div class="tips-pie" v-cloak v-show= " chartType == 'pie' ">
                                     <p><b>饼图</b></p>
                                     <p><b>维度</b> 拖入颜色</p>
                                     <p><b>度量</b> 拖入角度</p>
                                 </div>
-                                <div class="tips-ring" style="display: none">
-                                    <p><b>环形图</b></p>
-                                    <p><b>维度</b> 拖入颜色</p>
-                                    <p><b>度量</b> 拖入角度</p>
-                                </div>
+                                <%--<div class="tips-ring" style="display: none">--%>
+                                    <%--<p><b>环形图</b></p>--%>
+                                    <%--<p><b>维度</b> 拖入颜色</p>--%>
+                                    <%--<p><b>度量</b> 拖入角度</p>--%>
+                                <%--</div>--%>
                             </div>
                         </div>
                     </div>
@@ -190,84 +320,85 @@
             </div>
         </div>
     </div>
-</div>
-
-<div class="modal fade modal-success" id="addChartModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">保存图表</h4>
-            </div>
-            <div class="modal-body">
-                <form class="form-horizontal" id="addChartForm" method="post">
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">图表名称</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control chartName" name="chartName">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">数据模式</label>
-                        <div class="col-sm-10">
-                            <div class="radio3 radio-check radio-inline">
-                                <input type="radio" id="radio4" name="radio2" value="0" checked="">
-                                <label for="radio4">
-                                    镜像
-                                </label>
-                            </div>
-                            <div class="radio3 radio-check radio-success radio-inline">
-                                <input type="radio" id="radio5" name="radio2" value="1">
-                                <label for="radio5">
-                                    实时
-                                </label>
+    <!-- Modal -->
+    <div class="modal fade modal-success" id="addChartModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">保存图表</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" id="addChartForm" method="post">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">图表名称</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control chartName" name="chartName" v-model="chartName" >
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">定时更新</label>
-                        <div class="col-sm-10">
-                            <div class="bootstrap-switch bootstrap-switch-wrapper bootstrap-switch-small bootstrap-switch-animate bootstrap-switch-off" style="width: 89.3333px;">
-                                <div class="bootstrap-switch-container" style="width: 132px; margin-left: 0px;">
-                                    <input type="checkbox" class="toggle-checkbox" name="my-checkbox" checked="">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">数据模式</label>
+                            <div class="col-sm-10">
+                                <div class="radio3 radio-check radio-inline">
+                                    <input type="radio" id="radio4" name="radio2" value="0" v-model="dataSourcePicked" >
+                                    <label for="radio4">
+                                        镜像
+                                    </label>
+                                </div>
+                                <div class="radio3 radio-check radio-success radio-inline">
+                                    <input type="radio" id="radio5" name="radio2" value="1" v-model="dataSourcePicked">
+                                    <label for="radio5">
+                                        实时
+                                    </label>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">触发间隔</label>
-                        <div class="col-sm-10">
-                            <div>
-                                <select class="form-control">
-                                    <option value="day">每天</option>
-                                    <option value="week">每周</option>
-                                    <option value="month">每月</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">触发时间</label>
-                        <div class="col-sm-10">
-                            <div>
-                                <div class="input-group date form_datetime" data-link-field="dtp_input1">
-                                    <input class="form-control" size="16" type="text" name="triggerName" readonly>
-                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                        <div class="form-group" v-show="isShowUpdateCheck" v-cloak >
+                            <label class="col-sm-2 control-label">定时更新</label>
+                            <div class="col-sm-10">
+                                <div class="bootstrap-switch bootstrap-switch-wrapper bootstrap-switch-small bootstrap-switch-animate bootstrap-switch-off" style="width: 89.3333px;">
+                                    <div class="bootstrap-switch-container" style="width: 132px; margin-left: 0px;">
+                                        <input type="checkbox" class="toggle-checkbox" name="my-checkbox" checked="">
+                                    </div>
                                 </div>
-                                <input type="hidden" id="dtp_input1" value="" /><br/>
                             </div>
                         </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-success">确认</button>
+                        <div class="form-group" v-show="isShowJobSetting" v-cloak >
+                            <label class="col-sm-2 control-label">触发间隔</label>
+                            <div class="col-sm-10">
+                                <div>
+                                    <select class="form-control" v-model="selectedPeriod">
+                                        <option value="day" >每天</option>
+                                        <option value="week" >每周</option>
+                                        <option value="month" >每月</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" v-show="isShowJobSetting" v-cloak >
+                            <label class="col-sm-2 control-label">触发时间</label>
+                            <div class="col-sm-10">
+                                <div>
+                                    <div class="input-group date form_datetime" data-link-field="dtp_input1">
+                                        <input class="form-control" size="16" type="text" name="triggerName" v-model="startTime" readonly>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                    </div>
+                                    <input type="hidden" id="dtp_input1" value="" /><br/>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-success" @click="saveChart" >确认</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
 <script src="resources/js/lib/require.js" defer async="true" data-main="resources/js/app/dataAnalysis"></script>
 </body>
 </html>

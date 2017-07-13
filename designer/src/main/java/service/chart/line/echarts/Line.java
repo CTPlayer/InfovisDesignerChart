@@ -50,8 +50,8 @@ public class Line implements ChartOption {
 
         List<Map<String, Object>> dataSet = dataSetProvider.prepareDataSet(chartBuilderParams);
 
+        dataSet = chartsUtil.dataGroupBy(chartBuilderParams,dataSet,"line");
         chartsUtil.dataFilter(dataSet,chartBuilderParams,"line");
-
         // 拆分数据, 结构化
         Option option = new Option();
         // backgroundColor
@@ -85,6 +85,7 @@ public class Line implements ChartOption {
                 return v;
             }
         });
+        series.setName(chartBuilderParams.getBuilderModel().getyAxis().get(0));
         series.data().addAll(seriesData);
         option.series(series);
 

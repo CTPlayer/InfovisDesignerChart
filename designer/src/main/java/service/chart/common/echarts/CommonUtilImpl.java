@@ -116,4 +116,40 @@ public class CommonUtilImpl implements ChartsUtil {
         List<Map<String, Object>> dataSet = dataSetProvider.prepareDataSet(chartBuilderParams);
         return dataSet;
     }
+
+    @Override
+    public List<Map<String, Object>> dataGroupBy(ChartBuilderParams chartBuilderParams, List<Map<String, Object>> dataSet,String chartType) throws Exception {
+        List<Map<String, Object>> newDataSet = new ArrayList<>();
+        String xAxis = "";
+        String yAxis = "";
+        if(chartType == "bar" || chartType == "line"){
+            xAxis = chartBuilderParams.getBuilderModel().getxAxis().get(0);
+            yAxis = chartBuilderParams.getBuilderModel().getyAxis().get(0);
+        }else if(chartType == "pie"){
+            xAxis = chartBuilderParams.getBuilderModel().getMark().getColor();
+            yAxis = chartBuilderParams.getBuilderModel().getMark().getAngle();
+        }
+        if(xAxis != "" && yAxis != ""){
+            String xValue = "";
+            Integer yValue = 0;
+            HashMap<String, Integer> map = new HashMap<>();
+            for(Map<String, Object> data : dataSet){
+                if(data.containsKey(xAxis)){
+                    xValue = data.get(xAxis).toString();
+                    yValue = Integer.parseInt(data.get(yAxis).toString());
+                    if(map.containsKey(xValue)){
+                        yValue = yValue + map.get(xValue);
+                    }
+                    map.put(xValue,yValue);
+                }
+            }
+            for(String key:map.keySet()){
+                Map<String, Object> newMap = new HashMap<>();
+                newMap.put(xAxis,key);
+                newMap.put(yAxis,map.get(key));
+                newDataSet.add(newMap);
+            }
+        }
+        return newDataSet;
+    }
 }

@@ -39,4 +39,6 @@ public interface ChartsUtil {
      * @throws Exception
      */
     List<Map<String, Object>> getChartResult(ChartBuilderParams chartBuilderParams) throws Exception;
+
+    List<Map<String, Object>> dataGroupBy(ChartBuilderParams chartBuilderParams, List<Map<String, Object>> dataSet, String chartType) throws Exception;
 }
