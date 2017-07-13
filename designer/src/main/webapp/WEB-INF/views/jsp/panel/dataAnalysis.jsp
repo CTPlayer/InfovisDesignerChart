@@ -205,22 +205,22 @@
                                 <label class="col-sm-1 control-label">筛选</label>
                                 <div class="col-sm-11 labelDiv column-filter" style="overflow: hidden;z-index:0">
 
-                                    <div v-for="(item,index) in filter" v-if="item.dragDataType === 'text'" v-cloak class="trigger-column-tag trigger-column-tag-text" @click="showFilterContent(index)">
+                                    <div v-for="(item,index) in filter" v-if="item.dragDataType === 'text'" v-cloak class="trigger-column-tag trigger-column-tag-text" @click="showFilterContent(index,'text')">
                                         <a>
                                             <i class="glyphicon glyphicon-text-color" style="display: none;"></i>
                                             <span class="dragName">
                                                 {{ item.targetNodeText }}
                                             </span>
-                                            <button type="button" class="close trigger-column-tag-close" @click="tagRemove('xAxis',item)" >&times;</button>
+                                            <button type="button" class="close trigger-column-tag-close" @click.stop="tagRemove('filter',item)" >&times;</button>
                                         </a>
                                     </div>
-                                    <div v-for="(item,index) in filter" v-if="item.dragDataType === 'number'" v-cloak class="trigger-column-tag trigger-column-tag-number" @click="showFilterContent(index)">
+                                    <div v-for="(item,index) in filter" v-if="item.dragDataType === 'number'" v-cloak class="trigger-column-tag trigger-column-tag-number" @click="showFilterContent(index,'number')">
                                         <a>
                                             <i class="fa fa-sort-numeric-asc" style="display: none;"></i>
                                             <span class="dragName">
                                                 {{ item.targetNodeText }}
                                             </span>
-                                            <button type="button" class="close trigger-column-tag-close" @click="tagRemove('yAxis',item)" >&times;</button>
+                                            <button type="button" class="close trigger-column-tag-close" @click.stop="tagRemove('filter',item)" >&times;</button>
                                         </a>
                                     </div>
 
@@ -228,20 +228,20 @@
                                 <div class="panel fresh-color panel-info col-sm-11" style="position: absolute;right:0px;z-index: 9999999" v-for="(item, index) in filter" v-bind:style="{top: filterHeight}" v-show="showFilterIndex === index" v-cloak @mousedown.stop>
                                     <div class="panel-heading">{{ item.targetNodeText }}</div>
                                     <div class="panel-body">
-                                        <div v-if="'text' === filterType">
+                                        <div v-show="'text' === filterType">
                                             <div class="alert fresh-color alert-info" role="alert" style="text-align: center;font-size: 15px;">
                                                 <strong>列选项</strong>
                                             </div>
                                             <div class="row textContainer" style="margin-left:30px;height: 100px;overflow: auto">
                                                 <div class="checkbox3 checkbox-inline checkbox-check checkbox-light" v-for="(item,index) in numberResult">
-                                                    <input type="checkbox" v-bind:id="'checkbox-fa-light-'+index">
+                                                    <input type="checkbox" v-bind:id="'checkbox-fa-light-'+index" checked="">
                                                     <label v-bind:for="'checkbox-fa-light-'+index" style="padding-left: 30px;line-height: 25px;">
                                                         {{ item }}
                                                     </label>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div v-if="'number' === filterType">
+                                        <div v-show="'number' === filterType">
                                             <div class="alert fresh-color alert-info" role="alert" style="text-align: center;font-size: 15px;">
                                                 <strong>值范围</strong>
                                             </div>

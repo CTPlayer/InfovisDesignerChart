@@ -54,6 +54,8 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady',
                         $('body').addClass('background-default');
                     }
                 });
+                var chartIds = []; //所有图表的id
+                var containerIds = [];
                 //图表初始化
                 var deferred02 = $.ajax({
                     type: 'POST',
@@ -69,11 +71,17 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady',
                 deferred02.done(function(data){
                     app.widgets = JSON.parse(data.myPanel.htmlCode);
                     console.log(app.widgets);
-                    var chartIds = []; //所有图表的id
-                    for(var i=0;i<app.widgets.length;i++){
-                        chartIds.push(app.widgets[i].chartId);
-                    }
                     app.$nextTick(function(){
+                        // var textIds = []; //所有文字组件id
+                        for(var i=0;i<app.widgets.length;i++){
+                            if(app.widgets[i].chartId){
+                                chartIds.push(app.widgets[i].chartId);
+                                containerIds.push(app.widgets[i].id);
+                            }else {
+                                // textIds.push(app.widgets[item].id);
+                                CanvasTag().render(app.widgets[i].id,app.widgets[i].option);
+                            }
+                        }
                         $.ajax({
                             type: 'POST',
                             url: 'getShareOptions',
@@ -81,7 +89,7 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady',
                             success: function (data) {
                                 for(var i=0;i<chartIds.length;i++){
                                     if(data[i].chartType.indexOf("text") < 0){
-                                        var exportChart = echarts.init($("#" + app.widgets[i].id)[0]);
+                                        var exportChart = echarts.init($("#" + containerIds[i])[0]);
                                         if(parseInt(data[i].isRealTime) == 0){
                                             exportChart.setOption(JSON.parse(data[i].jsCode));
                                         }else if(parseInt(data[i].isRealTime) == 1){
@@ -116,7 +124,7 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady',
                                         });
                                     }else{
                                         if(data[i].chartType.indexOf("subGroupOfImage") < 0){
-                                            CanvasTag().render(app.widgets[i].id,JSON.parse(data[i].jsCode));
+                                            // CanvasTag().render(app.widgets[i].id,JSON.parse(data[i].jsCode));
                                         }else{
                                             var option = JSON.parse(data[i].jsCode);
                                             option.image = $("#"+app.widgets[i].id).parent().find("img")[0];
@@ -126,7 +134,7 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady',
                                 }
                             }
                         })
-                    })
+                    });
                 })
             }
         })

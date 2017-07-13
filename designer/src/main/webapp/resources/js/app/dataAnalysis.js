@@ -453,19 +453,21 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                         this.restoreTagStyle($(".yAxis"),'yAxis');
                     }else if(tagType == 'filter'){
                         var filterContent = this.filter;
+                        console.log(filterContent);
                         filterContent.splice($.inArray(targetNodeText, filterContent),1);
+                        console.log(filterContent);
                         this.filter = filterContent;
                     }
                     this.$nextTick(function(){
                         commonModule.renderChart(this.chartType,this.sqlRecordingId,app);
                     });
                 },
-                showFilterContent: function(index){
+                showFilterContent: function(index, dragDataType){
                     this.showFilterIndex = index;
                     $(document).mousedown(function(){
                         app.showFilterIndex = -1;
-                        console.log(app.showFilterIndex);
                     });
+                    app.filterType = dragDataType;
                 },
                 /**
                  * tag拖拽渲染
@@ -672,6 +674,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                             filterParam[this.filter[item].targetNodeText] = app.rangeMin+','+app.rangeMax;
                             filterContent.push(JSON.stringify(filterParam));
                         }
+                        console.log(filterContent);
                     }
                     commonModule.renderChart(this.chartType,this.sqlRecordingId,app,filterContent);
                 }
