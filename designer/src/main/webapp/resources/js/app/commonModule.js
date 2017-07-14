@@ -1,7 +1,7 @@
 /**
  * Created by ct on 2016/9/7.
  */
-define(['jquery','knockout','echarts','jrange'], function($,ko,echarts){
+define(['jquery','echarts','jrange'], function($,echarts){
     var renderChart = function(chartType,sqlRecordingId,app,filterContent){
         var color = $(".mark-item-color").find("span").children().eq(0).text().trim();
         var angle = $(".mark-item-corner").find("span").children().eq(0).text().trim();

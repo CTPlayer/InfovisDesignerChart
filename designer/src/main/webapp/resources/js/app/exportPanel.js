@@ -32,7 +32,8 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady',
             el: '#app',
             data: {
                 widgets: [],
-                isRenderFail: false
+                // isRenderFail: false,
+                renderFailList: []
             },
             mounted: function(){
                 //背景初始化
@@ -70,7 +71,6 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady',
                 });
                 deferred02.done(function(data){
                     app.widgets = JSON.parse(data.myPanel.htmlCode);
-                    console.log(app.widgets);
                     app.$nextTick(function(){
                         // var textIds = []; //所有文字组件id
                         for(var i=0;i<app.widgets.length;i++){
@@ -115,7 +115,7 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady',
                                                     exportChart.setOption(newOption);
                                                 },
                                                 error: function(){
-                                                    app.isRenderFail = true;
+                                                    app.renderFailList.push(app.widgets[i].id);
                                                 }
                                             });
                                         }
@@ -123,13 +123,9 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady',
                                             exportChart.resize();                 //自适应窗口
                                         });
                                     }else{
-                                        if(data[i].chartType.indexOf("subGroupOfImage") < 0){
-                                            // CanvasTag().render(app.widgets[i].id,JSON.parse(data[i].jsCode));
-                                        }else{
-                                            var option = JSON.parse(data[i].jsCode);
-                                            option.image = $("#"+app.widgets[i].id).parent().find("img")[0];
-                                            CanvasTagOfImage().render(app.widgets[i].id,"",option,false);
-                                        }
+                                        var option = JSON.parse(data[i].jsCode);
+                                        option.image = $("#"+app.widgets[i].id).parent().find("img")[0];
+                                        CanvasTagOfImage().render(app.widgets[i].id,"",option,false);
                                     }
                                 }
                             }

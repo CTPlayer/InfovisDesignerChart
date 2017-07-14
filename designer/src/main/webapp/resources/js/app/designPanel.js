@@ -348,7 +348,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                 //可拖拽模块的配置
                 widgets: [],
                 //选中渲染是否失败
-                isRenderFail: false,
+                // isRenderFail: false,
                 //当前页是否保存
                 isSave:true,
                 //组件参数
@@ -365,7 +365,8 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                 domId: 0,
                 chartType: '',
                 //是否切换了主题
-                currentTheme: ''
+                currentTheme: '',
+                renderFailList: []
             },
             methods: {
                 //背景样式切换
@@ -596,7 +597,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                                 renderMenu.renderMenu($targetDiv, data.chartName, app);
                                             },
                                             error: function(){
-                                                app.isRenderFail = true;
+                                                app.renderFailList.push(app.order);
                                             }
                                         });
                                     }
@@ -664,6 +665,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                 //修改图表，组件细节后保存
                 saveOptionChange: function(){
                     var domOption;
+                    console.log(this.chartType);
                     if(this.chartType.indexOf('text') >= 0){
                         //id为domId div的zid
                         var domZid = $("#"+this.domId).attr("zid");
@@ -682,6 +684,8 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             //文字组件不存在复用，不保存到T_MY_CHARTS表中
                             var index= this.order - 1;
                             this.widgets[index].option = domOption;
+                            domPzr.storage.getShapeList()[0].style = domOption;
+                            domPzr.refresh();
                         }else {
                             domOption.text = option.text;
                             domOption.textColor = option.textColor;
@@ -1009,7 +1013,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                                     renderMenu.renderMenu($(target), data[i].chartName, app);
                                                 },
                                                 error: function () {
-                                                    app.isRenderFail = true;
+                                                    app.renderFailList.push(app.order);
                                                 }
                                             });
                                         }
@@ -1061,7 +1065,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                                 renderMenu.renderMenu($("#"+app.order),data.chartName,app);
                                             },
                                             error: function(){
-                                                app.isRenderFail = true;
+                                                app.renderFailList.push(app.order);
                                             }
                                         });
                                     }
