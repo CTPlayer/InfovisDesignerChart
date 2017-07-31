@@ -15,7 +15,8 @@ require.config({
         "CanvasTagOfImage" : "customModule/CanvasTag/CanvasTagOfImage",
         "jrange" : 'lib/jRange/jquery.range',
         "vue": "lib/vue/vue",
-        "echarts": "lib/charts/echarts"
+        "echarts": "lib/charts/echarts",
+        "theme": "lib/charts/theme"
     },
     shim : {
         "bootstrap" : { "deps" :['jquery'] },
@@ -24,9 +25,9 @@ require.config({
     waitSeconds: 30
 });
 
-require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady',
+require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady','theme',
         'jrange', 'bootstrap'],
-    function($,CanvasTag,CanvasTagOfImage,echarts,vue,domReady){
+    function($,CanvasTag,CanvasTagOfImage,echarts,vue,domReady,theme){
     domReady(function(){
         var app = new vue({
             el: '#app',
@@ -34,6 +35,41 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady',
                 widgets: [],
                 // isRenderFail: false,
                 renderFailList: []
+            },
+            methods: {
+                overloadItemStyle: function(optItem, theme) {
+                    for(k in theme) {
+                        if(optItem[k] && (typeof theme[k] !== 'object')){
+                            delete optItem[k];
+                        } else if(typeof theme[k] == 'object') {
+                            this.overloadItemStyle(optItem, theme[k]);
+                        }
+                    }
+                },
+                changeTheme: function(themeName){
+                    this.currentTheme = themeName;
+                    var widgets = this.widgets;
+                    for(var i=0;i<widgets.length;i++) {
+                        var target = $("#" + widgets[i].id);
+                        var chartName = $(target).find('#chartTitle').text();
+                        if (widgets[i].chartType.indexOf("text") < 0) {
+                            var chartOption = echarts.getInstanceByDom($(target)[0]).getOption();
+                            echarts.dispose($(target)[0]);
+                            echarts.registerTheme(themeName, theme[themeName]);
+                            var exportChart = echarts.init($(target)[0], themeName);
+                            app.overloadItemStyle(chartOption, theme[themeName]);       // 主题与图表option合并
+                            if(chartOption.series[0].type == 'line' || chartOption.series[0].type == 'bar'){
+                                chartOption.xAxis[0].axisLine.lineStyle.color = '#999999';
+                                chartOption.yAxis[0].axisLine.lineStyle.color = '#999999';
+                                chartOption.xAxis[0].axisTick.lineStyle.color = '#999999';
+                                chartOption.yAxis[0].axisTick.lineStyle.color = '#999999';
+                                chartOption.xAxis[0].axisLabel.textStyle.color = '#999999';
+                                chartOption.yAxis[0].axisLabel.textStyle.color = '#999999';
+                            }
+                            exportChart.setOption(chartOption);
+                        }
+                    }
+                }
             },
             mounted: function(){
                 //背景初始化
@@ -87,7 +123,11 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady',
                             url: 'getShareOptions',
                             data: 'cids=' + chartIds,
                             success: function (data) {
+                                var themeName;
                                 for(var i=0;i<chartIds.length;i++){
+                                    if(app.widgets[i].themeName){
+                                        themeName = app.widgets[i].themeName;
+                                    }
                                     if(data[i].chartType.indexOf("text") < 0){
                                         var exportChart = echarts.init($("#" + containerIds[i])[0]);
                                         if(parseInt(data[i].isRealTime) == 0){
@@ -119,15 +159,14 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady',
                                                 }
                                             });
                                         }
-                                        window.addEventListener("resize", function () {
-                                            exportChart.resize();                 //自适应窗口
-                                        });
                                     }else{
                                         var option = JSON.parse(data[i].jsCode);
                                         option.image = $("#"+app.widgets[i].id).parent().find("img")[0];
                                         CanvasTagOfImage().render(app.widgets[i].id,"",option,false);
                                     }
                                 }
+                                //theme
+                                app.changeTheme(themeName);
                             }
                         })
                     });

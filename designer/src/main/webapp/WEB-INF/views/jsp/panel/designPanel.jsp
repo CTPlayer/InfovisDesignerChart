@@ -503,7 +503,7 @@
         <!-- Main Content -->
         <div class="container-fluid">
             <%--<div class="grid-stack">--%>
-                <div v-for="item in widgets" v-bind:style="{ width:item.width + 'px', height:item.height + 'px', transform: 'translate(' + item.datax + 'px,' + item.datay + 'px)' }" class="draggable" v-bind:chartType="item.chartType" v-bind:id="item.id" v-bind:chartId="item.chartId" v-bind:data-x="item.datax" v-bind:data-y="item.datay" >
+                <div v-for="item in widgets" v-bind:style="{ width:item.containerWidth, height:item.containerHeight, transform: 'translate(' + item.datax + 'px,' + item.datay + 'px)' }" class="draggable" v-bind:chartType="item.chartType" v-bind:id="item.id" v-bind:chartId="item.chartId" v-bind:data-x="item.datax" v-bind:data-y="item.datay" >
                     <img style="display: none" v-if="item.chartType === 'text:subGroupOfImage' " v-bind:src="item.hideImg">
                     <div v-if="item.id  in renderFailList" v-cloak style="text-align: center;padding-top: 40%;"><span class="glyphicon glyphicon-flash" style="font-size: 40px;display:block" aria-hidden="true"></span><span class="glyphicon-class" style="font-size:25px;">当前图表渲染失败，请检查数据库链接是否正常!</span></div>
                 </div>

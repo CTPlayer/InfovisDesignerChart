@@ -665,7 +665,6 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                 //修改图表，组件细节后保存
                 saveOptionChange: function(){
                     var domOption;
-                    console.log(this.chartType);
                     if(this.chartType.indexOf('text') >= 0){
                         //id为domId div的zid
                         var domZid = $("#"+this.domId).attr("zid");
@@ -783,7 +782,6 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                         var target = $("#" + widgets[i].id);
                         var chartName = $(target).find('#chartTitle').text();
                         if (widgets[i].chartType.indexOf("text") < 0) {
-                            console.log(widgets[i].chartType);
                             var chartOption = echarts.getInstanceByDom($(target)[0]).getOption();
                             echarts.dispose($(target)[0]);
                             echarts.registerTheme(themeName, theme[themeName]);
@@ -1047,7 +1045,6 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                 app.widgets.push({ chartType: 'chart',id: app.order,chartId: data.id,width: 400,height: 400, chartName: data.chartName });
                                 app.$nextTick(function(){
                                     if(parseInt(data.isRealTime) == 0){
-                                        console.log(app.order);
                                         echarts.init($("#"+app.order)[0]).setOption(JSON.parse(data.jsCode));
                                         renderMenu.renderMenu($("#"+app.order),data.chartName,app);
                                     }else if(parseInt(data.isRealTime) == 1){
