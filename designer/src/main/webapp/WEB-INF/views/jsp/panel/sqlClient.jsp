@@ -194,9 +194,6 @@
                                 <a href="javascript: void(0);" id="deleteDB" >删除连接</a>
                             </li>
                             <li class="dropdown">
-                                <a href="dataAnalysis.page" role="button"><i class="glyphicon glyphicon-folder-close"></i>&nbsp;&nbsp;数据分析</a>
-                            </li>
-                            <li class="dropdown">
                                 <a href="query.page" role="button"><i class="glyphicon glyphicon-folder-close"></i>&nbsp;&nbsp;我的作品</a>
                             </li>
                         </ul>
