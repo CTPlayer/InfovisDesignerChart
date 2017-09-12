@@ -13,6 +13,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.multipart.MultipartFile;
 import service.chart.ChartOption;
+import service.chart.TableData;
 import service.chart.bar.echarts.Bar;
 import service.chart.line.echarts.Line;
 import service.chart.pie.echarts.Pie;
@@ -38,6 +39,9 @@ public class DefaultController {
 
     @Resource
     private MyChartsService myChartsService;
+
+    @Resource
+    private TableData tableData;
 
     /**
      * 添加设计面板
@@ -276,6 +280,8 @@ public class DefaultController {
             chartOption = context.getBean(Line.class);
         } else if (chartBuilderParams.getChartType() == ChartBuilderParams.ChartType.bar) {
             chartOption = context.getBean(Bar.class);
+        } else if (chartBuilderParams.getChartType() == ChartBuilderParams.ChartType.table) {
+               return tableData.getTableData(chartBuilderParams);
         }
 
         return TemplateUtil.genJsonStr4Obj(chartOption.transform(chartBuilderParams), true);
