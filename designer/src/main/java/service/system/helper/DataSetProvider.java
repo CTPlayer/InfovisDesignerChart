@@ -22,8 +22,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import service.connectionManage.ConnectionManageService;
 import service.connectionManage.SqlRecordingManageService;
+import service.system.SqlEditService;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -66,6 +68,102 @@ public final class DataSetProvider {
 
         return dataBaseMetadataHelper.prepareDataSet(jdbcProps);
 
+    }
+
+    /**
+     * 构建table数据
+     * @param chartBuilderParams
+     * @return
+     * @throws Exception
+     */
+    public List<Map<String, Object>> prepareDataSetForTable(ChartBuilderParams chartBuilderParams) throws Exception {
+        SqlRecordingManage sqlRecordingManage = new SqlRecordingManage();
+        sqlRecordingManage.setId(chartBuilderParams.getDataRecordId());
+        sqlRecordingManage = sqlRecordingManageService.queryAsObject(sqlRecordingManage);
+
+        ConnectionManage connectionManage = new ConnectionManage();
+        connectionManage.setId(sqlRecordingManage.getConnectionId());
+        connectionManage = connectionManageService.queryAsObject(connectionManage);
+
+        JdbcProps jdbcProps = new JdbcProps();
+        jdbcProps.setSql(sqlRecordingManage.getSqlRecording());
+        jdbcProps.setUrl(connectionManage.getDbUrl());
+        jdbcProps.setUsername(connectionManage.getUserName());
+        jdbcProps.setPassword(connectionManage.getPassword());
+
+        //分页
+        if(chartBuilderParams.isPageOrNo()){
+            jdbcProps.setPaging(true);
+            jdbcProps.setPage(chartBuilderParams.getPage());
+            jdbcProps.setPageSize(chartBuilderParams.getPageSize());
+        }else {
+            jdbcProps.setPaging(false);
+        }
+
+        //按字段排序
+        if(chartBuilderParams.getSidx() != null && !"".equals(chartBuilderParams.getSidx())){
+            jdbcProps.setSidx(chartBuilderParams.getSidx());
+            jdbcProps.setSord(chartBuilderParams.getSord());
+        }
+
+        //过滤
+        if(chartBuilderParams.isFilterOrNo()){
+            jdbcProps.setFilterOrNo(true);
+            jdbcProps.setFilterModels(chartBuilderParams.getFilterModels());
+        }else {
+            jdbcProps.setFilterOrNo(false);
+        }
+
+        //拼接字段名
+        List<String> xAxis = new ArrayList<>();
+        List<String> yAxis = new ArrayList<>();
+        List<String> allAxis = new ArrayList<>();
+        if (chartBuilderParams.getChartType() == ChartBuilderParams.ChartType.pie) {
+            xAxis.add(chartBuilderParams.getBuilderModel().getMark().getColor());
+            yAxis.add(chartBuilderParams.getBuilderModel().getMark().getAngle());
+        }else {
+            xAxis = chartBuilderParams.getBuilderModel().getxAxis();
+            yAxis = chartBuilderParams.getBuilderModel().getyAxis();
+        }
+        StringBuffer sb = new StringBuffer();
+        String sql = jdbcProps.getSql();
+        if(xAxis.size() > 0){
+            for(String xColumn : xAxis){
+                allAxis.add(xColumn);
+            }
+        }
+        if(yAxis.size() > 0){
+            for(String yColumn : yAxis){
+                allAxis.add(yColumn);
+            }
+        }
+        if(allAxis.size() > 0){
+            for(int i=0;i<xAxis.size();i++){
+                if(i == 0){
+                    sb.append(allAxis.get(i));
+                }else {
+                    sb.append(",");
+                    sb.append(allAxis.get(i));
+                }
+            }
+            if(xAxis.size() > 0 && yAxis.size() > 0){
+                sb.append(",");
+            }
+            for(int i=xAxis.size();i<allAxis.size();i++){
+                if(i == xAxis.size()){
+                    sb.append("sum("+allAxis.get(i)+")"+" as "+allAxis.get(i));
+                }else {
+                    sb.append(",");
+                    sb.append("sum("+allAxis.get(i)+")"+" as "+allAxis.get(i));
+                }
+            }
+            String columns = sql.substring("select ".indexOf(sql), " from".indexOf(sql));
+            sql = sql.replace(columns, sb.toString());
+            jdbcProps.setSql(sql);
+        }
+        L.info("执行查询语句: {}", jdbcProps.getSql());
+
+        return dataBaseMetadataHelper.prepareDataSetForTable(jdbcProps, xAxis);
     }
 
 }

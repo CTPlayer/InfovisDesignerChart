@@ -11,16 +11,13 @@ import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.cglib.proxy.Callback;
 import org.springframework.context.ApplicationContext;
 import service.chart.ChartOption;
 import service.chart.bar.echarts.Bar;
 import service.chart.line.echarts.Line;
 import service.chart.pie.echarts.Pie;
-import service.chart.pie.echarts.Ring;
 import service.myPanel.MyChartsService;
 
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +38,6 @@ public class UpdateChartOption implements Job {
         //构造option所需的ChartBuilderParams对象参数
         ChartBuilderParams chartBuilderParams = new ChartBuilderParams();
         myCharts.setId((String) jobDataMap.get("chartId"));
-        System.out.println("我的job在执行！");
         try {
             //获取spring上下文
             ApplicationContext applicationContext = (ApplicationContext) context.getScheduler().getContext().get("applicationContext");
@@ -65,9 +61,6 @@ public class UpdateChartOption implements Job {
                 newOption = chartOption.transform(chartBuilderParams);
             } else if (chartBuilderParams.getChartType() == ChartBuilderParams.ChartType.bar) {
                 chartOption = applicationContext.getBean(Bar.class);
-                newOption = chartOption.transform(chartBuilderParams);
-            } else if (chartBuilderParams.getChartType() == ChartBuilderParams.ChartType.ring) {
-                chartOption = applicationContext.getBean(Ring.class);
                 newOption = chartOption.transform(chartBuilderParams);
             }
             if(option.get("xAxis") != null) {

@@ -279,6 +279,9 @@
                         <div class="panel fresh-color panel-default chart-type-select-panel" style="width:100px;top:300px;position: fixed">
                             <div class="panel-heading">图表类型</div>
                             <div class="chart-type">
+                                <span class="table" @click="chartTypeSelect('table')" v-bind:class="{ active: 'table' === chartType }">
+                                    <img src="resources/img/table_chart.svg">
+                                </span>
                                 <span class="bar" @click="chartTypeSelect('bar')" v-bind:class="{ active: 'bar' === chartType }">
                                     <img src="resources/img/bar_chart.png">
                                 </span>
@@ -288,11 +291,13 @@
                                 <span class="pie" @click="chartTypeSelect('pie')" v-bind:class="{ active: 'pie' === chartType }">
                                     <img src="resources/img/pie_chart.png">
                                 </span>
-                                <%--<span class="ring" @click="chartTypeSelect('bar')">--%>
-                                    <%--<img src="resources/img/ring_chart.png">--%>
-                                <%--</span>--%>
                             </div>
                             <div class="drag-tips">
+                                <div class="tips-table" v-cloak v-show= " chartType == 'table' "  >
+                                    <p><b>二维表</b></p>
+                                    <p><b>维度</b> 拖入列</p>
+                                    <p><b>度量</b> 拖入行</p>
+                                </div>
                                 <div class="tips-bar" v-cloak v-show= " chartType == 'bar' "  >
                                     <p><b>标准柱状图</b></p>
                                     <p><b>维度</b> 拖入列</p>
@@ -308,11 +313,6 @@
                                     <p><b>维度</b> 拖入颜色</p>
                                     <p><b>度量</b> 拖入角度</p>
                                 </div>
-                                <%--<div class="tips-ring" style="display: none">--%>
-                                    <%--<p><b>环形图</b></p>--%>
-                                    <%--<p><b>维度</b> 拖入颜色</p>--%>
-                                    <%--<p><b>度量</b> 拖入角度</p>--%>
-                                <%--</div>--%>
                             </div>
                         </div>
                     </div>

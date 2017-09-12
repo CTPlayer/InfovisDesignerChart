@@ -7,7 +7,6 @@ require.config({
         "validate": "lib/jquery.validate.min",
         "metisMenu": "lib/metisMenu/metisMenu.min",
         "ztree": "lib/ztree/js/jquery.ztree.all.min",
-        "options": "lib/charts/options",
         "infovis": "lib/infovis.min",
         "jqueryCookie": "lib/jquery.cookie",
         "jqueryMd5": "lib/jquery.md5",
@@ -15,7 +14,6 @@ require.config({
         "scrollbar" : 'lib/mCustomScrollbar/jquery.mCustomScrollbar.min',
         "commonModule" : 'app/commonModule',
         "jrange" : 'lib/jRange/jquery.range',
-        "knockout": "lib/knockout/knockout-3.4.0",
         "datetimepicker": "lib/bootstrapTimePicker/bootstrap-datetimepicker",
         "dateTimepicker-cn": "lib/bootstrapTimePicker/bootstrap-datetimepicker.zh-CN",
         "bootstrap-switch": "lib/flatadmin/lib/js/bootstrap-switch.min",
@@ -34,260 +32,6 @@ require.config({
     waitSeconds: 30
 });
 
-// require(['jquery', 'options', 'infovis', 'validate', 'knockout', 'datetimepicker', 'dateTimepicker-cn', 'bootstrap-switch'],
-//     function($, baseOptions, infovis, validate, ko){
-//     $(function(){
-//         //日期格式化方法
-//         Date.prototype.Format = function(fmt)
-//         {
-//             var o = {
-//                 "M+" : this.getMonth()+1,                 //月份
-//                 "d+" : this.getDate(),                    //日
-//                 "h+" : this.getHours(),                   //小时
-//                 "m+" : this.getMinutes(),                 //分
-//                 "s+" : this.getSeconds(),                 //秒
-//                 "q+" : Math.floor((this.getMonth()+3)/3), //季度
-//                 "S"  : this.getMilliseconds()             //毫秒
-//             };
-//             if(/(y+)/.test(fmt))
-//                 fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));
-//             for(var k in o)
-//                 if(new RegExp("("+ k +")").test(fmt))
-//                     fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
-//             return fmt;
-//         };
-//
-//         var engine = infovis.init(baseOptions.makeAllOptions() || {});
-//         var chartId = 0;              //chartId 对应myCharts表的主键，默认是0，即新建图表时，查询参数为0
-//         var exportId;                 //对应当前的设计面板
-//         if(window.location.href.indexOf("chartId") > 0){          //若通过点击设计面板中的表进入时，则chartId对应其在MyCharts表中的主键
-//             chartId = window.location.href.split("=")[1].replace("&exportId","");
-//             exportId = window.location.href.split("=")[2].replace("#","");
-//         }else{
-//             exportId = window.location.href.split("=")[1].replace("#","");
-//         }
-//
-//         $(".backUp").prepend('<a href="showPanel.page?exportId=' + exportId + '"role="button"><button class="btn btn-info"><span class="glyphicon glyphicon-menu-left"></span> 返回</button></a>');
-//
-//         var deferred = $.ajax({
-//             type: 'POST',
-//             url: 'selectOneChartInfo',
-//             data: "id="+chartId
-//         });
-//         deferred.done(function(data){
-//             if(data){
-//                 var editChart = engine.chart.init(document.getElementById("editArea"));
-//                 window.jobGroup = data.chartType;
-//                 if(parseInt(data.isRealTime) == 0){
-//                     editChart.setOption(JSON.parse(data.jsCode));
-//                 }else if(parseInt(data.isRealTime) == 1){
-//                     $.ajax({
-//                         type: 'POST',
-//                         contentType: "application/json; charset=utf-8",
-//                         url: 'render',
-//                         data: JSON.stringify({
-//                             'chartType': data.chartType,
-//                             'dataRecordId': data.sqlRecordingId,
-//                             'builderModel': JSON.parse(data.buildModel)
-//                         }),
-//                         success: function(option){
-//                             var newOption = JSON.parse(data.jsCode);
-//                             newOption.series = option.series;
-//                             editChart.setOption(newOption);
-//                         },
-//                         error: function(){
-//                             $("editArea").text("当前图表渲染失败，请检查远程数据库连接是否正常或刷新重试。");
-//                         }
-//                     });
-//                 }
-//                 $("#addChartForm").find(".chartName").val(data.chartName);
-//                 $("input[name='radio2'][value="+data.isRealTime+"]").attr("checked",true);
-//                 // 获取当前定时任务信息
-//                 $.ajax({
-//                     type: 'POST',
-//                     url: 'myChart/getSchedulerInfo',
-//                     data: {
-//                         triggerName: chartId,
-//                         triggerGroup: data.chartType
-//                     },
-//                     success: function(info){
-//                         if(info.haveJob == true){
-//                             $(".toggle-checkbox").bootstrapSwitch('state', true);
-//                             $('.form_datetime').find("input").val(info.startTime);
-//                             if(info.period == "day"){
-//                                 $("#addChartForm").find("option").eq(0).attr("selected", true);
-//                             }else if(info.period == "week"){
-//                                 $("#addChartForm").find("option").eq(1).attr("selected", true);
-//                             }else if(info.period == "month"){
-//                                 $("#addChartForm").find("option").eq(2).attr("selected", true);
-//                             }
-//                         }else {
-//                             $(".toggle-checkbox").bootstrapSwitch('state', false);
-//                         }
-//                     }
-//                 });
-//             }
-//         });
-//
-//         $('.toggle-checkbox').bootstrapSwitch({
-//             size: "small",
-//             onSwitchChange: function(event, state){
-//                 if(state == true){
-//                     $("#addChartForm").find(".form-group").eq(3).css("display", "block");
-//                     $("#addChartForm").find(".form-group").eq(4).css("display", "block");
-//                     $.ajax({
-//                        type: 'POST',
-//                        url: 'myChart/resumeJob',
-//                        data: {
-//                            jobName: chartId,
-//                            jobGroup: window.jobGroup
-//                        }
-//                     });
-//                 }else if(state == false){
-//                     $("#addChartForm").find(".form-group").eq(3).css("display", "none");
-//                     $("#addChartForm").find(".form-group").eq(4).css("display", "none");
-//                     $.ajax({
-//                         type: 'POST',
-//                         url: 'myChart/pauseJob',
-//                         data: {
-//                             jobName: chartId,
-//                             jobGroup: window.jobGroup
-//                         }
-//                     });
-//                 }
-//             }
-//         });
-//         $('.form_datetime').datetimepicker({
-//             format: "yyyy-mm-dd hh:ii:ss",
-//             language:  'zh-CN',
-//             weekStart: 1,
-//             todayBtn:  1,
-//             autoclose: 1,
-//             todayHighlight: 1,
-//             startView: 2,
-//             forceParse: 0,
-//             showMeridian: 1
-//         });
-//         var time = new Date().Format("yyyy-MM-dd hh:mm:ss");
-//         $('.form_datetime').find("input").val(time);   //设置默认值
-//
-//         $("#radio4").click(function(){
-//             $("#addChartForm").find(".form-group").eq(2).css("display", "block");
-//             $("#addChartForm").find(".form-group").eq(3).css("display", "block");
-//             $("#addChartForm").find(".form-group").eq(4).css("display", "block");
-//             $(".toggle-checkbox").bootstrapSwitch('state', true);
-//         });
-//
-//         $("#radio5").click(function(){
-//             $("#addChartForm").find(".form-group").eq(2).css("display", "none");
-//             $("#addChartForm").find(".form-group").eq(3).css("display", "none");
-//             $("#addChartForm").find(".form-group").eq(4).css("display", "none");
-//             $(".toggle-checkbox").bootstrapSwitch('state', false);
-//         });
-//
-//         $("#addChartModal .btn-success").click(function(){
-//             if(engine.chart.getInstanceByDom(document.getElementById("editArea"))){
-//                 $("#addChartForm").submit();
-//             }else{
-//                 alert("请先绘制图表");
-//             };
-//         });
-//
-//         $("#addChartForm").validate({
-//             errorElement : 'div',
-//             errorClass : 'warning-block',
-//             focusInvalid : true,
-//             ignore : "",
-//             rules : {
-//                 chartName : {
-//                     required : true,
-//                     maxlength:300
-//                 }
-//             },
-//             messages : {
-//                 chartName : {
-//                     required : "图表名称为必填项",
-//                     maxlength: "最大长度为50个字符"
-//                 }
-//             },
-//             submitHandler : function(form){
-//                 if(chartId == 0){
-//                     var paramId;
-//                     var deferred01 = $.ajax({
-//                         type: 'POST',
-//                         url: 'addCharts',
-//                         data : {
-//                             'chartType': window.cType,
-//                             'sqlRecordingId': window.sqlRecordingId,
-//                             'buildModel': JSON.stringify(window.bmodel),
-//                             'jsCode': JSON.stringify(engine.chart.getInstanceByDom(document.getElementById("editArea")).getOption()),
-//                             'chartName': $("#addChartForm").find(".chartName").val(),
-//                             'isRealTime' : $("input:radio:checked").val()
-//                         }
-//                     });
-//                     deferred01.done(function(data){
-//                         paramId = data;
-//                         $(form)[0].reset();
-//                         $("#addChartModal").modal('toggle');
-//                         top.window.location = "showPanel.page?exportId="+exportId+"&chartId="+data;
-//                     });
-//
-//                     if($(".toggle-checkbox").bootstrapSwitch('state') == true){
-//                         var time = $('.form_datetime').find("input").val();
-//                         $.when(deferred01).done(function(){
-//                             var deferred02 = $.ajax({
-//                                 type: 'POST',
-//                                 url: 'myChart/addSchedulerJob',
-//                                 data: {
-//                                     'chartId': paramId,
-//                                     'chartType': window.cType,
-//                                     'startTime': time,
-//                                     'period': $("#addChartForm").find(".form-group").eq(3).find("select").val(),
-//                                     'triggerName': paramId,
-//                                     'triggerGroup': window.cType
-//                                 }
-//                             });
-//                             deferred02.fail(function(){
-//                                 alert("定时任务设置失败!");
-//                             });
-//                         });
-//                     }
-//                 }else {
-//                     var deferred = $.ajax({
-//                         type: 'POST',
-//                         url: 'updateChartInfo',
-//                         data : {
-//                             'id': chartId,
-//                             'chartType': engine.chart.getInstanceByDom(document.getElementById("editArea")).getOption().series[0].type,
-//                             'sqlRecordingId': window.sqlRecordingId,
-//                             'buildModel': JSON.stringify(window.bmodel),
-//                             'jsCode': JSON.stringify(engine.chart.getInstanceByDom(document.getElementById("editArea")).getOption()),
-//                             'chartName': $("#addChartForm").find("input").val(),
-//                             'isRealTime' : $("input:radio:checked").val()
-//                         }
-//                     });
-//                     deferred.done(function(data){
-//                         $(form)[0].reset();
-//                         $("#addChartModal").modal('toggle');
-//                         top.window.location = "showPanel.page?exportId="+exportId;
-//                     })
-//
-//                     $.ajax({
-//                         type: 'POST',
-//                         url: 'myChart/retScheduleJob',
-//                         data: {
-//                             'triggerName': chartId,
-//                             'triggerGroup': window.jobGroup,
-//                             'startTime': $('.form_datetime').find("input").val(),
-//                             'period': $("#addChartForm").find(".form-group").eq(3).find("select").val()
-//                         }
-//                     })
-//                 }
-//             }
-//         });
-//     })
-// });
-
 require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate',
     'bootstrap','metisMenu','mousewheel','scrollbar','jqueryCookie','jqueryMd5','jquery-ui','datetimepicker','dateTimepicker-cn','bootstrap-switch'],
     function($,domReady,vue,echarts,commonModule,ztree,validate){
@@ -305,42 +49,42 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                         line:true,
                         bar:true,
                         pie:false,
-                        ring:false
+                        table:true
                     },
                     yAxis:{
                         dataType: "number",
                         line:true,
                         bar:true,
                         pie:false,
-                        ring:false
+                        table:true
                     },
                     filter:{
                         dataType: "all",
                         line:true,
                         bar:true,
                         pie:true,
-                        ring:true
+                        table: true
                     },
                     color :{
                         dataType: "text",
                         line:false,
                         bar:false,
                         pie:true,
-                        ring:true
+                        tale:false
                     },
                     corner :{
                         dataType: "number",
                         line:false,
                         bar:false,
                         pie:true,
-                        ring:true
+                        table:false
                     },
                     tag : {
                         dataType: "",
                         line:false,
                         bar:false,
                         pie:false,
-                        ring:false
+                        table:false
                     }
                 },
                 //通知第一层树，第二层树加载

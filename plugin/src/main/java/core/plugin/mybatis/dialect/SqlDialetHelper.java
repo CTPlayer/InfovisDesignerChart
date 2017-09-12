@@ -40,6 +40,46 @@ public class SqlDialetHelper {
     }
 
     /**
+     * 获取排序sql
+     * @param originalSql
+     * @param sidx
+     * @param sord
+     * @return
+     */
+    public static String getOrderSql(String originalSql, String sidx, String sord){
+        StringBuilder sb = new StringBuilder();
+        sb.append(originalSql).append(" order by " + sidx +  " " + sord);
+        return sb.toString();
+    }
+
+    /**
+     * 获取过滤sql
+     * @param originalSql
+     * @param column
+     * @param columnType
+     * @param value
+     * @param min
+     * @param max
+     * @return
+     */
+    public static String getFilterSql(String originalSql, String column, String columnType, String[] value, Integer min, Integer max){
+        StringBuilder sb = new StringBuilder();
+        sb.append(originalSql);
+        if("text".equals(columnType)){
+            for(int i=0;i<value.length;i++){
+                if(i == value.length - 1){
+                    sb.append(" " + column + " != " + "'" + value[i] + "'");
+                }else {
+                    sb.append(" " + column + " != " + "'" + value[i] + "'" + " and");
+                }
+            }
+        }else if("number".equals(columnType)){
+            sb.append(" " + column + " between " + min + " and " +max);
+        }
+        return sb.toString();
+    }
+
+    /**
      * 获取统计sql
      * @param url
      * @param originalSql

@@ -1,6 +1,9 @@
 package model.database;
 
 import common.model.BaseModel;
+import model.chart.FilterModel;
+
+import java.util.List;
 
 /**
  * Created by gzy on 2016/8/11.
@@ -28,6 +31,10 @@ public class JdbcProps  extends BaseModel{
     private String sql;
 
     private int queryMaxRows = 30;
+
+    private List<FilterModel> filterModels;
+
+    private boolean filterOrNo;
 
     public String getDriverClassName() {
         return driverClassName;
@@ -117,4 +124,19 @@ public class JdbcProps  extends BaseModel{
         this.dbPort = dbPort;
     }
 
+    public List<FilterModel> getFilterModels() {
+        return filterModels;
+    }
+
+    public void setFilterModels(List<FilterModel> filterModels) {
+        this.filterModels = filterModels;
+    }
+
+    public boolean isFilterOrNo() {
+        return filterOrNo;
+    }
+
+    public void setFilterOrNo(boolean filterOrNo) {
+        this.filterOrNo = filterOrNo;
+    }
 }

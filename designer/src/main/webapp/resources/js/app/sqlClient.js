@@ -25,7 +25,6 @@ require.config({
         "jquery-layout" : { "deps" :['jquery','jquery-ui'] },
         "jquery-steps" : { "deps" :['jquery'] },
         "bootstrap" : { "deps" :['jquery'] },
-        "gridstack" : { "deps" :['bootstrap', 'jquery-ui', 'lodash'] },
         "bootpag" : { "deps" :['jquery'] },
         "confirmModal" : { "deps" :['jquery'] }
     },

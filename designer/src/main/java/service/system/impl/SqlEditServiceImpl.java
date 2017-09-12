@@ -15,16 +15,12 @@ import java.util.List;
 @Service("sqlEditService")
 public class SqlEditServiceImpl implements SqlEditService {
     @Override
-    public void groupBySql(ChartBuilderParams chartBuilderParams, JdbcProps jdbcProps) {
-        String sql = jdbcProps.getSql();
+    public String groupBySql(ChartBuilderParams chartBuilderParams, String sql) {
         List<String> xAxis = new ArrayList<>();
-        List<String> yAxis = new ArrayList<>();
         if (chartBuilderParams.getChartType() == ChartBuilderParams.ChartType.pie) {
             xAxis.add(chartBuilderParams.getBuilderModel().getMark().getColor());
-            yAxis.add(chartBuilderParams.getBuilderModel().getMark().getAngle());
         }else {
             xAxis = chartBuilderParams.getBuilderModel().getxAxis();
-            yAxis = chartBuilderParams.getBuilderModel().getyAxis();
         }
 
         if(xAxis.size() > 0){
@@ -37,5 +33,6 @@ public class SqlEditServiceImpl implements SqlEditService {
                 }
             }
         }
+        return sql;
     }
 }

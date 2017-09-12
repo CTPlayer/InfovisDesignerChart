@@ -6,26 +6,22 @@ import model.chart.ChartBuilderParams;
 import model.myPanel.MyCharts;
 import model.myPanel.MyPanel;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import service.chart.ChartOption;
 import service.chart.bar.echarts.Bar;
 import service.chart.line.echarts.Line;
 import service.chart.pie.echarts.Pie;
-import service.chart.pie.echarts.Ring;
 import service.myPanel.MyChartsService;
 import service.myPanel.MyPanelService;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -280,8 +276,6 @@ public class DefaultController {
             chartOption = context.getBean(Line.class);
         } else if (chartBuilderParams.getChartType() == ChartBuilderParams.ChartType.bar) {
             chartOption = context.getBean(Bar.class);
-        } else if (chartBuilderParams.getChartType() == ChartBuilderParams.ChartType.ring) {
-            chartOption = context.getBean(Ring.class);
         }
 
         return TemplateUtil.genJsonStr4Obj(chartOption.transform(chartBuilderParams), true);

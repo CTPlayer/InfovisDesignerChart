@@ -13,6 +13,7 @@ package service.system.helper;
 import common.model.BaseModel;
 import core.plugin.mybatis.dialect.SqlDialetHelper;
 import core.plugin.spring.database.route.DynamicDataSource;
+import model.chart.FilterModel;
 import model.database.ColumnMetaData;
 import model.database.JdbcProps;
 import model.database.TableMetaData;
@@ -22,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.stereotype.Component;
+import service.system.SqlEditService;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -369,6 +371,93 @@ public class DataBaseMetadataHelper {
             JdbcUtils.closeConnection(conn);
         }
         return datas;
+    }
+
+    /**
+     * 执行查询语句,准备表格数据集
+     * @param jdbcProps
+     * @return
+     * @throws Exception
+     */
+    public ArrayList prepareDataSetForTable(JdbcProps jdbcProps, List<String> xAxis) throws Exception {
+        Connection conn = null;
+        PreparedStatement st = null;
+        ResultSet cRs = null;
+        ResultSetMetaData rsmd = null;
+        long totalCount = 0;
+        List<Map<String, Object>> datas = new ArrayList<>();
+        dynamicDataSource.selectDataSource(jdbcProps.getUrl(), jdbcProps.getUsername(), jdbcProps.getPassword());
+        conn = dynamicDataSource.getConnection();
+        String sql = jdbcProps.getSql();
+        if(jdbcProps.isFilterOrNo()){
+            sql = sql + " where";
+            List<FilterModel> filterModels = jdbcProps.getFilterModels();
+            for(int i=0;i<filterModels.size();i++){
+                sql = SqlDialetHelper.getFilterSql(sql, filterModels.get(i).getColumn(), filterModels.get(i).getColumnType(), filterModels.get(i).getValue(), filterModels.get(i).getMin(), filterModels.get(i).getMax());
+                if(i < filterModels.size() -1){
+                    sql = sql + " and";
+                }
+            }
+        }
+
+        //此部分为临时添加，后期需改进
+        if(xAxis.size() > 0){
+            sql = sql + " group by ";
+            for(int i=0;i<xAxis.size();i++){
+                if(i == 0){
+                    sql = sql + xAxis.get(i);
+                }else {
+                    sql = sql + "," + xAxis.get(i);
+                }
+            }
+        }
+
+        if(jdbcProps.getPagingModel().getSidx() != null && !"".equals(jdbcProps.getPagingModel().getSidx())){
+            sql = SqlDialetHelper.getOrderSql(sql, jdbcProps.getPagingModel().getSidx(), jdbcProps.getPagingModel().getSord());
+        }
+        if(jdbcProps.isPaging()){
+            RowBounds rowBounds = getRowBounds(jdbcProps);
+            totalCount = executeCountSql(conn, SqlDialetHelper.getCountSqlByDialet(jdbcProps.getUrl(), sql));
+            jdbcProps.setTotalCount(totalCount);
+            sql = SqlDialetHelper.getQuerySqlByDialet(jdbcProps.getUrl(), sql, rowBounds);
+            L.info("查询sql:" + sql);
+        }
+        try {
+            //sql不为空，并且为查询语句或count语句
+            if (StringUtils.isNotBlank(sql)) {
+                if (sql.matches(SQL_SELECT_REGEX) || sql.matches(SQL_COUNT_REGEX)) {
+                    st = conn.prepareStatement(sql);
+                    cRs = st.executeQuery();
+                    rsmd = cRs.getMetaData();
+                    String[] columnNameDatas = new String[rsmd.getColumnCount()];
+                    for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                        columnNameDatas[i - 1] = rsmd.getColumnLabel(i);
+                    }
+                    while (cRs.next()) {
+                        Map<String, Object> rawDataMap = new HashMap<>();
+                        for (int j = 1; j <= rsmd.getColumnCount(); j++) {
+                            rawDataMap.put(columnNameDatas[j - 1], cRs.getObject(j));
+                        }
+                        datas.add(rawDataMap);
+                    }
+                } else {
+                    throw new RuntimeException("Only select statement can be executed!");
+                }
+            } else {
+                throw new RuntimeException("SQL is required!");
+            }
+        } finally {
+            JdbcUtils.closeResultSet(cRs);
+            JdbcUtils.closeStatement(st);
+            JdbcUtils.closeConnection(conn);
+        }
+        ArrayList list = new ArrayList();
+        list.add(datas);
+        if(jdbcProps.isPaging()){
+            list.add(totalCount%jdbcProps.getPageSize() == 0 ? totalCount/jdbcProps.getPageSize() : totalCount/jdbcProps.getPageSize()+1);
+            list.add(totalCount);
+        }
+        return list;
     }
 
     /**
