@@ -19,7 +19,13 @@ require.config({
         "bootstrap-switch": "lib/flatadmin/lib/js/bootstrap-switch.min",
         "domReady" : 'lib/domReady',
         "vue": "lib/vue/vue",
-        "echarts": "lib/charts/echarts"
+        "echarts": "lib/charts/echarts",
+        "generateTableHtml": "app/generateTableHtml",
+        "tooltipster": "lib/gridly/tooltipster.bundle.min",
+        "sortable": "lib/gridly/jquery.sortable",
+        "thenBy": "lib/gridly/thenBy",
+        "jquery-confirm": "lib/confirm/jquery-confirm.min",
+        "jquery-loading": "lib/jqueryLoading/jquery.loading"
     },
     shim : {
         "bootstrap" : { "deps" :['jquery'] },
@@ -27,7 +33,9 @@ require.config({
         "jqueryMd5" : { "deps" :['jquery'] },
         "metisMenu" : { "deps" :['jquery'] },
         "ztree" : { "deps" :['jquery'] },
-        "dateTimepicker-cn" : { "deps" :['jquery'] }
+        "dateTimepicker-cn" : { "deps" :['jquery', 'datetimepicker'] },
+        "sortable" : { "deps" :['jquery'] },
+        "bootstrap-switch" : { "deps" :['jquery'] }
     },
     waitSeconds: 30
 });
@@ -41,7 +49,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
             data: {
                 dangerIndex: -1,
                 //图表类型
-                chartType: 'bar',
+                chartType: 'table',
                 //标记可接受数据类型(维度、度量)以及图表类型
                 axisTagMap: {
                     xAxis: {
@@ -135,7 +143,15 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                 //color,corner接收框样式
                 backgroundColor: '',
                 border: '',
-                borderRight: ''
+                borderRight: '',
+                //table过滤内容模型
+                filterParam: {},
+                //table分组内容模型
+                groupParam: {},
+                //table排序模型
+                order: {},
+                //table当前页
+                currentPage: 1
             },
             methods: {
                 //顶部菜单划过事件
@@ -201,7 +217,11 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                         this.filter = filterContent;
                     }
                     this.$nextTick(function(){
-                        commonModule.renderChart(this.chartType,this.sqlRecordingId,app);
+                        if(app.chartType == 'table'){
+                            commonModule.renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
+                        }else {
+                            commonModule.renderChart(this.chartType,this.sqlRecordingId,app);
+                        }
                     });
                 },
                 showFilterContent: function(index, dragDataType){
@@ -225,6 +245,8 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                     if(((acceptDataType == dragDataType)&&isAcceptChartType) || acceptDataType == "all"){
                         switch (tagType) {
                             case 'color':
+                                var color = [];
+                                this.color = color;
                                 this.color.push({iclass: 'fa '+iclass, targetNodeText: targetNodeText});
                                 target.css("background-color",'#f6eedb');
                                 target.css("border",'1px #f9e7bb solid');
@@ -234,6 +256,8 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 });
                                 break;
                             case 'corner':
+                                var corner = [];
+                                this.corner = corner;
                                 this.corner.push({iclass: 'fa '+iclass, targetNodeText: targetNodeText});
                                 target.css("background-color",'#d2ddf0');
                                 target.css("border",'1px #b1caf4 solid');
@@ -247,23 +271,37 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 target.css("cursor","move");
                                 break;
                             case 'xAxis':
-                                var xAxis = [];
-                                xAxis.push(targetNodeText);
-                                this.xAxis = xAxis;
+                                if(app.chartType == 'table'){
+                                    if($.inArray(targetNodeText, app.xAxis) < 0){
+                                        this.xAxis.push(targetNodeText);
+                                    }
+                                }else {
+                                    var xAxis = [];
+                                    xAxis.push(targetNodeText);
+                                    this.xAxis = xAxis;
+                                }
                                 target.css("background-color",'#f6eedb');
                                 target.css("border",'1px #f9e7bb solid');
                                 app.$nextTick(function(){
-                                    commonModule.renderChart(app.chartType,this.sqlRecordingId,app);
+                                    if(app.chartType == 'table'){
+                                        commonModule.renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
+                                    }else {
+                                        commonModule.renderChart(app.chartType,this.sqlRecordingId,app);
+                                    }
                                 });
-                                break;
+                                break;y
                             case 'yAxis':
-                                var yAxis = [];
-                                yAxis.push(targetNodeText);
-                                this.yAxis = yAxis;
+                                if($.inArray(targetNodeText, app.yAxis) < 0){
+                                    this.yAxis.push(targetNodeText);
+                                }
                                 target.css("background-color",'#d2ddf0');
                                 target.css("border",'1px #b1caf4 solid');
                                 app.$nextTick(function(){
-                                    commonModule.renderChart(app.chartType,this.sqlRecordingId,app);
+                                    if(app.chartType == 'table'){
+                                        commonModule.renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
+                                    }else {
+                                        commonModule.renderChart(app.chartType,this.sqlRecordingId,app);
+                                    }
                                 });
                                 break;
                             case 'filter':
@@ -289,6 +327,8 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                     }else {
                         this.restoreTagStyle(target,tagType);
                     }
+                    var xAxis= app.xAxis;
+                    var yAxis = app.yAxis;
                 },
                 //重置全部标签内容
                 resetTagContent: function(){
@@ -416,7 +456,6 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                             filterParam[this.filter[item].targetNodeText] = app.rangeMin+','+app.rangeMax;
                             filterContent.push(JSON.stringify(filterParam));
                         }
-                        console.log(filterContent);
                     }
                     commonModule.renderChart(this.chartType,this.sqlRecordingId,app,filterContent);
                 }
@@ -931,6 +970,9 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                         treeObj.setting.callback.onClick(null,"dataListTree",childNode)
                     })
                 });
+                //table标签拖拽排序
+                $(".xAxis").sortable().bind('sortupdate');
+                $(".yAxis").sortable().bind('sortupdate');
             },
             watch: {
                 chartType: function () {

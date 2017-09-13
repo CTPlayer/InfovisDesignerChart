@@ -157,8 +157,7 @@ public final class DataSetProvider {
                     sb.append("sum("+allAxis.get(i)+")"+" as "+allAxis.get(i));
                 }
             }
-            String columns = sql.substring("select ".indexOf(sql), " from".indexOf(sql));
-            sql = sql.replace(columns, sb.toString());
+            sql = sql.replace("*", sb.toString());
             jdbcProps.setSql(sql);
         }
         L.info("执行查询语句: {}", jdbcProps.getSql());

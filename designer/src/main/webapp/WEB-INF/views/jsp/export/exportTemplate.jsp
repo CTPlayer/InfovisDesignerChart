@@ -5,8 +5,6 @@
 <head>
     <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>报表展示</title>
-    <!-- gridstack CSS -->
-    <link rel="stylesheet" href="resources/js/lib/gridstack/css/gridstack.min.css"/>
     <!--background theme-->
     <link rel="stylesheet" type="text/css" href="resources/css/backgroundTheme.css">
     <!-- Bootstrap Core CSS -->

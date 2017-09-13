@@ -42,24 +42,25 @@ public class CommonUtilImpl implements ChartsUtil {
         switch (chartType){
             case "bar" :
             case "line" :
-                String aAxis = chartBuilderParams.getBuilderModel().getxAxis().get(0);
-                String yAxis = chartBuilderParams.getBuilderModel().getyAxis().get(0);
+                List<String> aAxis = chartBuilderParams.getBuilderModel().getxAxis();
+                List<String> yAxis = chartBuilderParams.getBuilderModel().getyAxis();
                 if(chartBuilderParams.getBuilderModel().getFilter() != null) {
                     for (int i = 0; i < chartBuilderParams.getBuilderModel().getFilter().size(); i++) {
                         String filterName = "";   //当前所过滤的字段
                         String filter = chartBuilderParams.getBuilderModel().getFilter().get(i);
+                        System.out.println(filter);
                         Set<String> set = TemplateUtil.genObjFormJson(filter, Map.class).keySet();
                         for (String s : set) {
                             filterName = s;
                         }
-                        if (aAxis.equals(filterName)) {
+                        if (aAxis.contains(filterName)) {
                             for (int j = 0; j < dataSet.size(); j++) {
                                 if (!TemplateUtil.genObjFormJson(filter, Map.class).get(filterName).toString().contains(dataSet.get(j).get(filterName).toString())) {
                                     dataSet.remove(j);
                                     j--;
                                 }
                             }
-                        } else if (yAxis.equals(filterName)) {
+                        } else if (yAxis.contains(filterName)) {
                             String[] area = TemplateUtil.genObjFormJson(filter, Map.class).get(filterName).toString().split(",");
                             int min = Integer.parseInt(area[0]);
                             int max = Integer.parseInt(area[1]);
@@ -75,7 +76,6 @@ public class CommonUtilImpl implements ChartsUtil {
                 }
                 break;
             case "pie" :
-            case "ring":
                 String color = chartBuilderParams.getBuilderModel().getMark().getColor();
                 String angle = chartBuilderParams.getBuilderModel().getMark().getAngle();
                 if(chartBuilderParams.getBuilderModel().getFilter() != null){
@@ -120,33 +120,47 @@ public class CommonUtilImpl implements ChartsUtil {
     @Override
     public List<Map<String, Object>> dataGroupBy(ChartBuilderParams chartBuilderParams, List<Map<String, Object>> dataSet,String chartType) throws Exception {
         List<Map<String, Object>> newDataSet = new ArrayList<>();
-        String xAxis = "";
-        String yAxis = "";
+        List<String> xAxis = new ArrayList<>();
+        List<String> yAxis = new ArrayList<>();
         if(chartType == "bar" || chartType == "line"){
-            xAxis = chartBuilderParams.getBuilderModel().getxAxis().get(0);
-            yAxis = chartBuilderParams.getBuilderModel().getyAxis().get(0);
+            if(chartBuilderParams.getBuilderModel().getxAxis().size() > 0){
+                xAxis = chartBuilderParams.getBuilderModel().getxAxis();
+            }
+            if(chartBuilderParams.getBuilderModel().getyAxis().size() > 0){
+                yAxis = chartBuilderParams.getBuilderModel().getyAxis();
+            }
         }else if(chartType == "pie"){
-            xAxis = chartBuilderParams.getBuilderModel().getMark().getColor();
-            yAxis = chartBuilderParams.getBuilderModel().getMark().getAngle();
+            xAxis.add(chartBuilderParams.getBuilderModel().getMark().getColor());
+            yAxis.add(chartBuilderParams.getBuilderModel().getMark().getAngle());
         }
-        if(xAxis != "" && yAxis != ""){
+        if(xAxis.size() > 0 && yAxis.size() > 0){
             String xValue = "";
             Integer yValue = 0;
-            HashMap<String, Integer> map = new HashMap<>();
+            HashMap<String, List<Integer>> map = new HashMap<>();
             for(Map<String, Object> data : dataSet){
-                if(data.containsKey(xAxis)){
-                    xValue = data.get(xAxis).toString();
-                    yValue = Integer.parseInt(data.get(yAxis).toString());
-                    if(map.containsKey(xValue)){
-                        yValue = yValue + map.get(xValue);
+                if(data.containsKey(xAxis.get(0))){
+                    Object object = data.get(xAxis.get(0));
+                    xValue = object == null ? "null" : data.get(xAxis.get(0)).toString();
+                    List<Integer> yValues = new ArrayList<>();
+                    for(int i=0;i<yAxis.size();i++){
+                        yValues.add(0);
+                        object = data.get(yAxis.get(i));
+                        String yValueStr = object == null ? "0" : data.get(yAxis.get(i)).toString();
+                        yValue = Integer.parseInt(yValueStr.indexOf(".") > 0 ? yValueStr.split("\\.")[0] : yValueStr);
+                        if(map.containsKey(xValue)){
+                            yValue = yValue + map.get(xValue).get(i);
+                        }
+                        yValues.set(i, yValue);
+                        map.put(xValue,yValues);
                     }
-                    map.put(xValue,yValue);
                 }
             }
             for(String key:map.keySet()){
                 Map<String, Object> newMap = new HashMap<>();
-                newMap.put(xAxis,key);
-                newMap.put(yAxis,map.get(key));
+                newMap.put(xAxis.get(0),key);
+                for(int i=0;i<yAxis.size();i++){
+                    newMap.put(yAxis.get(i), map.get(key).get(i));
+                }
                 newDataSet.add(newMap);
             }
         }

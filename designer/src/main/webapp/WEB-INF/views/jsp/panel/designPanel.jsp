@@ -13,9 +13,6 @@
     <link href="resources/js/lib/bootstrap/css/font-awesome.css" rel="stylesheet">
     <!-- Animate -->
     <link href="resources/js/lib/bootstrap/css/animate.css" rel="stylesheet">
-    <!-- gridstack CSS -->
-    <link rel="stylesheet" href="resources/js/lib/gridstack/css/gridstack.min.css"/>
-    <link rel="stylesheet" type="text/css" href="resources/js/lib/gridstack/css/default.css">
     <!--Color Picker CSS-->
     <link rel="stylesheet" type="text/css" href="resources/js/lib/bootstrap/css/spectrum.css">
     <!--flat admin-->

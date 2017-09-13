@@ -1,0 +1,59 @@
+tr:first-child {
+    font: bold 16px Verdana, Helvetica, Arial, sans-serif;
+}
+
+tr:not(:first-child){
+    font-size: 14px;
+}
+
+/*table tr:nth-child(odd){*/
+    /*background-color: rgb(233,239,243);*/
+/*}*/
+table tr:nth-child(odd) {
+    background-color:#f8f8f8;
+}
+
+table tr:nth-child(even){
+    background-color: rgb(255,255,255);
+}
+
+table {
+    table-layout: fixed;
+}
+
+/*td {*/
+    /*text-overflow:ellipsis; overflow:hidden; white-space:nowrap;*/
+    /*padding: 2px;*/
+    /*border: 1px inset black;*/
+    /*border-collapse: collapse;*/
+/*}*/
+td {
+    height:32px;
+    color: #353d47;
+    border:1px inset #e8e8e8;
+}
+
+/*td:hover {*/
+    /*cursor: pointer;*/
+    /*border: 1px solid grey;*/
+/*}*/
+td:hover {
+    border:1px inset #e8e8e8;
+}
+
+.list-group-item:hover {
+    background-color: rgb(34,167,240);
+    cursor: pointer;
+}
+
+.filterName {
+    color: rgb(34,167,240);
+}
+
+.filterValue {
+    font-style: italic;
+}
+
+.totalCount {
+    font: bold 13px Verdana;
+}

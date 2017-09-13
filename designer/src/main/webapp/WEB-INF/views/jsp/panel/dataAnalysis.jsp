@@ -39,6 +39,14 @@
     <link href="resources/js/lib/bootstrapTimePicker/bootstrap-datetimepicker.min.css" rel="stylesheet">
     <![endif]-->
 
+    <!--table CSS-->
+    <link href="resources/css/svgTable.css" rel="stylesheet">
+    <!-- toolTip CSS -->
+    <link href="resources/css/tooltipster.bundle.min.css" rel="stylesheet">
+    <!--jquery-confirm css-->
+    <link href="resources/css/jquery-confirm.min.css" rel="stylesheet">
+    <!--jquery-loading css-->
+    <link href="resources/js/lib/jqueryLoading/jquery.loading.css" rel="stylesheet">
     <style>
         [v-cloak] {
             display: none;
@@ -268,7 +276,7 @@
             <div class="row row-editArea">
                 <div class="col-lg-12 col-xs-12 col-sm-12">
                     <div class="col-lg-10 col-xs-10">
-                        <div id="editArea">
+                        <div id="editArea" style="overflow: auto">
                             <h3>
                                 <p><i class="glyphicon glyphicon-info-sign"></i>  请选择数据集</p>
                                 <p>将维度、度量拖入工作区（行、列、标记）</p>

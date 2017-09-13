@@ -26,10 +26,7 @@ import service.chart.ChartsUtil;
 import service.system.helper.DataSetProvider;
 
 import javax.annotation.Resource;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 标准柱状图实现
@@ -76,17 +73,21 @@ public class Bar implements ChartOption {
         option.xAxis().add(axis);
         option.yAxis().add(new ValueAxis());
         // series
-        Series series = new com.github.abel533.echarts.series.Bar();
-        Collection<Object> seriesData = CollectionUtils.collect(dataSet, new Transformer<Map<String, Object>, Object>() {
-            @Override
-            public Object transform(Map<String, Object> input) {
-                Object v = input.get(chartBuilderParams.getBuilderModel().getyAxis().get(0));
-                return v;
-            }
-        });
-        series.setName(chartBuilderParams.getBuilderModel().getyAxis().get(0));
-        series.data().addAll(seriesData);
-        option.series(series);
+        List<Series> list = new ArrayList<>();
+        for(final int[] i = {0};i[0] < chartBuilderParams.getBuilderModel().getyAxis().size();i[0]++){
+            Series series = new com.github.abel533.echarts.series.Bar();
+            Collection<Object> seriesData = CollectionUtils.collect(dataSet, new Transformer<Map<String, Object>, Object>() {
+                @Override
+                public Object transform(Map<String, Object> input) {
+                    Object v = input.get(chartBuilderParams.getBuilderModel().getyAxis().get(i[0]));
+                    return v;
+                }
+            });
+            series.setName(chartBuilderParams.getBuilderModel().getyAxis().get(i[0]));
+            series.data().addAll(seriesData);
+            list.add(series);
+        }
+        option.series(list);
 
         return option;
     }
