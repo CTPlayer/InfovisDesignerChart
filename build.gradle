@@ -42,14 +42,14 @@ allprojects {
 // 子项目设置
 subprojects {
     // ~~~~~~~ 代码质量检测 ~~~~~~~~~~~~~~
-    apply plugin: "jacoco"
-    apply plugin: "checkstyle"
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    checkstyle {
-        configFile = file("../reference/config/checkstyle/sun_check.xml")
-        sourceSets = [sourceSets.main]
-        ignoreFailures = true
-    }
+//    apply plugin: "jacoco"
+//    apply plugin: "checkstyle"
+//    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//    checkstyle {
+//        configFile = file("../reference/config/checkstyle/sun_check.xml")
+//        sourceSets = [sourceSets.main]
+//        ignoreFailures = true
+//    }
 
     // 我们使用slf4j&logback，移除commons-logging
     configurations {
@@ -94,20 +94,20 @@ subprojects {
     }
 }
 
-apply plugin: "org.sonarqube"
-sonarqube {
-    properties {
-        property "sonar.host.url", "$sonarHostUrl"
-        property "sonar.login", "$sonarLogin"
-        property "sonar.password", "$sonarPassword"
-        property "sonar.jdbc.url", "$sonarJdbcUrl"
-        property "sonar.jdbc.driverClassName", "$sonarJdbcDriverClassName"
-        property "sonar.jdbc.username", "$sonarJdbcUsername"
-        property "sonar.jdbc.password", "$sonarJdbcPassword"
-        property "sonar.sourceEncoding", "UTF-8"
-        property "sonar.jacoco.reportPath", "${project.buildDir}/jacoco/test.exec"
-    }
-}
+//apply plugin: "org.sonarqube"
+//sonarqube {
+//    properties {
+//        property "sonar.host.url", "$sonarHostUrl"
+//        property "sonar.login", "$sonarLogin"
+//        property "sonar.password", "$sonarPassword"
+//        property "sonar.jdbc.url", "$sonarJdbcUrl"
+//        property "sonar.jdbc.driverClassName", "$sonarJdbcDriverClassName"
+//        property "sonar.jdbc.username", "$sonarJdbcUsername"
+//        property "sonar.jdbc.password", "$sonarJdbcPassword"
+//        property "sonar.sourceEncoding", "UTF-8"
+//        property "sonar.jacoco.reportPath", "${project.buildDir}/jacoco/test.exec"
+//    }
+//}
 
 // 整个项目的核心配置，基本上包含了所有的依赖，以及spring（包括mvc）和mybatis的配置
 project(":designer") {

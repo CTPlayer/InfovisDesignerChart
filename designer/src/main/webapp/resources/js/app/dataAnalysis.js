@@ -434,7 +434,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                 },
                 //图表保存
                 saveChart: function(){
-                    if(echarts.getInstanceByDom(document.getElementById("editArea"))){
+                    if((this.xAxis > 0 && this.yAxis > 0) || (this.corner > 0 && this.color > 0)){
                         $("#addChartForm").submit();
                     }else{
                         alert("请先绘制图表");
@@ -603,6 +603,12 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                     },
                     submitHandler : function(form){
                         if(app.chartId == 0){
+                            var jsCode;
+                            if(app.chartType == 'table'){
+                                jsCode = $("#editArea").html();
+                            }else {
+                                jsCode = JSON.stringify(echarts.getInstanceByDom(document.getElementById("editArea")).getOption());
+                            }
                             var paramId;
                             var deferred01 = $.ajax({
                                 type: 'POST',
@@ -611,7 +617,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                     'chartType': app.chartType,
                                     'sqlRecordingId': app.sqlRecordingId,
                                     'buildModel': JSON.stringify(app.builderModel),
-                                    'jsCode': JSON.stringify(echarts.getInstanceByDom(document.getElementById("editArea")).getOption()),
+                                    'jsCode': jsCode,
                                     'chartName': app.chartName,
                                     'isRealTime' : app.dataSourcePicked
                                 }

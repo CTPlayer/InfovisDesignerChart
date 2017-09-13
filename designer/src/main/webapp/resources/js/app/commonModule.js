@@ -19,7 +19,7 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                 },
                 'filter':filterContent
             }
-        }else if(chartType == 'line' || chartType == 'bar' || chartType == 'table'){
+        }else if(chartType == 'line' || chartType == 'bar'){
              builderModel = {
                 'xAxis':  xAxis,
                 'yAxis':  yAxis,
@@ -69,8 +69,6 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
             'xAxis': xAxis,
             'yAxis': yAxis
         };
-
-        // var showNumber = $("#showNumber").val();
         var showNumer = 20;
 
         app.builderModel = builderModel;         //用于插入图表关联信息
@@ -162,6 +160,7 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                 //     mergeCell(data, groupParam);
                 // }
 
+                //点击翻页
                 // $(".paging").find("li").click(function(){
                 //     if($(this).hasClass("pagePre")){
                 //         if(window.currentPage > 1){

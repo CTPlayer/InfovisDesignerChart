@@ -35,22 +35,22 @@ define(['jquery','tooltipster'], function($){
 
         if(!$.isEmptyObject(data[0])){
             pageTag += '<nav aria-label="...">';
-            pageTag += '<ul class="pagination">';
-            pageTag += '<li class="pagePre"><a href="javascript:void(0)" aria-label="Previous"><span aria-hidden="true">«</span></a></li>';
-            if(totalPages < 6){
-                for(var i=1;i<(totalPages + 1);i++){
-                    pageTag += '<li class="pageNumber"><a href="javascript:void(0)">'+i+'</a></li>';
-                }
-            }else {
-                var startPage = parseInt(window.currentPage%5) == 0 ? (window.currentPage/5-1)*5+1 : parseInt(window.currentPage/5)*5+1;
-                var endPage = startPage+5 > totalPages+1 ? totalPages+1 : startPage+5;
-                for(var i=startPage;i<endPage;i++){
-                    pageTag += '<li class="pageNumber"><a href="javascript:void(0)">'+i+'</a></li>';
-                }
-            }
-            pageTag += '<li class="pageNext"><a href="javascript:void(0)" aria-label="Next"><span aria-hidden="true">»</span></a></li>';
-            pageTag += '</ul>';
-            pageTag += '<span style="position:absolute;line-height: 47px;font-size: 15px;"><strong>&nbsp;&nbsp;总计&nbsp;&nbsp;' + totalCount + '&nbsp;&nbsp;条数据</strong></span>';
+            // pageTag += '<ul class="pagination">';
+            // pageTag += '<li class="pagePre"><a href="javascript:void(0)" aria-label="Previous"><span aria-hidden="true">«</span></a></li>';
+            // if(totalPages < 6){
+            //     for(var i=1;i<(totalPages + 1);i++){
+            //         pageTag += '<li class="pageNumber"><a href="javascript:void(0)">'+i+'</a></li>';
+            //     }
+            // }else {
+            //     var startPage = parseInt(window.currentPage%5) == 0 ? (window.currentPage/5-1)*5+1 : parseInt(window.currentPage/5)*5+1;
+            //     var endPage = startPage+5 > totalPages+1 ? totalPages+1 : startPage+5;
+            //     for(var i=startPage;i<endPage;i++){
+            //         pageTag += '<li class="pageNumber"><a href="javascript:void(0)">'+i+'</a></li>';
+            //     }
+            // }
+            // pageTag += '<li class="pageNext"><a href="javascript:void(0)" aria-label="Next"><span aria-hidden="true">»</span></a></li>';
+            // pageTag += '</ul>';
+            pageTag += '<span style="line-height: 47px;font-size: 15px;"><strong>&nbsp;&nbsp;总计&nbsp;&nbsp;' + totalCount + '&nbsp;&nbsp;条数据</strong></span>';
             pageTag += '</nav>';
         }
 

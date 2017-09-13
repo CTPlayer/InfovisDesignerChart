@@ -55,9 +55,9 @@
 </head>
 
 <body class="flat-blue">
-<div class="app-container" id="app">
-    <div class="row content-container">
-        <nav class="navbar navbar-inverse navbar-static-top">
+<div class="app-container" id="app" style="height: 100%">
+    <div class="row content-container" style="height: 100%">
+        <nav class="navbar navbar-inverse navbar-static-top" style="height: 6.4%">
             <div class="container-fluid">
                 <ul class="nav navbar-nav navbar-left">
                     <a class="navbar-brand" href="#" style="color: #ffffff"><i class="glyphicon glyphicon-equalizer" aria-hidden="true"></i> 数据分析</a>
@@ -72,7 +72,7 @@
                 </ul>
             </div>
         </nav>
-        <div class="navbar-default sidebar scrollable" role="navigation" style="height: 550px;">
+        <div class="navbar-default sidebar scrollable" role="navigation" style="height: 90%;">
             <div class="panel panel-default">
                 <div class="panel-heading" role="tab" id="heading">
                     <h4 class="panel-title">
