@@ -1006,8 +1006,10 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                                     app.scrollType = 'auto';
                                                     app.tableHtml[data[i].id] = data[i].jsCode;
 
-                                                    var property = containerIds[i];
-                                                    chartNames.push({property: data[i].chartName});
+                                                    var menuInfo = [];
+                                                    menuInfo.push(target);
+                                                    menuInfo.push(data[i].chartName);
+                                                    chartNames.push(menuInfo);
                                                 }else {
                                                     exportChart.setOption(JSON.parse(data[i].jsCode));
                                                     renderMenu.renderMenu($(target), data[i].chartName, app);
@@ -1054,15 +1056,12 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                             }
                                         }
                                     }
-                                    //table的menu渲染
-                                    console.log(chartNames);
-                                    for(var i=0;i<chartNames.length;i++){
-                                        for(var property in chartNames[i]){
-                                            console.log(property);
-                                            console.log(chartNames[i].property);
-                                            renderMenu.renderMenu($('#'+property), chartNames[i].property, app);
+                                    app.$nextTick(function(){
+                                        //table的menu渲染
+                                        for(var i=0;i<chartNames.length;i++){
+                                            renderMenu.renderMenu(chartNames[i][0], chartNames[i][1], app);
                                         }
-                                    }
+                                    });
                                     //theme
                                     app.changeTheme(themeName);
                                     app.isSave = true;
