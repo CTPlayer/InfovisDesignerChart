@@ -57,7 +57,7 @@
 <body class="flat-blue">
 <div class="app-container" id="app" style="height: 100%">
     <div class="row content-container" style="height: 100%">
-        <nav class="navbar navbar-inverse navbar-static-top" style="height: 6.4%">
+        <nav class="navbar navbar-inverse navbar-static-top">
             <div class="container-fluid">
                 <ul class="nav navbar-nav navbar-left">
                     <a class="navbar-brand" href="#" style="color: #ffffff"><i class="glyphicon glyphicon-equalizer" aria-hidden="true"></i> 数据分析</a>

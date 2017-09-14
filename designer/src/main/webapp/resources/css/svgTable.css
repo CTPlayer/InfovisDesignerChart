@@ -57,3 +57,7 @@ td:hover {
 .totalCount {
     font: bold 13px Verdana;
 }
+
+table nav {
+    text-align: center;
+}

@@ -25,7 +25,8 @@ require.config({
         "sortable": "lib/gridly/jquery.sortable",
         "thenBy": "lib/gridly/thenBy",
         "jquery-confirm": "lib/confirm/jquery-confirm.min",
-        "jquery-loading": "lib/jqueryLoading/jquery.loading"
+        "jquery-loading": "lib/jqueryLoading/jquery.loading",
+        "nicescroll": "lib/nicescroll/jquery.nicescroll.min"
     },
     shim : {
         "bootstrap" : { "deps" :['jquery'] },
@@ -41,7 +42,7 @@ require.config({
 });
 
 require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate',
-    'bootstrap','metisMenu','mousewheel','scrollbar','jqueryCookie','jqueryMd5','jquery-ui','datetimepicker','dateTimepicker-cn','bootstrap-switch'],
+    'bootstrap','metisMenu','mousewheel','scrollbar','jqueryCookie','jqueryMd5','jquery-ui','datetimepicker','dateTimepicker-cn','bootstrap-switch','nicescroll'],
     function($,domReady,vue,echarts,commonModule,ztree,validate){
     domReady(function(){
         var app = new vue({
@@ -434,7 +435,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                 },
                 //图表保存
                 saveChart: function(){
-                    if((this.xAxis > 0 && this.yAxis > 0) || (this.corner > 0 && this.color > 0)){
+                    if((this.xAxis.length > 0 && this.yAxis.length > 0) || (this.corner.length > 0 && this.color.length > 0)){
                         $("#addChartForm").submit();
                     }else{
                         alert("请先绘制图表");
@@ -605,6 +606,9 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                         if(app.chartId == 0){
                             var jsCode;
                             if(app.chartType == 'table'){
+                                $("#editArea").find("table").css('width', '400px');
+                                $("#editArea").find("table").css('height', '90%');
+                                $("#editArea").find(".paging").css('height', '10%');
                                 jsCode = $("#editArea").html();
                             }else {
                                 jsCode = JSON.stringify(echarts.getInstanceByDom(document.getElementById("editArea")).getOption());
@@ -979,6 +983,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                 //table标签拖拽排序
                 $(".xAxis").sortable().bind('sortupdate');
                 $(".yAxis").sortable().bind('sortupdate');
+                $("#editArea").niceScroll();
             },
             watch: {
                 chartType: function () {

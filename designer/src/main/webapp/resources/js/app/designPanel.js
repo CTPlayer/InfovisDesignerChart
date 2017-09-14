@@ -25,7 +25,8 @@ require.config({
         "bootstrapFileStyle": "lib/bootstrapFileStyle/fileinput.min",
         "interact": "lib/interact/interact",
         "echarts": "lib/charts/echarts",
-        "theme": "lib/charts/theme"
+        "theme": "lib/charts/theme",
+        "nicescroll": "lib/nicescroll/jquery.nicescroll.min"
     },
     shim : {
         "bootstrap" : { "deps" :['jquery'] },
@@ -36,7 +37,7 @@ require.config({
 });
 
 require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','interact','formatData','CanvasTag','zrender','theme',
-        'bootstrapFileStyle','spectrum','confirmModal'],
+        'bootstrapFileStyle','spectrum','confirmModal','nicescroll'],
     function ($,domReady,vue,CanvasTagOfImage,renderMenu,echarts,interact,formatData,CanvasTag,zrender,theme) {
         domReady(function () {
             //charts配置双向绑定组件
@@ -366,7 +367,11 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                     chartType: '',
                     //是否切换了主题
                     currentTheme: '',
-                    renderFailList: []
+                    renderFailList: [],
+                    //tale html代码
+                    tableHtml: {},
+                    //每一个图表container的overflow属性
+                    scrollType: 'visible'
                 },
                 methods: {
                     //背景样式切换
@@ -782,21 +787,23 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             var target = $("#" + widgets[i].id);
                             var chartName = $(target).find('#chartTitle').text();
                             if (widgets[i].chartType.indexOf("text") < 0) {
-                                var chartOption = echarts.getInstanceByDom($(target)[0]).getOption();
-                                echarts.dispose($(target)[0]);
-                                echarts.registerTheme(themeName, theme[themeName]);
-                                var exportChart = echarts.init($(target)[0], themeName);
-                                app.overloadItemStyle(chartOption, theme[themeName]);       // 主题与图表option合并
-                                if(chartOption.series[0].type == 'line' || chartOption.series[0].type == 'bar'){
-                                    chartOption.xAxis[0].axisLine.lineStyle.color = '#999999';
-                                    chartOption.yAxis[0].axisLine.lineStyle.color = '#999999';
-                                    chartOption.xAxis[0].axisTick.lineStyle.color = '#999999';
-                                    chartOption.yAxis[0].axisTick.lineStyle.color = '#999999';
-                                    chartOption.xAxis[0].axisLabel.textStyle.color = '#999999';
-                                    chartOption.yAxis[0].axisLabel.textStyle.color = '#999999';
+                                if(echarts.getInstanceByDom($(target)[0])){
+                                    var chartOption = echarts.getInstanceByDom($(target)[0]).getOption();
+                                    echarts.dispose($(target)[0]);
+                                    echarts.registerTheme(themeName, theme[themeName]);
+                                    var exportChart = echarts.init($(target)[0], themeName);
+                                    app.overloadItemStyle(chartOption, theme[themeName]);       // 主题与图表option合并
+                                    if(chartOption.series[0].type == 'line' || chartOption.series[0].type == 'bar'){
+                                        chartOption.xAxis[0].axisLine.lineStyle.color = '#999999';
+                                        chartOption.yAxis[0].axisLine.lineStyle.color = '#999999';
+                                        chartOption.xAxis[0].axisTick.lineStyle.color = '#999999';
+                                        chartOption.yAxis[0].axisTick.lineStyle.color = '#999999';
+                                        chartOption.xAxis[0].axisLabel.textStyle.color = '#999999';
+                                        chartOption.yAxis[0].axisLabel.textStyle.color = '#999999';
+                                    }
+                                    exportChart.setOption(chartOption);
+                                    renderMenu.renderMenu($(target), chartName, app);
                                 }
-                                exportChart.setOption(chartOption);
-                                renderMenu.renderMenu($(target), chartName, app);
                             }
                         }
                     }
@@ -901,7 +908,14 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                 }
                                 zrInstance.resize();
                             }else if( chartType == 'chart' ){
-                                echarts.getInstanceByDom(document.getElementById(id)).resize();
+                                if(echarts.getInstanceByDom(document.getElementById(id))){
+                                    echarts.getInstanceByDom(document.getElementById(id)).resize();
+                                }else {
+                                    width = parseInt($(target).css('width').replace('px',''));
+                                    height = parseInt($(target).css('height').replace('px',''));
+                                    $(target).find('table').css('width', width);
+                                    $(target).find('table').css('height', height);
+                                }
                             }
                         });
                     //文字组件初始化
@@ -978,6 +992,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                 });
                                 defer.done(function(data) {
                                     var themeName;
+                                    var chartNames = [];
                                     for (var i = 0; i < chartIds.length; i++) {
                                         if(app.widgets[i].themeName){
                                             themeName = app.widgets[i].themeName;
@@ -986,9 +1001,20 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                         if (data[i].chartType.indexOf("text") < 0) {
                                             var exportChart = echarts.init($(target)[0]);
                                             if (parseInt(data[i].isRealTime) == 0) {
-                                                var chartOption = JSON.parse(data[i].jsCode);
-                                                exportChart.setOption(chartOption);
-                                                renderMenu.renderMenu($(target), data[i].chartName, app);
+
+                                                if(data[i].chartType == 'table'){
+                                                    app.scrollType = 'auto';
+                                                    app.tableHtml[data[i].id] = data[i].jsCode;
+
+                                                    var property = containerIds[i];
+                                                    chartNames.push({property: data[i].chartName});
+                                                }else {
+                                                    exportChart.setOption(JSON.parse(data[i].jsCode));
+                                                    renderMenu.renderMenu($(target), data[i].chartName, app);
+                                                }
+                                                // var chartOption = JSON.parse(data[i].jsCode);
+                                                // exportChart.setOption(chartOption);
+                                                // renderMenu.renderMenu($(target), data[i].chartName, app);
                                             } else if (parseInt(data[i].isRealTime) == 1) {
                                                 $.ajax({
                                                     async: false,
@@ -1028,6 +1054,15 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                             }
                                         }
                                     }
+                                    //table的menu渲染
+                                    console.log(chartNames);
+                                    for(var i=0;i<chartNames.length;i++){
+                                        for(var property in chartNames[i]){
+                                            console.log(property);
+                                            console.log(chartNames[i].property);
+                                            renderMenu.renderMenu($('#'+property), chartNames[i].property, app);
+                                        }
+                                    }
                                     //theme
                                     app.changeTheme(themeName);
                                     app.isSave = true;
@@ -1049,8 +1084,15 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                     app.widgets.push({ chartType: 'chart',id: app.order,chartId: data.id,width: '400px',height: '400px', chartName: data.chartName });
                                     app.$nextTick(function(){
                                         if(parseInt(data.isRealTime) == 0){
-                                            echarts.init($("#"+app.order)[0]).setOption(JSON.parse(data.jsCode));
-                                            renderMenu.renderMenu($("#"+app.order),data.chartName,app);
+                                            if(data.chartType == 'table'){
+                                                app.scrollType = 'auto';
+                                                app.tableHtml[data.id] = data.jsCode;
+                                            }else {
+                                                echarts.init($("#"+app.order)[0]).setOption(JSON.parse(data.jsCode));
+                                            }
+                                            setTimeout(function(){
+                                                renderMenu.renderMenu($("#"+app.order),data.chartName,app);
+                                            }, 0);
                                         }else if(parseInt(data.isRealTime) == 1){
                                             $.ajax({
                                                 type: 'POST',
@@ -1070,13 +1112,14 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                                 }
                                             });
                                         }
+                                        $(".draggable").niceScroll();
                                     })
                                 }
                             });
                         }
                     });
                     //窗口关闭监听
-                    // 关闭窗口时弹出确认提示
+                    //关闭窗口时弹出确认提示
                     $(window).bind('beforeunload', function(){
                         // 只有在标识变量is_confirm不为false时，才弹出确认提示
                         if(app.isSave == false)
