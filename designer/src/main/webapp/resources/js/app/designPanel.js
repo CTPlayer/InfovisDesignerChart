@@ -787,23 +787,21 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             var target = $("#" + widgets[i].id);
                             var chartName = $(target).find('#chartTitle').text();
                             if (widgets[i].chartType.indexOf("text") < 0) {
-                                if(echarts.getInstanceByDom($(target)[0])){
-                                    var chartOption = echarts.getInstanceByDom($(target)[0]).getOption();
-                                    echarts.dispose($(target)[0]);
-                                    echarts.registerTheme(themeName, theme[themeName]);
-                                    var exportChart = echarts.init($(target)[0], themeName);
-                                    app.overloadItemStyle(chartOption, theme[themeName]);       // 主题与图表option合并
-                                    if(chartOption.series[0].type == 'line' || chartOption.series[0].type == 'bar'){
-                                        chartOption.xAxis[0].axisLine.lineStyle.color = '#999999';
-                                        chartOption.yAxis[0].axisLine.lineStyle.color = '#999999';
-                                        chartOption.xAxis[0].axisTick.lineStyle.color = '#999999';
-                                        chartOption.yAxis[0].axisTick.lineStyle.color = '#999999';
-                                        chartOption.xAxis[0].axisLabel.textStyle.color = '#999999';
-                                        chartOption.yAxis[0].axisLabel.textStyle.color = '#999999';
-                                    }
-                                    exportChart.setOption(chartOption);
-                                    renderMenu.renderMenu($(target), chartName, app);
+                                var chartOption = echarts.getInstanceByDom($(target)[0]).getOption();
+                                echarts.dispose($(target)[0]);
+                                echarts.registerTheme(themeName, theme[themeName]);
+                                var exportChart = echarts.init($(target)[0], themeName);
+                                app.overloadItemStyle(chartOption, theme[themeName]);       // 主题与图表option合并
+                                if(chartOption.series[0].type == 'line' || chartOption.series[0].type == 'bar'){
+                                    chartOption.xAxis[0].axisLine.lineStyle.color = '#999999';
+                                    chartOption.yAxis[0].axisLine.lineStyle.color = '#999999';
+                                    chartOption.xAxis[0].axisTick.lineStyle.color = '#999999';
+                                    chartOption.yAxis[0].axisTick.lineStyle.color = '#999999';
+                                    chartOption.xAxis[0].axisLabel.textStyle.color = '#999999';
+                                    chartOption.yAxis[0].axisLabel.textStyle.color = '#999999';
                                 }
+                                exportChart.setOption(chartOption);
+                                renderMenu.renderMenu($(target), chartName, app);
                             }
                         }
                     }
@@ -908,9 +906,12 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                 }
                                 zrInstance.resize();
                             }else if( chartType == 'chart' ){
+                                console.log('1');
                                 if(echarts.getInstanceByDom(document.getElementById(id))){
+                                    console.log('2');
                                     echarts.getInstanceByDom(document.getElementById(id)).resize();
                                 }else {
+                                    console.log('running');
                                     width = parseInt($(target).css('width').replace('px',''));
                                     height = parseInt($(target).css('height').replace('px',''));
                                     $(target).find('table').css('width', width);
@@ -1061,9 +1062,10 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                         for(var i=0;i<chartNames.length;i++){
                                             renderMenu.renderMenu(chartNames[i][0], chartNames[i][1], app);
                                         }
+                                        $(".draggable").niceScroll();
                                     });
                                     //theme
-                                    app.changeTheme(themeName);
+                                    // app.changeTheme(themeName);
                                     app.isSave = true;
                                 })
                             });

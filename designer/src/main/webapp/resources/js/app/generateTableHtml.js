@@ -33,8 +33,8 @@ define(['jquery','tooltipster'], function($){
             table += "</tr>";
         }
 
-        if(!$.isEmptyObject(data[0])){
-            pageTag += '<nav aria-label="...">';
+        // if(!$.isEmptyObject(data[0])){
+            // pageTag += '<nav aria-label="...">';
             // pageTag += '<ul class="pagination">';
             // pageTag += '<li class="pagePre"><a href="javascript:void(0)" aria-label="Previous"><span aria-hidden="true">«</span></a></li>';
             // if(totalPages < 6){
@@ -50,9 +50,9 @@ define(['jquery','tooltipster'], function($){
             // }
             // pageTag += '<li class="pageNext"><a href="javascript:void(0)" aria-label="Next"><span aria-hidden="true">»</span></a></li>';
             // pageTag += '</ul>';
-            pageTag += '<span style="line-height: 47px;font-size: 15px;"><strong>&nbsp;&nbsp;总计&nbsp;&nbsp;' + totalCount + '&nbsp;&nbsp;条数据</strong></span>';
-            pageTag += '</nav>';
-        }
+            // pageTag += '<span style="line-height: 47px;font-size: 15px;"><strong>&nbsp;&nbsp;总计&nbsp;&nbsp;' + totalCount + '&nbsp;&nbsp;条数据</strong></span>';
+            // pageTag += '</nav>';
+        // }
 
         dom.html([
             '<table  border="0" cellpadding="0" cellspacing="10"  width="'+tableWidth+'">',
