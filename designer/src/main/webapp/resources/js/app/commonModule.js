@@ -3,6 +3,7 @@
  */
 define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jquery-loading'], function($, echarts, generateTableHtml){
     var renderChart = function(chartType,sqlRecordingId,app,filterContent){
+        $('.row-editArea').loading('toggle');
         var color = $(".mark-item-color").find("span").children().eq(0).text().trim();
         var angle = $(".mark-item-corner").find("span").children().eq(0).text().trim();
         var tag = $(".mark-item-tag").find("span").children().eq(0).text().trim();
@@ -39,6 +40,7 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                 'builderModel': builderModel
             }),
             success: function(option){
+                $('.row-editArea').loading('toggle');
                 echarts.dispose(document.getElementById("editArea"));
                 var editChart = echarts.init(document.getElementById("editArea"));
                 editChart.setOption(option);

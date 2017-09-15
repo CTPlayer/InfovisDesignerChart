@@ -238,8 +238,9 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                  * @param tagType 目标区域类型
                  * @param target 所要添加的目标区域
                  * @param dragDataType 字段类型
+                 * @param isRender 是否渲染图表
                  */
-                renderTag: function(targetNodeText,tagType,target,dragDataType,chartType){
+                renderTag: function(targetNodeText,tagType,target,dragDataType,chartType,isRender){
                     var acceptDataType = this.axisTagMap[tagType].dataType;
                     var isAcceptChartType = this.axisTagMap[tagType][chartType];
                     var iclass = this.getTagIclassType(tagType);
@@ -253,7 +254,9 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 target.css("border",'1px #f9e7bb solid');
                                 target.css("cursor","move");
                                 app.$nextTick(function(){
-                                    commonModule.renderChart(app.chartType,this.sqlRecordingId,app);
+                                    if(isRender != false){
+                                        commonModule.renderChart(app.chartType,this.sqlRecordingId,app);
+                                    }
                                 });
                                 break;
                             case 'corner':
@@ -264,7 +267,9 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 target.css("border",'1px #b1caf4 solid');
                                 target.css("cursor","move");
                                 app.$nextTick(function(){
-                                    commonModule.renderChart(app.chartType,this.sqlRecordingId,app);
+                                    if(isRender != false){
+                                        commonModule.renderChart(app.chartType,this.sqlRecordingId,app);
+                                    }
                                 });
                                 break;
                             case 'tag':
@@ -273,57 +278,65 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 break;
                             case 'xAxis':
                                 if(app.chartType == 'table'){
-                                    if($.inArray(targetNodeText, app.xAxis) < 0){
-                                        this.xAxis.push(targetNodeText);
+                                    for(var i=0;i<targetNodeText.length;i++){
+                                        if($.inArray(targetNodeText[i], app.xAxis) < 0){
+                                            this.xAxis.push(targetNodeText[i]);
+                                        }
                                     }
                                 }else {
                                     var xAxis = [];
-                                    xAxis.push(targetNodeText);
+                                    xAxis.push(targetNodeText[0]);
                                     this.xAxis = xAxis;
                                 }
                                 target.css("background-color",'#f6eedb');
                                 target.css("border",'1px #f9e7bb solid');
                                 app.$nextTick(function(){
-                                    if(app.chartType == 'table'){
-                                        commonModule.renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
-                                    }else {
-                                        commonModule.renderChart(app.chartType,this.sqlRecordingId,app);
+                                    if(isRender != false){
+                                        if(app.chartType == 'table'){
+                                            commonModule.renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
+                                        }else {
+                                            commonModule.renderChart(app.chartType,this.sqlRecordingId,app);
+                                        }
                                     }
                                 });
                                 break;y
                             case 'yAxis':
-                                if($.inArray(targetNodeText, app.yAxis) < 0){
-                                    this.yAxis.push(targetNodeText);
+                                for(var i=0;i<targetNodeText.length;i++){
+                                    if($.inArray(targetNodeText[i], app.yAxis) < 0){
+                                        this.yAxis.push(targetNodeText[i]);
+                                    }
                                 }
                                 target.css("background-color",'#d2ddf0');
                                 target.css("border",'1px #b1caf4 solid');
                                 app.$nextTick(function(){
-                                    if(app.chartType == 'table'){
-                                        commonModule.renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
-                                    }else {
-                                        commonModule.renderChart(app.chartType,this.sqlRecordingId,app);
+                                    if(isRender != false){
+                                        if(app.chartType == 'table'){
+                                            commonModule.renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
+                                        }else {
+                                            commonModule.renderChart(app.chartType,this.sqlRecordingId,app);
+                                        }
                                     }
                                 });
                                 break;
                             case 'filter':
-                                var filterText = [];
-                                for(var item in this.filter){
-                                    filterText.push(this.filter[item].targetNodeText);
-                                }
-                                if($.inArray(targetNodeText,filterText) == -1 && ($.inArray(targetNodeText,this.xAxis) >= 0 ||
-                                    $.inArray(targetNodeText,this.yAxis) >= 0 || $.inArray(targetNodeText,this.color) >= 0 ||
-                                    $.inArray(targetNodeText,this.corner) >= 0)){
-                                    this.filter.push({targetNodeText: targetNodeText, dragDataType: dragDataType});
-                                    app.$nextTick(function(){
-                                        var height = target.height();
-                                        app.filterHeight = height+'px';
-                                        this.showFilterIndex = this.filter.length-1;
-                                        $(document).mousedown(function(){
-                                            app.showFilterIndex = -1;
-                                        });
-                                    });
-                                    commonModule.getFilterResult(this.chartType,this.sqlRecordingId,targetNodeText,dragDataType,app);
-                                }
+                                // var filterText = [];
+                                // for(var item in this.filter){
+                                //     filterText.push(this.filter[item].targetNodeText);
+                                // }
+                                // if($.inArray(targetNodeText,filterText) == -1 && ($.inArray(targetNodeText,this.xAxis) >= 0 ||
+                                //     $.inArray(targetNodeText,this.yAxis) >= 0 || $.inArray(targetNodeText,this.color) >= 0 ||
+                                //     $.inArray(targetNodeText,this.corner) >= 0)){
+                                //     this.filter.push({targetNodeText: targetNodeText, dragDataType: dragDataType});
+                                //     app.$nextTick(function(){
+                                //         var height = target.height();
+                                //         app.filterHeight = height+'px';
+                                //         this.showFilterIndex = this.filter.length-1;
+                                //         $(document).mousedown(function(){
+                                //             app.showFilterIndex = -1;
+                                //         });
+                                //     });
+                                //     commonModule.getFilterResult(this.chartType,this.sqlRecordingId,targetNodeText,dragDataType,app);
+                                // }
                         }
                     }else {
                         this.restoreTagStyle(target,tagType);
@@ -500,7 +513,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                         app.jobGroup = data.chartType;
                         app.builderModel = JSON.parse(data.buildModel);
                         if(parseInt(data.isRealTime) == 0){
-                            editChart.setOption(JSON.parse(data.jsCode));
+                            // 渲染tag自动会渲染相应图表
                         }else if(parseInt(data.isRealTime) == 1){
                             $.ajax({
                                 type: 'POST',
@@ -606,9 +619,9 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                         if(app.chartId == 0){
                             var jsCode;
                             if(app.chartType == 'table'){
-                                $("#editArea").find("table").css('width', '400px');
-                                $("#editArea").find("table").css('height', '90%');
-                                $("#editArea").find(".paging").css('height', '10%');
+                                $("#editArea").find("table").css('width', '100%');
+                                $("#editArea").find("table").css('height', '100%');
+                                // $("#editArea").find(".paging").css('height', '10%');
                                 jsCode = $("#editArea").html();
                             }else {
                                 jsCode = JSON.stringify(echarts.getInstanceByDom(document.getElementById("editArea")).getOption());
@@ -653,6 +666,14 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 });
                             }
                         }else {
+                            var jsCode;
+                            if(app.chartType == 'table'){
+                                $("#editArea").find("table").css('width', '100%');
+                                $("#editArea").find("table").css('height', '100%');
+                                jsCode = $("#editArea").html();
+                            }else {
+                                jsCode = JSON.stringify(echarts.getInstanceByDom(document.getElementById("editArea")).getOption());
+                            }
                             var deferred = $.ajax({
                                 type: 'POST',
                                 url: 'updateChartInfo',
@@ -661,7 +682,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                     'chartType': app.chartType,
                                     'sqlRecordingId': app.sqlRecordingId,
                                     'buildModel': JSON.stringify(app.builderModel),
-                                    'jsCode': JSON.stringify(echarts.getInstanceByDom(document.getElementById("editArea")).getOption()),
+                                    'jsCode': jsCode,
                                     'chartName': app.chartName,
                                     'isRealTime' : app.dataSourcePicked
                                 }
@@ -787,7 +808,8 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                         drop: function (event, ui) {
                                             app.axisTagType($(this));
                                             app.dragUIDataType(ui);
-                                            var targetNodeText = $(ui.draggable).find("a").find("span")[0].innerText;
+                                            var targetNodeText = [];
+                                            targetNodeText.push($(ui.draggable).find("a").find("span")[0].innerText);
                                             app.renderTag(targetNodeText,app.tagType,$(this),app.dragDataType,app.chartType);
                                         },
                                         over: function (event, ui) {
@@ -933,18 +955,18 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                     var buildModel = JSON.parse(result.buildModel);
                     if(buildModel.mark){
                         if(buildModel.mark.color && buildModel.mark.color != '') {
-                            app.renderTag(buildModel.mark.color,'color',$("form.make-model-region .mark-down-column .mark-item-color"),'text','pie');
+                            app.renderTag(buildModel.mark.color,'color',$("form.make-model-region .mark-down-column .mark-item-color"),'text','pie',false);
                         }
                         if(buildModel.mark.angle && buildModel.mark.angle != ''){
                             app.renderTag(buildModel.mark.angle,'corner',$("form.make-model-region .mark-down-column .mark-item-corner"),'number','pie');
                         }
                     }
                     if(buildModel.xAxis && buildModel.xAxis != ''){
-                        app.renderTag(buildModel.xAxis[0],'xAxis',$("form.make-model-region .xAxis"),'text',result.chartType);
+                        app.renderTag(buildModel.xAxis,'xAxis',$("form.make-model-region .xAxis"),'text',result.chartType,false);
                     }
 
                     if(buildModel.yAxis && buildModel.yAxis != ''){
-                        app.renderTag(buildModel.yAxis[0],'yAxis',$("form.make-model-region .yAxis"),'number',result.chartType);
+                        app.renderTag(buildModel.yAxis,'yAxis',$("form.make-model-region .yAxis"),'number',result.chartType);
                     }
                     app.sqlRecordingId = result.sqlRecordingId;
                     if(result.chartType){

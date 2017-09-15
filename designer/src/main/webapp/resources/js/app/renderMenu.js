@@ -10,7 +10,7 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
     var renderMenu = function(target,chartName,app){
         //根据target判断不同的渲染方式以及事件绑定
         var charttype = target.attr("chartType");
-        if(charttype.indexOf("text") < 0) {
+        if(charttype == 'chart') {
             target.append('<div id="operate" style="width:100%;height:0px;background-color:rgb(53,61,71);position:absolute;top:0px;opacity:0.8">' +
                 '<span style="display:none;">' +
                 '<span id="chartTitle">'+chartName+'</span>' +
@@ -19,12 +19,20 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
                 '<a href="#"><i class="fa fa-cog" style="color: white"></i></a>' +
                 '</span>' +
                 '</div>');
-        }else{
+        }else if(charttype.indexOf("text") >= 0){
             target.append('<div id="operate" style="width:100%;height:0px;background-color:rgb(53,61,71);position:absolute;top:0px;opacity:0.8">' +
                 '<span style="display:none;">' +
                 '<span id="chartTitle">'+chartName+'</span>' +
                 '<a href="#"><i class="glyphicon glyphicon-remove" style="color: white"></i></a>' +
                 '<a href="#" data-toggle="modal" data-target="#textOptionModal"><i class="glyphicon glyphicon-pencil" style="color: white"></i></a>' +
+                '</span>' +
+                '</div>');
+        }else if(charttype == 'table'){
+            target.append('<div id="operate" style="width:100%;height:0px;background-color:rgb(53,61,71);position:absolute;top:0px;opacity:0.8">' +
+                '<span style="display:none;">' +
+                '<span id="chartTitle">'+chartName+'</span>' +
+                '<a href="#"><i class="glyphicon glyphicon-remove" style="color: white"></i></a>' +
+                '<a href="#"><i class="fa fa-cog" style="color: white"></i></a>' +
                 '</span>' +
                 '</div>');
         }
@@ -46,12 +54,16 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
 
         //删除当前容器
         target.find('a').eq(0).click(function(){
+            for(var i=0;i<app.widgets.length;i++){
+                if(app.widgets[i].id == $(this).parent().parent().parent()[0].id){
+                    app.widgets.splice(i, 1);
+                }
+            }
             app.isSave = false;
-            $(this).parent().parent().parent().remove();
         });
 
         //根据target判断不同的渲染方式以及事件绑定
-        if(charttype.indexOf("text") < 0) {
+        if(charttype == 'chart') {
             //将选中即将配置的图表渲染到配置面板
             //双向绑定
             target.find('a').eq(1).click(function () {
@@ -67,7 +79,7 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
                 }
                 top.window.location = "dataAnalysis.page?chartId=" + index + "&exportId=" + exportId;
             });
-        }else {
+        }else if(charttype.indexOf("text") >= 0) {
             target.find('a').eq(1).click(function () {
                 var pzr = zrender.getInstance(target.attr("zid"));//原控件
                 var option = $.extend(true, {}, pzr.storage.getShapeList()[0].style);
@@ -78,6 +90,15 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
                     app.currentView = 'img';
                     app.subGroupOption = option;
                 }
+            });
+        }else if(charttype == 'table'){
+            target.find('a').eq(1).click(function () {
+                var index = $(this).parent().parent().parent().attr("chartId");
+                var exportId = $("#exportId").val();
+                if (app.isSave == false) {
+                    app.saveCurrentPanel();
+                }
+                top.window.location = "dataAnalysis.page?chartId=" + index + "&exportId=" + exportId;
             });
         }
     };

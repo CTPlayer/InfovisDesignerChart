@@ -486,7 +486,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                     }
                                     if(response.data[i].chartType == 'text:subGroupOfImage'){
                                         mySubGroup.push({ chartId: response.data[i].id, base64: "data:image/jpg;base64,"+JSON.parse(response.data[i].jsCode).image});
-                                    }else if($.inArray(response.data[i].chartType,['bar','line','ring','pie']) != -1){
+                                    }else if($.inArray(response.data[i].chartType,['bar','line','pie','table']) != -1){
                                         myCharts.push({ chartId: response.data[i].id,chartType: response.data[i].chartType, chartName: response.data[i].chartName, dataType: dataType, imgSrc: "resources/img/"+response.data[i].chartType+"_chart.png" });
                                     }
                                 }
@@ -571,12 +571,26 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                     }, 0);
                                 }else {
                                     app.order = app.order + 1;
-                                    app.widgets.push({ chartType: 'chart',id: app.order,chartId: data.id,width: '400px',height: '400px', chartName: data.chartName });
+                                    var chartTag;
+                                    if(data.chartType == 'table'){
+                                        chartTag = 'table';
+                                    }else {
+                                        chartTag = 'chart';
+                                    }
+                                    app.widgets.push({ chartType: chartTag,id: app.order,chartId: data.id,width: '400px',height: '400px', chartName: data.chartName });
                                     setTimeout(function(){
                                         if(parseInt(data.isRealTime) == 0){
                                             $targetDiv = $("#"+app.order);
-                                            echarts.init($targetDiv[0]).setOption(JSON.parse(data.jsCode));
-                                            renderMenu.renderMenu($targetDiv, data.chartName, app);
+                                            if(data.chartType == 'table'){
+                                                app.scrollType = 'auto';
+                                                app.tableHtml[data.id] = data.jsCode;
+                                                console.log(app.tableHtml);
+                                            }else {
+                                                echarts.init($targetDiv[0]).setOption(JSON.parse(data.jsCode));
+                                            }
+                                            app.$nextTick(function(){
+                                                renderMenu.renderMenu($targetDiv, data.chartName, app);
+                                            });
                                         }else if(parseInt(data.isRealTime) == 1){
                                             $.ajax({
                                                 async: false,
@@ -606,6 +620,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                                 }
                                             });
                                         }
+                                        $(".draggable").niceScroll();
                                     }, 0);
                                 }
                             });
@@ -746,7 +761,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             this.widgets[i].datay = typeof($(target).attr('data-y')) == 'undefined' ? 0 : $(target).attr('data-y');
                             this.widgets[i].width = target.css('width');
                             this.widgets[i].height = target.css('height');
-                            if(this.currentTheme != '' && widgets[i].chartType.indexOf('text') < 0){
+                            if(this.currentTheme != '' && widgets[i].chartType.indexOf('text') < 0 && widgets[i].chartType.indexOf('table') < 0){
                                 this.widgets[i].themeName = this.currentTheme;
                             }
                         }
@@ -786,7 +801,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                         for(var i=0;i<widgets.length;i++) {
                             var target = $("#" + widgets[i].id);
                             var chartName = $(target).find('#chartTitle').text();
-                            if (widgets[i].chartType.indexOf("text") < 0) {
+                            if (widgets[i].chartType.indexOf("text") < 0 && widgets[i].chartType.indexOf('table') < 0) {
                                 var chartOption = echarts.getInstanceByDom($(target)[0]).getOption();
                                 echarts.dispose($(target)[0]);
                                 echarts.registerTheme(themeName, theme[themeName]);
@@ -906,17 +921,12 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                 }
                                 zrInstance.resize();
                             }else if( chartType == 'chart' ){
-                                console.log('1');
-                                if(echarts.getInstanceByDom(document.getElementById(id))){
-                                    console.log('2');
-                                    echarts.getInstanceByDom(document.getElementById(id)).resize();
-                                }else {
-                                    console.log('running');
-                                    width = parseInt($(target).css('width').replace('px',''));
-                                    height = parseInt($(target).css('height').replace('px',''));
-                                    $(target).find('table').css('width', width);
-                                    $(target).find('table').css('height', height);
-                                }
+                                echarts.getInstanceByDom(document.getElementById(id)).resize();
+                            }else if( chartType == 'table' ){
+                                width = parseInt($(target).css('width').replace('px',''));
+                                height = parseInt($(target).css('height').replace('px',''));
+                                $(target).find('table').css('width', width);
+                                $(target).find('table').css('height', height);
                             }
                         });
                     //文字组件初始化
@@ -1015,9 +1025,6 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                                     exportChart.setOption(JSON.parse(data[i].jsCode));
                                                     renderMenu.renderMenu($(target), data[i].chartName, app);
                                                 }
-                                                // var chartOption = JSON.parse(data[i].jsCode);
-                                                // exportChart.setOption(chartOption);
-                                                // renderMenu.renderMenu($(target), data[i].chartName, app);
                                             } else if (parseInt(data[i].isRealTime) == 1) {
                                                 $.ajax({
                                                     async: false,
@@ -1065,7 +1072,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                         $(".draggable").niceScroll();
                                     });
                                     //theme
-                                    // app.changeTheme(themeName);
+                                    app.changeTheme(themeName);
                                     app.isSave = true;
                                 })
                             });
@@ -1082,7 +1089,13 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                 if(data && $('[chartId='+data.id+']').length <= 0) {
                                     app.isSave = false;
                                     app.order = app.order + 1;
-                                    app.widgets.push({ chartType: 'chart',id: app.order,chartId: data.id,width: '400px',height: '400px', chartName: data.chartName });
+                                    var chartTag;
+                                    if(data.chartType == 'table'){
+                                        chartTag = 'table';
+                                    }else {
+                                        chartTag = 'chart';
+                                    }
+                                    app.widgets.push({ chartType: chartTag,id: app.order,chartId: data.id,width: '400px',height: '400px', chartName: data.chartName });
                                     app.$nextTick(function(){
                                         if(parseInt(data.isRealTime) == 0){
                                             if(data.chartType == 'table'){
