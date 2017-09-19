@@ -137,9 +137,6 @@
                     </a>
                 </div>
                 <div class="col-lg-1">
-                    <a href="#"><button class="btn btn-info" @click="exportChartOrTable" type="submit"><span class="glyphicon glyphicon-export"></span> 导出</button></a>
-                </div>
-                <div class="col-lg-1">
                     <a href="#" data-toggle="modal" data-target="#addChartModal"><button class="btn btn-info saveChartInfo" type="submit"><span class="glyphicon glyphicon-floppy-saved"></span> 保存</button></a>
                 </div>
             </div>
@@ -150,10 +147,10 @@
                             <div class="col-lg-6">
                                 <label class="col-sm-1 control-label">列</label>
                                 <div class="col-sm-11 labelDiv trigger-column xAxis" style="overflow: hidden;">
-                                    <div v-for="item in xAxis" v-cloak class="trigger-column-tag trigger-column-tag-text" @click="groupTable(item)">
+                                    <div v-for="item in xAxis" v-cloak class="trigger-column-tag trigger-column-tag-text">
                                         <a>
                                             <i class="glyphicon glyphicon-text-color" style="display: none;"></i>
-                                            <span class="dragName">
+                                            <span class="dragName" @click="groupTable(item)">
                                                 {{ item }}
                                                 <i class="fa fa-group" v-show="'table' === chartType && groupFactor.indexOf(item) !== -1"></i>
                                             </span>
@@ -273,9 +270,9 @@
                     </form>
                 </div>
             </div>
-            <div class="row row-editArea">
-                <div class="col-lg-12 col-xs-12 col-sm-12">
-                    <div class="col-lg-10 col-xs-10">
+            <div class="row row-editArea" style="height: 70%">
+                <div class="col-lg-12 col-xs-12 col-sm-12" style="height: 100%">
+                    <div class="col-lg-10 col-xs-10" style="height: 100%">
                         <div id="editArea" style="overflow: auto">
                             <h3>
                                 <p><i class="glyphicon glyphicon-info-sign"></i>  请选择数据集</p>

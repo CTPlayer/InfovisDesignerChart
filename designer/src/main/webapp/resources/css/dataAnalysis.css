@@ -110,7 +110,7 @@ form.make-model-region .labelDiv .mark-item-right {
 
 #editArea {
     width: 100%;
-    height: 300px;
+    height: 90%;
     margin: auto;
 }
 
@@ -173,7 +173,7 @@ form.make-model-region .labelDiv .mark-item-right {
 }
 
 #editArea{
-    margin-top:40px;
+    margin-top:30px;
     text-align: center
 }
 
@@ -184,7 +184,7 @@ form.make-model-region .labelDiv .mark-item-right {
 
 .row-editArea{
     border:1px #ccc dashed;
-    height:386px;
+    /*height:386px;*/
 }
 
 body{

@@ -305,6 +305,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 target.css("background-color",'#f6eedb');
                                 target.css("border",'1px #f9e7bb solid');
                                 app.$nextTick(function(){
+                                    console.log('running');
                                     if(isRender != false){
                                         if(app.chartType == 'table'){
                                             commonModule.renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
@@ -492,24 +493,15 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                 },
                 //表格分组
                 groupTable: function(tagText){
-                    var index = $.inArray(tagText, app.groupFactor);
-                    console.log(index);
-                    if(index >= 0){
-                        app.groupFactor.splice(index, 1);
-                    }else {
-                        app.groupFactor.push(tagText);
-                    }
-                    console.log(app.groupFactor);
-                    app.groupParam.groupFactor = app.groupFactor;
-                    commonModule.renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
-                },
-                //图表和表格导出
-                exportChartOrTable: function () {
                     if(this.chartType == 'table'){
-                        $("#editArea").find("table").tableExport({
-                            bootstrap: true,
-                            position: "top"
-                        });
+                        var index = $.inArray(tagText, app.groupFactor);
+                        if(index >= 0){
+                            app.groupFactor.splice(index, 1);
+                        }else {
+                            app.groupFactor.push(tagText);
+                        }
+                        app.groupParam.groupFactor = app.groupFactor;
+                        commonModule.renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
                     }
                 }
             },
@@ -549,10 +541,18 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                 deferred.done(function(data){
                     if(data){
                         var editChart = echarts.init(document.getElementById("editArea"));
+                        app.chartType = data.chartType;
                         app.jobGroup = data.chartType;
                         app.builderModel = JSON.parse(data.buildModel);
                         if(parseInt(data.isRealTime) == 0){
-                            // 渲染tag自动会渲染相应图表
+                            if(app.chartType == 'table'){
+                                $("#editArea").html(data.jsCode);
+                                $("#editArea").find("table").tableExport({
+                                    bootstrap: true
+                                });
+                            }else {
+                                editChart.setOption(JSON.parse(data.jsCode));
+                            }
                         }else if(parseInt(data.isRealTime) == 1){
                             $.ajax({
                                 type: 'POST',
@@ -566,6 +566,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 success: function(option){
                                     var newOption = JSON.parse(data.jsCode);
                                     newOption.series = option.series;
+                                    commonModule.addToolBox(option);
                                     editChart.setOption(newOption);
                                 },
                                 error: function(){
@@ -660,10 +661,12 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                             if(app.chartType == 'table'){
                                 $("#editArea").find("table").css('width', '100%');
                                 $("#editArea").find("table").css('height', '100%');
-                                // $("#editArea").find(".paging").css('height', '10%');
+                                $("#editArea").find("caption").remove();
                                 jsCode = $("#editArea").html();
                             }else {
-                                jsCode = JSON.stringify(echarts.getInstanceByDom(document.getElementById("editArea")).getOption());
+                                var option = echarts.getInstanceByDom(document.getElementById("editArea")).getOption();
+                                option.toolbox[0].show = false;
+                                jsCode = JSON.stringify(option);
                             }
                             var paramId;
                             var deferred01 = $.ajax({
@@ -684,7 +687,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 $("#addChartModal").modal('toggle');
                                 top.window.location = "showPanel.page?exportId="+app.exportId+"&chartId="+data;
                             });
-                            if($(".toggle-checkbox").bootstrapSwitch('state') == true){
+                            if($(".toggle-checkbox").bootstrapSwitch('state') == true && app.chartType != 'table'){
                                 var time = $('.form_datetime').find("input").val();
                                 $.when(deferred01).done(function(){
                                     var deferred02 = $.ajax({
@@ -709,9 +712,12 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                             if(app.chartType == 'table'){
                                 $("#editArea").find("table").css('width', '100%');
                                 $("#editArea").find("table").css('height', '100%');
+                                $("#editArea").find("caption").remove();
                                 jsCode = $("#editArea").html();
                             }else {
-                                jsCode = JSON.stringify(echarts.getInstanceByDom(document.getElementById("editArea")).getOption());
+                                var option = echarts.getInstanceByDom(document.getElementById("editArea")).getOption();
+                                option.toolbox[0].show = false;
+                                jsCode = JSON.stringify(option);
                             }
                             var deferred = $.ajax({
                                 type: 'POST',
@@ -732,16 +738,18 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 top.window.location = "showPanel.page?exportId="+app.exportId;
                             });
 
-                            $.ajax({
-                                type: 'POST',
-                                url: 'myChart/retScheduleJob',
-                                data: {
-                                    'triggerName': app.chartId,
-                                    'triggerGroup': app.jobGroup,
-                                    'startTime': app.startTime,
-                                    'period': app.selectedPeriod
-                                }
-                            })
+                            if(app.chartType != 'table'){
+                                $.ajax({
+                                    type: 'POST',
+                                    url: 'myChart/retScheduleJob',
+                                    data: {
+                                        'triggerName': app.chartId,
+                                        'triggerGroup': app.jobGroup,
+                                        'startTime': app.startTime,
+                                        'period': app.selectedPeriod
+                                    }
+                                })
+                            }
                         }
                     }
                 });
@@ -997,7 +1005,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                             app.renderTag(buildModel.mark.color,'color',$("form.make-model-region .mark-down-column .mark-item-color"),'text','pie',false);
                         }
                         if(buildModel.mark.angle && buildModel.mark.angle != ''){
-                            app.renderTag(buildModel.mark.angle,'corner',$("form.make-model-region .mark-down-column .mark-item-corner"),'number','pie');
+                            app.renderTag(buildModel.mark.angle,'corner',$("form.make-model-region .mark-down-column .mark-item-corner"),'number','pie',false);
                         }
                     }
                     if(buildModel.xAxis && buildModel.xAxis != ''){
@@ -1005,7 +1013,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                     }
 
                     if(buildModel.yAxis && buildModel.yAxis != ''){
-                        app.renderTag(buildModel.yAxis,'yAxis',$("form.make-model-region .yAxis"),'number',result.chartType);
+                        app.renderTag(buildModel.yAxis,'yAxis',$("form.make-model-region .yAxis"),'number',result.chartType,false);
                     }
                     app.sqlRecordingId = result.sqlRecordingId;
                     if(result.chartType){

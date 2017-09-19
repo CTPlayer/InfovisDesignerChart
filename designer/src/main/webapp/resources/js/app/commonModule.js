@@ -43,6 +43,7 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                 $('.row-editArea').loading('toggle');
                 echarts.dispose(document.getElementById("editArea"));
                 var editChart = echarts.init(document.getElementById("editArea"));
+                addToolBox(option);
                 editChart.setOption(option);
             }
         });
@@ -164,7 +165,9 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                 if(!$.isEmptyObject(groupParam)){
                     mergeCell(data, groupParam, allColumn);
                 }
-
+                $("#editArea").find("table").tableExport({
+                    bootstrap: true
+                });
                 //点击翻页
                 // $(".paging").find("li").click(function(){
                 //     if($(this).hasClass("pagePre")){
@@ -202,9 +205,6 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                 //     }
                 //     renderChart(chartType,window.sqlRecordingId,filterParam,groupParam,window.currentPage,window.order);
                 // });
-
-                //table转chart
-                // getChoosedColumn(xAxis);
             }
         });
     };
@@ -273,121 +273,6 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
     };
 
     /**
-     * 获取被选中的待转换的字段
-     * @param xAxis
-     */
-    var getChoosedColumn = function(xAxis){
-        $("#editArea").find("tr").eq(0).siblings().find("td").each(function(index){
-            $(this).click(function(){
-                $("#editArea").find("tr").each(function(){
-                    var currentTd = $(this).find("td").eq(index%xAxis.length);
-                    if(currentTd.hasClass("choosed")){
-                        currentTd.removeClass("choosed");
-                    }else {
-                        currentTd.addClass("choosed");
-                    }
-                });
-            });
-        });
-    };
-
-    var tableToChart = function(choosedColumn, chartType, filterParam, order, engine, currentPage){
-        var xAxis = [];
-        var yAxis = [];
-        var showNumber = $("#showNumber").val();
-
-        if(choosedColumn.length != 2){
-            $.alert({
-                title: '提示!',
-                content: '请选择一个维度字段和一个度量字段!'
-            });
-        }else {
-            for(var i=0;i<choosedColumn.length;i++){
-                if($(".xAxis").find("#"+choosedColumn[i]).hasClass("trigger-column-tag-text")){
-                    xAxis.push(choosedColumn[i]);
-                }else if($(".xAxis").find("#"+choosedColumn[i]).hasClass("trigger-column-tag-number")){
-                    yAxis.push(choosedColumn[i]);
-                }
-            }
-            if(xAxis.length != 1 || yAxis.length != 1){
-                $.alert({
-                    title: '提示!',
-                    content: '请选择一个且只能选择一个维度字段!'
-                });
-            }else {
-                var chartModel;
-                if(chartType == 'bar'){
-                    chartModel = {
-                        'xAxis': xAxis,
-                        'yAxis': yAxis
-                    };
-                }else if(chartType == 'pie'){
-                    chartModel = {
-                        'mark': {
-                            'color': xAxis[0],
-                            'angle': yAxis[0]
-                        }
-                    };
-                }
-
-                var filterModels = [];
-                var isFilter = "false";
-                if(!$.isEmptyObject(filterParam)){
-                    isFilter = "true";
-                    for(var key in filterParam){
-                        var filterModel = {};
-                        if($.isArray(filterParam[key])){
-                            filterModel.column = key;
-                            filterModel.columnType = 'text';
-                            filterModel.value = filterParam[key];
-                        }else {
-                            var min = parseInt(filterParam[key].split('~')[0]);
-                            var max = parseInt(filterParam[key].split('~')[1]);
-                            filterModel.column = key;
-                            filterModel.columnType = 'number';
-                            filterModel.min = min;
-                            filterModel.max = max;
-                        }
-                        filterModels.push(filterModel);
-                    }
-                }
-                $('.row-editArea').loading('toggle');
-                $.ajax({
-                    type: 'POST',
-                    contentType: "application/json; charset=utf-8",
-                    url: 'render',
-                    data: JSON.stringify({
-                        'chartType': chartType,
-                        'dataRecordId': sqlRecordingId,
-                        'builderModel': chartModel,
-                        'page': Math.ceil(currentPage),
-                        'pageSize': showNumber,
-                        'pageOrNo': "true",
-                        'sidx': order.column,
-                        'sord': order.sort,
-                        'filterModels': filterModels,
-                        'filterOrNo': isFilter
-                    }),
-                    success: function(data){
-                        $('.row-editArea').loading('toggle');
-                        var myChart = engine.chart.init(document.getElementById("editArea"));
-                        myChart.setOption(data);
-                    }
-                })
-            }
-        }
-    };
-
-    /**
-     * 图表各类型转换选中效果
-     * @param target
-     */
-    var chartTypeSpanRegistry = function (target) {
-        target.addClass('active');
-        target.siblings().removeClass("active");
-    };
-
-    /**
      * table合并分组
      */
     var arrayToTimes = function(dataArray){
@@ -418,10 +303,6 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
 
     var mergeCell = function(data, groupParam, allColumn){
         var preRowSpans = [];
-        // var xAxis = [];
-        // for(var i=0;i<$(".xAxis").find(".dragName").length;i++){
-        //     xAxis.push($(".xAxis").find(".dragName").eq(i).text().trim());
-        // }
         var rows = $("#editArea").find("tr");
         for(var i=0;i<groupParam.groupFactor.length;i++){
             var dataArray = [];
@@ -556,11 +437,24 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
         }
     };
 
+    /**
+     * 为option添加toolbox
+     * @param option
+     */
+    var addToolBox = function(option){
+        var toolbox = {
+              show : true,
+              feature : {
+                  saveAsImage : {show: true}
+              }
+        };
+        option.toolbox = toolbox;
+    };
+
     return {
         renderChart : renderChart,
         renderTable : renderTable,
         getFilterResult : getFilterResult,
-        chartTypeSpanRegistry : chartTypeSpanRegistry,
-        tableToChart : tableToChart
+        addToolBox : addToolBox
     }
 });

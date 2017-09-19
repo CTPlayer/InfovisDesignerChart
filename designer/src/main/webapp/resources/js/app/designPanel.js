@@ -1009,10 +1009,9 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                         if (data[i].chartType.indexOf("text") < 0) {
                                             var exportChart = echarts.init($(target)[0]);
                                             if (parseInt(data[i].isRealTime) == 0) {
-
                                                 if(data[i].chartType == 'table'){
                                                     app.scrollType = 'auto';
-                                                    $("#"+data[i].id).html(data[i].jsCode);
+                                                    $("#"+containerIds[i]).html(data[i].jsCode);
 
                                                     var menuInfo = [];
                                                     menuInfo.push(target);
@@ -1097,7 +1096,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                         if(parseInt(data.isRealTime) == 0){
                                             if(data.chartType == 'table'){
                                                 app.scrollType = 'auto';
-                                                $("#"+data.id).html(data.jsCode);
+                                                $("#"+app.order).html(data.jsCode);
                                             }else {
                                                 echarts.init($("#"+app.order)[0]).setOption(JSON.parse(data.jsCode));
                                             }

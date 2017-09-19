@@ -133,8 +133,7 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady','the
                                             var exportChart = echarts.init($("#" + containerIds[i])[0]);
                                             if(parseInt(data[i].isRealTime) == 0){
                                                 if(data[i].chartType == 'table'){
-                                                    $("#"+data[i].id).html(data[i].jsCode);
-
+                                                    $("#"+containerIds[i]).html(data[i].jsCode);
                                                 }else {
                                                     exportChart.setOption(JSON.parse(data[i].jsCode));
                                                 }
