@@ -20,7 +20,7 @@ public interface ChartsUtil {
      * @return
      * @throws Exception
      */
-    Collection<Object> getFilterResult(ChartBuilderParams chartBuilderParams) throws Exception;
+    List<Map<String, Object>> getFilterResult(ChartBuilderParams chartBuilderParams) throws Exception;
 
     /**
      * 图表数据过滤方法

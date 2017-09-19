@@ -51,8 +51,8 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady','the
                         var widgets = this.widgets;
                         for(var i=0;i<widgets.length;i++) {
                             var target = $("#" + widgets[i].id);
-                            var chartName = $(target).find('#chartTitle').text();
-                            if (widgets[i].chartType.indexOf("text") < 0) {
+                            // var chartName = $(target).find('#chartTitle').text();
+                            if (widgets[i].chartType.indexOf("text") < 0 && widgets[i].chartType.indexOf('table') < 0) {
                                 var chartOption = echarts.getInstanceByDom($(target)[0]).getOption();
                                 echarts.dispose($(target)[0]);
                                 echarts.registerTheme(themeName, theme[themeName]);
@@ -132,7 +132,12 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady','the
                                         if(data[i].chartType.indexOf("text") < 0){
                                             var exportChart = echarts.init($("#" + containerIds[i])[0]);
                                             if(parseInt(data[i].isRealTime) == 0){
-                                                exportChart.setOption(JSON.parse(data[i].jsCode));
+                                                if(data[i].chartType == 'table'){
+                                                    $("#"+data[i].id).html(data[i].jsCode);
+
+                                                }else {
+                                                    exportChart.setOption(JSON.parse(data[i].jsCode));
+                                                }
                                             }else if(parseInt(data[i].isRealTime) == 1){
                                                 $.ajax({
                                                     async: false,

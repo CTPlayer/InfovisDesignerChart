@@ -1,9 +1,9 @@
 define(['jquery','tooltipster'], function($){
-    var render = function (dom, data, keys, totalPages, order, totalCount) {
+    var render = function (dom, data, keys, totalPages, order, totalCount, app) {
         var tableWidth = dom.width();
         var table = '';
         var dataType = '';
-        var pageTag = '';
+        // var pageTag = '';
 
         table += "<tr>";
         for(var i=0;i<keys.length;i++){
@@ -15,9 +15,9 @@ define(['jquery','tooltipster'], function($){
                     orderTag = '<span class="glyphicon glyphicon-arrow-up"></span>';
                 }
             }
-            if($("#"+keys[i]).hasClass("trigger-column-tag-text")){
+            if($.inArray(keys[i], app.xAxis) >= 0){
                 dataType = 'text';
-            }else if($("#"+keys[i]).hasClass("trigger-column-tag-number")){
+            }else if($.inArray(keys[i], app.yAxis) >= 0){
                 dataType = 'number';
             }
             table += '<td dataType="'+dataType+'">'+keys[i]+orderTag+'</td>';
@@ -57,19 +57,19 @@ define(['jquery','tooltipster'], function($){
         dom.html([
             '<table  border="0" cellpadding="0" cellspacing="10"  width="'+tableWidth+'">',
                 table,
-            '</table>',
-            '<div class="paging">',
-                pageTag,
-            '</div>'
+            '</table>'
+            // '<div class="paging">',
+            //     pageTag,
+            // '</div>'
         ].join(''));
 
-        if(window.currentPage <= 1){
-            $(".paging").find(".pagePre").addClass("disabled");
-        }
-        if(window.currentPage >= totalPages){
-            $(".paging").find(".pageNext").addClass("disabled");
-        }
-        $(".paging").find(".pageNumber").eq(window.currentPage%5 == 0 ? 4 : window.currentPage%5 - 1).addClass("active");
+        // if(window.currentPage <= 1){
+        //     $(".paging").find(".pagePre").addClass("disabled");
+        // }
+        // if(window.currentPage >= totalPages){
+        //     $(".paging").find(".pageNext").addClass("disabled");
+        // }
+        // $(".paging").find(".pageNumber").eq(window.currentPage%5 == 0 ? 4 : window.currentPage%5 - 1).addClass("active");
 
         $('.tip').tooltipster({
             delay: 0

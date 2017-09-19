@@ -14,6 +14,7 @@
 package service.system.helper;
 
 import model.chart.ChartBuilderParams;
+import model.chart.FilterModel;
 import model.connectionManage.ConnectionManage;
 import model.connectionManage.SqlRecordingManage;
 import model.database.JdbcProps;
@@ -164,5 +165,40 @@ public final class DataSetProvider {
 
         return dataBaseMetadataHelper.prepareDataSetForTable(jdbcProps, xAxis);
     }
+
+    public List<Map<String, Object>> prepareDataSetForFilter(ChartBuilderParams chartBuilderParams) throws Exception {
+        SqlRecordingManage sqlRecordingManage = new SqlRecordingManage();
+        sqlRecordingManage.setId(chartBuilderParams.getDataRecordId());
+        sqlRecordingManage = sqlRecordingManageService.queryAsObject(sqlRecordingManage);
+
+        ConnectionManage connectionManage = new ConnectionManage();
+        connectionManage.setId(sqlRecordingManage.getConnectionId());
+        connectionManage = connectionManageService.queryAsObject(connectionManage);
+
+        JdbcProps jdbcProps = new JdbcProps();
+
+        String sql = sqlRecordingManage.getSqlRecording();
+        List<String> filters = chartBuilderParams.getBuilderModel().getFilter();
+        StringBuilder sb = new StringBuilder();
+        for(int i=0;i<filters.size();i++){
+            if(i == filters.size() - 1){
+                sb.append(filters.get(i));
+            }else {
+                sb.append(filters.get(i));
+                sb.append(",");
+            }
+            sql += " GROUP BY " + filters.get(i);
+        }
+        sql = sql.replace("*", sb.toString());
+
+        jdbcProps.setSql(sql);
+        jdbcProps.setUrl(connectionManage.getDbUrl());
+        jdbcProps.setUsername(connectionManage.getUserName());
+        jdbcProps.setPassword(connectionManage.getPassword());
+
+        L.info("执行查询语句: {}", jdbcProps.getSql());
+
+        return dataBaseMetadataHelper.prepareDataSet(jdbcProps);
+    };
 
 }

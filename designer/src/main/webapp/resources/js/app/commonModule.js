@@ -48,7 +48,7 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
         });
     };
 
-    var renderTable = function(chartType,sqlRecordingId,filterParam,groupParam,currentPage,order,app){
+    var renderTable = function(chartType,sqlRecordingId,filterContent,groupParam,currentPage,order,app){
         $('.row-editArea').loading('toggle');
         var xAxis = [];
         var yAxis = [];
@@ -77,8 +77,8 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
 
         var filterModels = [];
         var isFilter = "false";
-        if(!$.isEmptyObject(filterParam)){
-            isFilter = "true";
+        for(var i in filterContent){
+            var filterParam = JSON.parse(filterContent[i]);
             for(var key in filterParam){
                 var filterModel = {};
                 if($.isArray(filterParam[key])){
@@ -86,15 +86,18 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                     filterModel.columnType = 'text';
                     filterModel.value = filterParam[key];
                 }else {
-                    var min = parseInt(filterParam[key].split('~')[0]);
-                    var max = parseInt(filterParam[key].split('~')[1]);
+                    var min = parseInt(filterParam[key].split(',')[0]);
+                    var max = parseInt(filterParam[key].split(',')[1]);
                     filterModel.column = key;
                     filterModel.columnType = 'number';
                     filterModel.min = min;
                     filterModel.max = max;
                 }
-                filterModels.push(filterModel);
             }
+            filterModels.push(filterModel);
+        }
+        if(filterModels.length > 0){
+            isFilter = "true";
         }
 
         $.ajax({
@@ -107,7 +110,7 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                 'builderModel': builderModel,
                 'page': Math.ceil(currentPage),
                 'pageSize': showNumer,
-                'pageOrNo': "true",
+                'pageOrNo': "false",
                 'sidx': order.column,
                 'sord': order.sort,
                 'filterModels': filterModels,
@@ -132,21 +135,21 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                 /**
                  * 合并分组
                  */
-                // if(!$.isEmptyObject(groupParam)){
-                //     var thenByOrder1 = 1;
-                //     if(order.column == groupParam.groupFactor[0] && order.sort == 'desc'){
-                //         thenByOrder1 = -1;
-                //     }
-                //     var group = firstBy(function(v){ return v[groupParam.groupFactor[0]] }, thenByOrder1);
-                //     for(var i=1;i<groupParam.groupFactor.length;i++){
-                //         var thenByOrder2 = 1;
-                //         if(order.column == groupParam.groupFactor[i] && order.sort == 'desc'){
-                //             thenByOrder2 = -1;
-                //         }
-                //         group = group.thenBy(groupParam.groupFactor[i], thenByOrder2);
-                //     }
-                //     data.sort(group);
-                // }
+                if(!$.isEmptyObject(groupParam)){
+                    var thenByOrder1 = 1;
+                    if(order.column == groupParam.groupFactor[0] && order.sort == 'desc'){
+                        thenByOrder1 = -1;
+                    }
+                    var group = firstBy(function(v){ return v[groupParam.groupFactor[0]] }, thenByOrder1);
+                    for(var i=1;i<groupParam.groupFactor.length;i++){
+                        var thenByOrder2 = 1;
+                        if(order.column == groupParam.groupFactor[i] && order.sort == 'desc'){
+                            thenByOrder2 = -1;
+                        }
+                        group = group.thenBy(groupParam.groupFactor[i], thenByOrder2);
+                    }
+                    data.sort(group);
+                }
 
                 var allColumn = [];
                 for(var i=0;i<xAxis.length;i++){
@@ -157,10 +160,10 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                 }
 
                 $('.row-editArea').loading('toggle');
-                generateTableHtml.render($("#editArea"), data, allColumn, result.totalPages, app.order, result.totalCount);
-                // if(!$.isEmptyObject(groupParam)){
-                //     mergeCell(data, groupParam);
-                // }
+                generateTableHtml.render($("#editArea"), data, allColumn, result.totalPages, app.order, result.totalCount, app);
+                if(!$.isEmptyObject(groupParam)){
+                    mergeCell(data, groupParam, allColumn);
+                }
 
                 //点击翻页
                 // $(".paging").find("li").click(function(){
@@ -215,6 +218,7 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
      * @param filterPanel 过滤视图jquery对象
      */
     var getFilterResult = function(chartType,sqlRecordingId,targetText,dragDataType,app){
+        $(".panel-info").loading('toggle');
         var filter = [];
         if(targetText != null){
             filter.push(targetText);
@@ -235,16 +239,18 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                 'builderModel': builderModel
             }),
             success: function(data){
+                $(".panel-info").loading('toggle');
                 if(dragDataType == 'text'){
                     app.filterType = 'text';
-                    var numberResult = [];
+                    var textResult = [];
                     for(var i=0;i<data.filterResult.length;i++) {
-                        numberResult.push(data.filterResult[i][targetText]);
+                        textResult.push(data.filterResult[i][targetText]);
                     }
-                    app.numberResult = numberResult;
+                    app.filterContent.push({tagText: targetText,result: textResult,tagType: 'text'});
+                    app.checkedNames[targetText] = textResult;
                 }else if(dragDataType == 'number'){
                     app.filterType = 'number';
-                    numberResult = [];
+                    var numberResult = [];
                     var hasText = false;     // 判断是否有文字
                     for(var i=0;i<data.filterResult.length;i++){
                         numberResult.push(data.filterResult[i][targetText]);
@@ -256,8 +262,7 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                         if(hasText == false){
                             var min = Math.min.apply(null,numberResult);
                             var max = Math.max.apply(null,numberResult);
-                            app.rangeMin = min;
-                            app.rangeMax = max;
+                            app.filterContent.push({tagText: targetText,rangeMin: min,rangeMax: max,tagType: 'number'});
                         }else {
                             $(".numberContainer").html("当前值范围中包含非数字项，请检查或者转换为维度");
                         }
@@ -383,29 +388,6 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
     };
 
     /**
-     * tag拖拽OVER样式
-     */
-    var tagDropOverRender = function(target) {
-        target.css("border","1px dashed #22a7f0");
-        target.css("background-color","#cfe9f7");
-    };
-
-    /**
-     * 拖拽元素数据类型
-     */
-    var dragUIDataType = function (ui) {
-        var dragDataType;
-        var textTag = $(ui.draggable).find("a").find("i").hasClass("glyphicon-text-color");
-        var numberTag = $(ui.draggable).find("a").find("i").hasClass("fa-sort-numeric-asc");
-        if(textTag){
-            dragDataType = 'text';
-        }else if(numberTag){
-            dragDataType = 'number';
-        }
-        return dragDataType;
-    };
-
-    /**
      * table合并分组
      */
     var arrayToTimes = function(dataArray){
@@ -434,17 +416,17 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
         return rowSpans;
     };
 
-    var mergeCell = function(data, groupParam){
+    var mergeCell = function(data, groupParam, allColumn){
         var preRowSpans = [];
-        var xAxis = [];
-        for(var i=0;i<$(".xAxis").find(".dragName").length;i++){
-            xAxis.push($(".xAxis").find(".dragName").eq(i).text().trim());
-        }
+        // var xAxis = [];
+        // for(var i=0;i<$(".xAxis").find(".dragName").length;i++){
+        //     xAxis.push($(".xAxis").find(".dragName").eq(i).text().trim());
+        // }
         var rows = $("#editArea").find("tr");
         for(var i=0;i<groupParam.groupFactor.length;i++){
             var dataArray = [];
             var rowSpans = [];
-            var index = $.inArray(groupParam.groupFactor[i], xAxis);
+            var index = $.inArray(groupParam.groupFactor[i], allColumn);
             for(var j=0;j<data.length;j++){
                 dataArray.push(data[j][groupParam.groupFactor[i]]);
             }
@@ -481,12 +463,12 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
             var preSpan = 0;
             for(var j=0;j<rowSpans.length;j++){
                 var count = '';
-                for(var k=0;k<xAxis.length;k++){
+                for(var k=0;k<allColumn.length;k++){
                     if($("#editArea").find("tr").eq(0).find("td").eq(k).attr("dataType") == "number"){
                         var totalNumber = 0;
                         for(var m=preSpan;m<(rowSpans[j]+preSpan);m++){
-                            if(!isNaN(data[m][xAxis[k]])){
-                                totalNumber += parseInt(data[m][xAxis[k]]);
+                            if(!isNaN(data[m][allColumn[k]])){
+                                totalNumber += parseInt(data[m][allColumn[k]]);
                             }
                         }
                         count += '<td>'+totalNumber+'</td>';
@@ -526,15 +508,15 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                     colIndex += colSpans[i];
                 }
             });
-            differ = $.inArray(groupParam.groupFactor[k], xAxis) + 1;
+            differ = $.inArray(groupParam.groupFactor[k], allColumn) + 1;
         }
         //colspan计算
         for(var i=0;i<parseInt(groupParam.groupFactor.length)-1;i++){
             var preGroupData = [];
             var rowNumbers = [];
             $(rows).each(function(){
-                if($(this).find("td").eq($.inArray(groupParam.groupFactor[i], xAxis)).attr("rowspan") != undefined){
-                    preGroupData.push($(this).find("td").eq($.inArray(groupParam.groupFactor[i], xAxis)).attr("rowspan"));
+                if($(this).find("td").eq($.inArray(groupParam.groupFactor[i], allColumn)).attr("rowspan") != undefined){
+                    preGroupData.push($(this).find("td").eq($.inArray(groupParam.groupFactor[i], allColumn)).attr("rowspan"));
                     rowNumbers.push(0);
                 }
             });
@@ -542,8 +524,8 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                 var lastGroupData = [];
                 var lastGroupKey = groupParam.groupFactor[m];
                 $(rows).each(function(){
-                    if($(this).find("td").eq($.inArray(lastGroupKey, xAxis)).attr("rowspan") != undefined){
-                        lastGroupData.push($(this).find("td").eq($.inArray(lastGroupKey, xAxis)).attr("rowspan"));
+                    if($(this).find("td").eq($.inArray(lastGroupKey, allColumn)).attr("rowspan") != undefined){
+                        lastGroupData.push($(this).find("td").eq($.inArray(lastGroupKey, allColumn)).attr("rowspan"));
                     }
                 });
                 for(var j=0;j<preGroupData.length;j++){
@@ -564,8 +546,8 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
             }
             var tds = [];
             $(rows).each(function(){
-                if($(this).find("td").eq($.inArray(groupParam.groupFactor[i], xAxis)).attr("rowspan") != undefined){
-                    tds.push($(this).find("td").eq($.inArray(groupParam.groupFactor[i], xAxis)));
+                if($(this).find("td").eq($.inArray(groupParam.groupFactor[i], allColumn)).attr("rowspan") != undefined){
+                    tds.push($(this).find("td").eq($.inArray(groupParam.groupFactor[i], allColumn)));
                 }
             });
             for(var j=0;j<tds.length;j++){
@@ -579,8 +561,6 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
         renderTable : renderTable,
         getFilterResult : getFilterResult,
         chartTypeSpanRegistry : chartTypeSpanRegistry,
-        tagDropOverRender : tagDropOverRender,
-        dragUIDataType : dragUIDataType,
         tableToChart : tableToChart
     }
 });

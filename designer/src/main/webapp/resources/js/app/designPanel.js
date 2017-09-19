@@ -368,8 +368,6 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                     //是否切换了主题
                     currentTheme: '',
                     renderFailList: [],
-                    //tale html代码
-                    tableHtml: {},
                     //每一个图表container的overflow属性
                     scrollType: 'visible'
                 },
@@ -583,8 +581,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                             $targetDiv = $("#"+app.order);
                                             if(data.chartType == 'table'){
                                                 app.scrollType = 'auto';
-                                                app.tableHtml[data.id] = data.jsCode;
-                                                console.log(app.tableHtml);
+                                                $targetDiv.html(data.jsCode);
                                             }else {
                                                 echarts.init($targetDiv[0]).setOption(JSON.parse(data.jsCode));
                                             }
@@ -1015,7 +1012,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
 
                                                 if(data[i].chartType == 'table'){
                                                     app.scrollType = 'auto';
-                                                    app.tableHtml[data[i].id] = data[i].jsCode;
+                                                    $("#"+data[i].id).html(data[i].jsCode);
 
                                                     var menuInfo = [];
                                                     menuInfo.push(target);
@@ -1100,7 +1097,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                         if(parseInt(data.isRealTime) == 0){
                                             if(data.chartType == 'table'){
                                                 app.scrollType = 'auto';
-                                                app.tableHtml[data.id] = data.jsCode;
+                                                $("#"+data.id).html(data.jsCode);
                                             }else {
                                                 echarts.init($("#"+app.order)[0]).setOption(JSON.parse(data.jsCode));
                                             }

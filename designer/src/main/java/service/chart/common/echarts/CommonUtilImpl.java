@@ -21,20 +21,21 @@ public class CommonUtilImpl implements ChartsUtil {
     private DataSetProvider dataSetProvider;
 
     @Override
-    public Collection<Object> getFilterResult(final ChartBuilderParams chartBuilderParams) throws Exception {
-        List<Map<String, Object>> dataSet = dataSetProvider.prepareDataSet(chartBuilderParams);
-        Collection<Object> filterResult = CollectionUtils.collect(dataSet, new Transformer<Map<String, Object>, Object>() {
-            @Override
-            public Object transform(Map<String, Object> input) {
-                Map<String, Object> transformData = new HashMap<>();
-                for(int i=0;i<chartBuilderParams.getBuilderModel().getFilter().size();i++){
-                    Object v = input.get(chartBuilderParams.getBuilderModel().getFilter().get(i));
-                    transformData.put(chartBuilderParams.getBuilderModel().getFilter().get(i), v);
-                }
-                return transformData;
-            }
-        });
-        return filterResult;
+    public List<Map<String, Object>> getFilterResult(final ChartBuilderParams chartBuilderParams) throws Exception {
+//        List<Map<String, Object>> dataSet = dataSetProvider.prepareDataSet(chartBuilderParams);
+//        Collection<Object> filterResult = CollectionUtils.collect(dataSet, new Transformer<Map<String, Object>, Object>() {
+//            @Override
+//            public Object transform(Map<String, Object> input) {
+//                Map<String, Object> transformData = new HashMap<>();
+//                for(int i=0;i<chartBuilderParams.getBuilderModel().getFilter().size();i++){
+//                    Object v = input.get(chartBuilderParams.getBuilderModel().getFilter().get(i));
+//                    transformData.put(chartBuilderParams.getBuilderModel().getFilter().get(i), v);
+//                }
+//                return transformData;
+//            }
+//        });
+        List<Map<String, Object>> dataSet = dataSetProvider.prepareDataSetForFilter(chartBuilderParams);
+        return dataSet;
     }
 
     @Override
@@ -48,7 +49,6 @@ public class CommonUtilImpl implements ChartsUtil {
                     for (int i = 0; i < chartBuilderParams.getBuilderModel().getFilter().size(); i++) {
                         String filterName = "";   //当前所过滤的字段
                         String filter = chartBuilderParams.getBuilderModel().getFilter().get(i);
-                        System.out.println(filter);
                         Set<String> set = TemplateUtil.genObjFormJson(filter, Map.class).keySet();
                         for (String s : set) {
                             filterName = s;

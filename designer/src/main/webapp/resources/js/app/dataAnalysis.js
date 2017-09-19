@@ -23,10 +23,15 @@ require.config({
         "generateTableHtml": "app/generateTableHtml",
         "tooltipster": "lib/gridly/tooltipster.bundle.min",
         "sortable": "lib/gridly/jquery.sortable",
-        "thenBy": "lib/gridly/thenBy",
+        "thenBy": "lib/thenBy",
         "jquery-confirm": "lib/confirm/jquery-confirm.min",
         "jquery-loading": "lib/jqueryLoading/jquery.loading",
-        "nicescroll": "lib/nicescroll/jquery.nicescroll.min"
+        "nicescroll": "lib/nicescroll/jquery.nicescroll.min",
+        "tableexport": "lib/tableExport/tableexport.min",
+        "file-saverjs": "lib/tableExport/FileSaver",
+        "blobjs": "lib/tableExport/Blob",
+        "xlsx": "lib/tableExport/xlsx",
+        "jzip": "lib/tableExport/jszip"
     },
     shim : {
         "bootstrap" : { "deps" :['jquery'] },
@@ -36,13 +41,15 @@ require.config({
         "ztree" : { "deps" :['jquery'] },
         "dateTimepicker-cn" : { "deps" :['jquery', 'datetimepicker'] },
         "sortable" : { "deps" :['jquery'] },
-        "bootstrap-switch" : { "deps" :['jquery'] }
+        "bootstrap-switch" : { "deps" :['jquery'] },
+        "tableexport": { "deps" :['blobjs', 'file-saverjs', 'xlsx', 'jzip'] }
     },
     waitSeconds: 30
 });
 
 require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate',
-    'bootstrap','metisMenu','mousewheel','scrollbar','jqueryCookie','jqueryMd5','jquery-ui','datetimepicker','dateTimepicker-cn','bootstrap-switch','nicescroll'],
+    'bootstrap','metisMenu','mousewheel','scrollbar','jqueryCookie','jqueryMd5','jquery-ui','datetimepicker','dateTimepicker-cn',
+    'bootstrap-switch','nicescroll','tableexport'],
     function($,domReady,vue,echarts,commonModule,ztree,validate){
     domReady(function(){
         var app = new vue({
@@ -139,20 +146,27 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                 corner: [],
                 //标记
                 tag: [],
-                //过滤
+                //过滤项
                 filter: [],
+                //分组因素
+                group: [],
                 //color,corner接收框样式
                 backgroundColor: '',
                 border: '',
                 borderRight: '',
-                //table过滤内容模型
-                filterParam: {},
+                //过滤内容模型
+                filterContent: [],
                 //table分组内容模型
                 groupParam: {},
+                groupFactor: [],
                 //table排序模型
                 order: {},
                 //table当前页
-                currentPage: 1
+                currentPage: 1,
+                //checkBox选中项
+                checkedNames: {},
+                //table过滤条件
+                filterParam: {}
             },
             methods: {
                 //顶部菜单划过事件
@@ -319,24 +333,24 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 });
                                 break;
                             case 'filter':
-                                // var filterText = [];
-                                // for(var item in this.filter){
-                                //     filterText.push(this.filter[item].targetNodeText);
-                                // }
-                                // if($.inArray(targetNodeText,filterText) == -1 && ($.inArray(targetNodeText,this.xAxis) >= 0 ||
-                                //     $.inArray(targetNodeText,this.yAxis) >= 0 || $.inArray(targetNodeText,this.color) >= 0 ||
-                                //     $.inArray(targetNodeText,this.corner) >= 0)){
-                                //     this.filter.push({targetNodeText: targetNodeText, dragDataType: dragDataType});
-                                //     app.$nextTick(function(){
-                                //         var height = target.height();
-                                //         app.filterHeight = height+'px';
-                                //         this.showFilterIndex = this.filter.length-1;
-                                //         $(document).mousedown(function(){
-                                //             app.showFilterIndex = -1;
-                                //         });
-                                //     });
-                                //     commonModule.getFilterResult(this.chartType,this.sqlRecordingId,targetNodeText,dragDataType,app);
-                                // }
+                                var filterText = [];
+                                for(var item in this.filter){
+                                    filterText.push(this.filter[item].targetNodeText);
+                                }
+                                if($.inArray(targetNodeText,filterText) == -1 && ($.inArray(targetNodeText,this.xAxis) >= 0 ||
+                                    $.inArray(targetNodeText,this.yAxis) >= 0 || $.inArray(targetNodeText,this.color) >= 0 ||
+                                    $.inArray(targetNodeText,this.corner) >= 0)){
+                                    this.filter.push({targetNodeText: targetNodeText, dragDataType: dragDataType});
+                                    app.$nextTick(function(){
+                                        var height = target.height();
+                                        app.filterHeight = height+'px';
+                                        this.showFilterIndex = this.filter.length-1;
+                                        $(document).mousedown(function(){
+                                            app.showFilterIndex = -1;
+                                        });
+                                    });
+                                    commonModule.getFilterResult(this.chartType,this.sqlRecordingId,targetNodeText,dragDataType,app);
+                                }
                         }
                     }else {
                         this.restoreTagStyle(target,tagType);
@@ -450,28 +464,53 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                 saveChart: function(){
                     if((this.xAxis.length > 0 && this.yAxis.length > 0) || (this.corner.length > 0 && this.color.length > 0)){
                         $("#addChartForm").submit();
-                    }else{
+                    }else if ((this.xAxis.length > 0 || this.yAxis.length > 0) && this.chartType == 'table'){
+                        $("#addChartForm").submit();
+                    }else {
                         alert("请先绘制图表");
                     }
                 },
                 doFilter: function(){
                     var filterContent = [];  //经过过滤的内容
-                    for(var item in this.filter){
-                        if(this.filter[item].dragDataType == 'text'){
+                    for(var i=0;i<app.filterContent.length;i++){
+                        if(app.filterContent[i].tagType == 'text'){
                             var filterParam = {};
-                            var checkedOptions = [];
-                            $("input:checkbox:checked").each(function(){
-                                checkedOptions.push($(this).parent().text());
-                            });
-                            filterParam[this.filter[item].targetNodeText] = checkedOptions;
+                            filterParam[app.filterContent[i].tagText] = app.checkedNames[app.filterContent[i].tagText];
                             filterContent.push(JSON.stringify(filterParam));
-                        }else if(this.filter[item].dragDataType == 'number'){
-                            var filterParam = {};
-                            filterParam[this.filter[item].targetNodeText] = app.rangeMin+','+app.rangeMax;
+                        }else if(app.filterContent[i].tagType == 'number'){
+                            filterParam = {};
+                            filterParam[app.filterContent[i].tagText] = app.filterContent[i].rangeMin+','+app.filterContent[i].rangeMax;
                             filterContent.push(JSON.stringify(filterParam));
                         }
                     }
-                    commonModule.renderChart(this.chartType,this.sqlRecordingId,app,filterContent);
+                    app.filterParam = filterContent;
+                    if(app.chartType == 'table'){
+                        commonModule.renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
+                    }else {
+                        commonModule.renderChart(this.chartType,this.sqlRecordingId,app,app.filterParam);
+                    }
+                },
+                //表格分组
+                groupTable: function(tagText){
+                    var index = $.inArray(tagText, app.groupFactor);
+                    console.log(index);
+                    if(index >= 0){
+                        app.groupFactor.splice(index, 1);
+                    }else {
+                        app.groupFactor.push(tagText);
+                    }
+                    console.log(app.groupFactor);
+                    app.groupParam.groupFactor = app.groupFactor;
+                    commonModule.renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
+                },
+                //图表和表格导出
+                exportChartOrTable: function () {
+                    if(this.chartType == 'table'){
+                        $("#editArea").find("table").tableExport({
+                            bootstrap: true,
+                            position: "top"
+                        });
+                    }
                 }
             },
             mounted: function () {
@@ -1009,44 +1048,52 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
             },
             watch: {
                 chartType: function () {
-                    var xAxisText = this.xAxis.length > 0 ? this.xAxis[0]:'';
-                    var yAxisText = this.yAxis.length > 0 ? this.yAxis[0]:'';
-                    var colorText = this.color.length > 0 ? this.color[0].targetNodeText:'';
-                    var cornerText = this.corner.length > 0 ? this.corner[0].targetNodeText:'';
-                    if(this.chartType == 'pie'){
-                        if(xAxisText != ''){
-                            this.xAxis = [];
-                            this.$nextTick(function(){
-                                this.restoreTagStyle($('.xAxis'),'xAxis');
-                                this.renderTag(xAxisText,'color',$("form.make-model-region .mark-down-column .mark-item-color"),'text',this.chartType);
-                            });
-                        }
-                        if(yAxisText != ''){
-                            this.yAxis = [];
-                            this.$nextTick(function(){
-                                this.restoreTagStyle($('.yAxis'),'yAxis');
-                                this.renderTag(yAxisText,'corner',$("form.make-model-region .mark-down-column .mark-item-corner"),'number',this.chartType);
-                            });
-                        }
-                    }else  if(this.chartType == 'bar' || this.chartType == 'line'){
-                        if(colorText != ''){
-                            this.color = [];
-                            this.$nextTick(function(){
-                                this.restoreTagStyle($('form.make-model-region .mark-item-color'),'color');
-                                this.renderTag(colorText,'xAxis',$("form.make-model-region .xAxis"),'text',this.chartType);
-                            });
-                        }
-                        if(cornerText != ''){
-                            this.corner = [];
-                            this.$nextTick(function(){
-                                this.restoreTagStyle($('form.make-model-region .mark-item-corner'),'corner');
-                                this.renderTag(cornerText,'yAxis',$("form.make-model-region .yAxis"),'number',this.chartType);
-                            });
-                        }
-                        if (this.sqlRecordingId) {
-                            commonModule.renderChart(this.chartType, this.sqlRecordingId, app);
-                        }
+                    this.resetTagContent();
+                    if(echarts.getInstanceByDom(document.getElementById('editArea')) != undefined){
+                        echarts.getInstanceByDom(document.getElementById('editArea')).dispose();
                     }
+                    $("#editArea").html('<h3>'+
+                                            '<p><i class="glyphicon glyphicon-info-sign"></i>  请选择数据集</p>'+
+                                            '<p>将维度、度量拖入工作区（行、列、标记）</p>'+
+                                        '</h3>');
+                    // var xAxisText = this.xAxis.length > 0 ? this.xAxis[0]:'';
+                    // var yAxisText = this.yAxis.length > 0 ? this.yAxis[0]:'';
+                    // var colorText = this.color.length > 0 ? this.color[0].targetNodeText:'';
+                    // var cornerText = this.corner.length > 0 ? this.corner[0].targetNodeText:'';
+                    // if(this.chartType == 'pie'){
+                    //     if(xAxisText != ''){
+                    //         this.xAxis = [];
+                    //         this.$nextTick(function(){
+                    //             this.restoreTagStyle($('.xAxis'),'xAxis');
+                    //             this.renderTag(xAxisText,'color',$("form.make-model-region .mark-down-column .mark-item-color"),'text',this.chartType);
+                    //         });
+                    //     }
+                    //     if(yAxisText != ''){
+                    //         this.yAxis = [];
+                    //         this.$nextTick(function(){
+                    //             this.restoreTagStyle($('.yAxis'),'yAxis');
+                    //             this.renderTag(yAxisText,'corner',$("form.make-model-region .mark-down-column .mark-item-corner"),'number',this.chartType);
+                    //         });
+                    //     }
+                    // }else  if(this.chartType == 'bar' || this.chartType == 'line'){
+                    //     if(colorText != ''){
+                    //         this.color = [];
+                    //         this.$nextTick(function(){
+                    //             this.restoreTagStyle($('form.make-model-region .mark-item-color'),'color');
+                    //             this.renderTag(colorText,'xAxis',$("form.make-model-region .xAxis"),'text',this.chartType);
+                    //         });
+                    //     }
+                    //     if(cornerText != ''){
+                    //         this.corner = [];
+                    //         this.$nextTick(function(){
+                    //             this.restoreTagStyle($('form.make-model-region .mark-item-corner'),'corner');
+                    //             this.renderTag(cornerText,'yAxis',$("form.make-model-region .yAxis"),'number',this.chartType);
+                    //         });
+                    //     }
+                    //     if (this.sqlRecordingId) {
+                    //         commonModule.renderChart(this.chartType, this.sqlRecordingId, app);
+                    //     }
+                    // }
                 },
                 dataSourcePicked: function(){
                     if(this.dataSourcePicked == 0){

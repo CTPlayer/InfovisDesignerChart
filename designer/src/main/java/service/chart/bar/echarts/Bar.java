@@ -11,6 +11,7 @@
 package service.chart.bar.echarts;
 
 import com.github.abel533.echarts.Option;
+import com.github.abel533.echarts.Toolbox;
 import com.github.abel533.echarts.axis.Axis;
 import com.github.abel533.echarts.axis.CategoryAxis;
 import com.github.abel533.echarts.axis.ValueAxis;
