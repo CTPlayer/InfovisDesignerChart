@@ -45,13 +45,16 @@ public class UserRealm extends AuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
         String username = (String)token.getPrincipal();
+        String password = (String)token.getCredentials();
         User user = userService.findByUsername(username);
         System.out.println(user.getUserName());
         System.out.println(user.getPassword());
-        System.out.println(user == null);
 
-        if(user == null){
+        if("".equals(user.getPassword()) || user.getPassword() == null){
             throw new UnknownAccountException(); //没找到账号
+        }
+        if(password != user.getPassword()){
+            throw new IncorrectCredentialsException(); //密码错误
         }
         SimpleAuthenticationInfo authenticationInfo = new SimpleAuthenticationInfo(user.getUserName(), user.getPassword(), getName());
         return authenticationInfo;
