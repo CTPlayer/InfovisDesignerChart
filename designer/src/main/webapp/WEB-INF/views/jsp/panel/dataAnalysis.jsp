@@ -54,7 +54,7 @@
     </style>
 </head>
 
-<body class="flat-blue">
+<body class="flat-blue" style="overflow: auto">
 <div class="app-container" id="app" style="height: 100%">
     <div class="row content-container" style="height: 100%">
         <nav class="navbar navbar-inverse navbar-static-top">
@@ -129,7 +129,7 @@
         <!-- Main Content -->
         <div id="page-wrapper">
             <div>
-                <div class="col-lg-10 backUp">
+                <div class="col-lg-11 backUp">
                     <a v-bind:href="'showPanel.page?exportId=' + exportId" role="button">
                         <button class="btn btn-info">
                             <span class="glyphicon glyphicon-menu-left"></span> 返回

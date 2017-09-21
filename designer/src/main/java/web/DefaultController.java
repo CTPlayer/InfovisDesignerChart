@@ -2,10 +2,17 @@ package web;
 
 import common.util.TemplateUtil;
 import common.util.WebUtil;
+import model.authority.User;
 import model.chart.ChartBuilderParams;
 import model.myPanel.MyCharts;
 import model.myPanel.MyPanel;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.subject.Subject;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -42,6 +49,30 @@ public class DefaultController {
 
     @Resource
     private TableData tableData;
+
+    @RequestMapping("/login")
+    @ResponseBody
+    public Object login(User user){
+        Map<String, Object> resMap = new HashMap<>();
+        final Subject subject = SecurityUtils.getSubject();
+        final UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(user.getUserName(), user.getPassword());
+        System.out.println(user.getUserName()+":"+user.getPassword());
+        try {
+            subject.login(usernamePasswordToken);
+            resMap.put("success", true);
+        }catch (final UnknownAccountException uae){
+            resMap.put("success", false);
+            resMap.put("message","没有该用户： " + usernamePasswordToken.getPrincipal());
+        }catch (final IncorrectCredentialsException ice) {
+            resMap.put("success", false);
+            resMap.put("message",usernamePasswordToken.getPrincipal() + " 的密码不正确!");
+        }catch (final AuthenticationException ae) {
+            resMap.put("success", false);
+            resMap.put("message","身份验证失败");
+            usernamePasswordToken.clear();
+        }
+        return resMap;
+    }
 
     /**
      * 添加设计面板
@@ -138,6 +169,11 @@ public class DefaultController {
     @RequestMapping("/sqlClient.page")
     public Object sqlClient() throws Exception {
         return "panel/sqlClient";
+    }
+
+    @RequestMapping("/index.page")
+    public Object index() throws  Exception {
+        return "panel/index";
     }
 
     /**

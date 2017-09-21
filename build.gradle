@@ -149,9 +149,14 @@ project(":designer") {
                 "com.github.abel533:ECharts:3.0.0.1",
                 "jstl:jstl:$jstlib",
                 "taglibs:standard:$standard",
-                "org.quartz-scheduler:quartz:2.2.2"
+                "org.quartz-scheduler:quartz:2.2.2",
+                "org.apache.shiro:shiro-core:1.2.2",
+                "org.apache.shiro:shiro-web:1.2.2",
+                "org.apache.shiro:shiro-ehcache:1.2.2",
+                "org.apache.shiro:shiro-spring:1.2.2"
 
-   providedCompile "javax.servlet:javax.servlet-api:$servlet",
+
+        providedCompile "javax.servlet:javax.servlet-api:$servlet",
                 "javax.servlet.jsp:javax.servlet.jsp-api:$jsp",
                 "javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:$jstl"
     }

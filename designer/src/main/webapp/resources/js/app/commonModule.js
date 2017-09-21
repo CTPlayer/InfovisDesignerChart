@@ -166,7 +166,7 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                     mergeCell(data, groupParam, allColumn);
                 }
                 $("#editArea").find("table").tableExport({
-                    bootstrap: true
+                    bootstrap: false
                 });
                 //点击翻页
                 // $(".paging").find("li").click(function(){

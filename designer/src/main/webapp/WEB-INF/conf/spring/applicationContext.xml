@@ -98,4 +98,5 @@
   
   <import resource="../module/applicationContext-dao.xml" />
   <import resource="../module/applicationContext-quartz.xml" />
+  <import resource="../module/applicationContext-shiro.xml" />
 </beans>

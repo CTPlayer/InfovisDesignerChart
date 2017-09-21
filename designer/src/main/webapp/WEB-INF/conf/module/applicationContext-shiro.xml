@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+    <bean id="userRealm" class="realm.UserRealm" />
+
+    <!-- realm验证策略 -->
+    <bean id="authenticator" class="org.apache.shiro.authc.pam.ModularRealmAuthenticator">
+        <property name="authenticationStrategy">
+            <!-- 多个realm只要一个验证通过即可 -->
+            <bean class="org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy" />
+        </property>
+    </bean>
+
+    <!--securityManager是shiro的核心，初始化时协调各个模块运行-->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="authenticator" ref="authenticator" />
+        <property name="realm">
+            <ref bean="userRealm" />
+        </property>
+        <property name="sessionManager" ref="sessionManager"/>
+    </bean>
+
+    <!-- 相当于调用SecurityUtils.setSecurityManager(securityManager) -->
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="org.apache.shiro.SecurityUtils.setSecurityManager"/>
+        <property name="arguments" ref="securityManager"/>
+    </bean>
+
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager" />
+        <!-- 登陆链接 -->
+        <property name="loginUrl" value="/index.page"/>
+        <property name="successUrl" value="/query.page"/>
+        <!-- 没有权限跳转的链接 -->
+        <property name="unauthorizedUrl" value="/unauthorized.page"/>
+        <!--<property name="filterChainDefinitions">-->
+            <!--<value>-->
+                <!--/book/deleteBook=roles[admin] &lt;!&ndash; 需要admin，才能删除 &ndash;&gt;-->
+                <!--/book/list=authc &lt;!&ndash; 需要登录才能查询 &ndash;&gt;-->
+            <!--</value>-->
+        <!--</property>-->
+    </bean>
+
+    <!-- Shiro的会话管理器 属性包括session失效时间，是否删除失效的session，是否扫描session线程,清理超时会话 -->
+    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <property name="globalSessionTimeout" value="1800000"/>
+        <property name="deleteInvalidSessions" value="true"/>
+        <property name="sessionValidationSchedulerEnabled" value="true"/>
+    </bean>
+
+    <!-- spring管理shiro bean生命周期 -->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
+    <!-- 启动注解权限控制 -->
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor" />
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+    </bean>
+
+    <!-- 缓存管理器 使用Ehcache实现 -->
+    <!--<bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">-->
+        <!--<property name="cacheManagerConfigFile" value="/WEB-INF/conf/module/applicationContext-ehcache.xml"/>-->
+    <!--</bean>-->
+</beans>
