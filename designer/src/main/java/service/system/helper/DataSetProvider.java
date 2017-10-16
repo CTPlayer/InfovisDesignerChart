@@ -122,45 +122,46 @@ public final class DataSetProvider {
         if (chartBuilderParams.getChartType() == ChartBuilderParams.ChartType.pie) {
             xAxis.add(chartBuilderParams.getBuilderModel().getMark().getColor());
             yAxis.add(chartBuilderParams.getBuilderModel().getMark().getAngle());
-        }else {
+        } else {
             xAxis = chartBuilderParams.getBuilderModel().getxAxis();
             yAxis = chartBuilderParams.getBuilderModel().getyAxis();
         }
         StringBuffer sb = new StringBuffer();
         String sql = jdbcProps.getSql();
-        if(xAxis.size() > 0){
-            for(String xColumn : xAxis){
+        if (xAxis.size() > 0) {
+            for (String xColumn : xAxis) {
                 allAxis.add(xColumn);
             }
         }
-        if(yAxis.size() > 0){
-            for(String yColumn : yAxis){
+        if (yAxis.size() > 0) {
+            for (String yColumn : yAxis) {
                 allAxis.add(yColumn);
             }
         }
-        if(allAxis.size() > 0){
-            for(int i=0;i<xAxis.size();i++){
-                if(i == 0){
+        if (allAxis.size() > 0) {
+            for (int i = 0; i < xAxis.size(); i++) {
+                if (i == 0) {
                     sb.append(allAxis.get(i));
-                }else {
+                } else {
                     sb.append(",");
                     sb.append(allAxis.get(i));
                 }
             }
-            if(xAxis.size() > 0 && yAxis.size() > 0){
+            if (xAxis.size() > 0 && yAxis.size() > 0) {
                 sb.append(",");
             }
-            for(int i=xAxis.size();i<allAxis.size();i++){
-                if(i == xAxis.size()){
-                    sb.append("sum("+allAxis.get(i)+")"+" as "+allAxis.get(i));
-                }else {
+            for (int i = xAxis.size(); i < allAxis.size(); i++) {
+                if (i == xAxis.size()) {
+                    sb.append("sum(" + allAxis.get(i) + ")" + " as " + allAxis.get(i));
+                } else {
                     sb.append(",");
-                    sb.append("sum("+allAxis.get(i)+")"+" as "+allAxis.get(i));
+                    sb.append("sum(" + allAxis.get(i) + ")" + " as " + allAxis.get(i));
                 }
             }
             sql = sql.replace("*", sb.toString());
             jdbcProps.setSql(sql);
         }
+
         L.info("执行查询语句: {}", jdbcProps.getSql());
 
         return dataBaseMetadataHelper.prepareDataSetForTable(jdbcProps, xAxis);
@@ -179,18 +180,23 @@ public final class DataSetProvider {
 
         String sql = sqlRecordingManage.getSqlRecording();
         List<String> filters = chartBuilderParams.getBuilderModel().getFilter();
-        StringBuilder sb = new StringBuilder();
-        for(int i=0;i<filters.size();i++){
-            if(i == filters.size() - 1){
-                sb.append(filters.get(i));
-            }else {
-                sb.append(filters.get(i));
-                sb.append(",");
+        if(jdbcProps.getSql().contains("*") && !jdbcProps.getSql().contains("group")) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < filters.size(); i++) {
+                if (i == filters.size() - 1) {
+                    sb.append(filters.get(i));
+                } else {
+                    sb.append(filters.get(i));
+                    sb.append(",");
+                }
+                sql += " GROUP BY " + filters.get(i);
             }
-            sql += " GROUP BY " + filters.get(i);
+            sql = sql.replace("*", sb.toString());
+        }else if(!jdbcProps.getSql().contains("*") && !jdbcProps.getSql().contains("group")){
+            for (int i = 0; i < filters.size(); i++) {
+                sql += " GROUP BY " + filters.get(i);
+            }
         }
-        sql = sql.replace("*", sb.toString());
-
         jdbcProps.setSql(sql);
         jdbcProps.setUrl(connectionManage.getDbUrl());
         jdbcProps.setUsername(connectionManage.getUserName());

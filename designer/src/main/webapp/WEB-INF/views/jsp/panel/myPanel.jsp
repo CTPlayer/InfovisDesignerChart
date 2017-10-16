@@ -76,6 +76,32 @@
                 <li class="dropdown" id="exportHtml">
                     <a href="#"  role="button" data-toggle="modal" data-target="#addPanelModal"><i class="glyphicon glyphicon-plus"></i>&nbsp;&nbsp;新建面板</a>
                 </li>
+                <li class="dropdown profile">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><shiro:principal property="userName"/><span class="caret"></span></a>
+                    <ul class="dropdown-menu animated fadeInDown">
+                        <li class="profile-img">
+                            <img src="resources/js/lib/flatadmin/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img">
+                        </li>
+                        <li>
+                            <div class="profile-info">
+                                <h4 class="username"><shiro:principal property="userName"/></h4>
+                                <p><shiro:principal property="descride"/></p>
+                                <div class="btn-group margin-bottom-2x" role="group">
+                                    <a href="javascript:void(0)"><button type="button" class="btn btn-default">
+                                        <shiro:hasRole name="consumer">
+                                            普通用户
+                                        </shiro:hasRole>
+                                        <shiro:hasRole name="admin">
+                                            超级用户
+                                        </shiro:hasRole>
+                                    </button></a>
+                                    <a href="authority/userManage.page"><button type="button" class="btn btn-default"><i class="fa fa-user"></i> 用户管理</button></a>
+                                    <a href="authority/logout"><button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> 登出</button></a>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
             </ul>
             </div>
         </nav>

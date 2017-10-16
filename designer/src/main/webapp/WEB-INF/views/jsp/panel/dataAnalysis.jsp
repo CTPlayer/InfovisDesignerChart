@@ -51,6 +51,15 @@
         [v-cloak] {
             display: none;
         }
+
+        .form-control {
+            display: inline-block;
+            width: 70%;
+        }
+
+        tr:first-child {
+            display: none;
+        }
     </style>
 </head>
 
@@ -63,11 +72,39 @@
                     <a class="navbar-brand" href="#" style="color: #ffffff"><i class="glyphicon glyphicon-equalizer" aria-hidden="true"></i> 数据分析</a>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown" v-bind:class="{danger: dangerIndex == 3}" @mouseenter="topMenuMouseEnter(3)" >
+                        <a href="#"  role="button" data-toggle="modal" data-target="#setAuthorityModal"><i class="icon fa fa-cogs"></i>&nbsp;&nbsp;权限设置</a>
+                    </li>
                     <li class="dropdown" v-bind:class="{danger: dangerIndex == 0}" @mouseenter="topMenuMouseEnter(0)" >
                         <a href="query.page" role="button"><i class="glyphicon glyphicon-folder-close"></i>&nbsp;&nbsp;我的作品</a>
                     </li>
                     <li class="dropdown" v-bind:class="{danger: dangerIndex == 1}" @mouseenter="topMenuMouseEnter(1)" >
                         <a href="sqlClient.page"  role="button"><i class="icon fa fa-database"></i>&nbsp;&nbsp;数据源</a>
+                    </li>
+                    <li class="dropdown profile" v-bind:class="{danger: dangerIndex == 2}" @mouseenter="topMenuMouseEnter(2)">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><shiro:principal property="userName"/><span class="caret"></span></a>
+                        <ul class="dropdown-menu animated fadeInDown">
+                            <li class="profile-img">
+                                <img src="resources/js/lib/flatadmin/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img">
+                            </li>
+                            <li>
+                                <div class="profile-info">
+                                    <h4 class="username"><shiro:principal property="userName"/></h4>
+                                    <p><shiro:principal property="descride"/></p>
+                                    <div class="btn-group margin-bottom-2x" role="group">
+                                        <button type="button" class="btn btn-default"><i class="fa fa-user"></i>
+                                            <shiro:hasRole name="consumer">
+                                                普通用户
+                                            </shiro:hasRole>
+                                            <shiro:hasRole name="admin">
+                                                超级管理员
+                                            </shiro:hasRole>
+                                        </button>
+                                        <a href="authority/logout"><button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> 登出</button></a>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -405,8 +442,72 @@
             </div>
         </div>
     </div>
+    <div class="modal fade modal-success" id="setAuthorityModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">权限设置</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="width: 100%;text-align: center">
+                        <tr>
+                            <td>作者</td><td colspan="2"><shiro:principal property="userName"/></td>
+                        </tr>
+                        <%--<tr>--%>
+                            <%--<td>用户权限</td>--%>
+                            <%--<td style="height: 70px;">--%>
+                                <%--普通用户：--%>
+                                <%--<select class="form-control" v-model="authorityForConsumer">--%>
+                                    <%--<option value="">不可见</option>--%>
+                                    <%--<option value="read">可读权限</option>--%>
+                                    <%--<option value="write">可写权限</option>--%>
+                                <%--</select>--%>
+                            <%--</td>--%>
+                            <%--<td>--%>
+                                <%--超级用户：--%>
+                                <%--<select class="form-control" v-model="authorityForAdmin">--%>
+                                    <%--<option value="write">可写权限</option>--%>
+                                <%--</select>--%>
+                            <%--</td>--%>
+                        <%--</tr>--%>
+                        <tr>
+                            <td rowspan="2">用户组权限</td>
+                            <td>
+                                <div style="height: 150px;overflow: auto;margin-left: 10px" class="row">
+                                    <div v-for="(item,index) in allGroups" class="checkbox3 checkbox-danger checkbox-inline checkbox-check  checkbox-circle checkbox-light" style="float: left">
+                                        <input type="checkbox" v-bind:id="'checkbox-fa-light-1'+index" v-bind:value="item.groupId" v-model="groupForRead">
+                                        <label v-bind:for="'checkbox-fa-light-1'+index">
+                                            {{ item.groupName }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                可读权限
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="height: 150px;overflow: auto;margin-left: 10px" class="row">
+                                    <div v-for="(item,index) in allGroups" class="checkbox3 checkbox-danger checkbox-inline checkbox-check  checkbox-circle checkbox-light" style="float: left">
+                                        <input type="checkbox" v-bind:id="'checkbox-fa-light-2'+index" v-bind:value="item.groupId" v-model="groupForWrite">
+                                        <label v-bind:for="'checkbox-fa-light-2'+index">
+                                            {{ item.groupName }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                可写权限
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
 <script src="resources/js/lib/require.js" defer async="true" data-main="resources/js/app/dataAnalysis"></script>
 </body>
 </html>

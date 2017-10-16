@@ -166,7 +166,12 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                 //checkBox选中项
                 checkedNames: {},
                 //table过滤条件
-                filterParam: {}
+                filterParam: {},
+                allGroups: [],
+                authorityForConsumer: 'read',
+                authorityForAdmin: 'write',
+                groupForRead: [],
+                groupForWrite: []
             },
             methods: {
                 //顶部菜单划过事件
@@ -176,6 +181,14 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                 //图表类型选择
                 chartTypeSelect: function (chartType) {
                     this.chartType = chartType;
+                    this.resetTagContent();
+                    if(echarts.getInstanceByDom(document.getElementById('editArea')) != undefined){
+                        echarts.getInstanceByDom(document.getElementById('editArea')).dispose();
+                    }
+                    $("#editArea").html('<h3>'+
+                                            '<p><i class="glyphicon glyphicon-info-sign"></i>  请选择数据集</p>'+
+                                            '<p>将维度、度量拖入工作区（行、列、标记）</p>'+
+                                        '</h3>');
                 },
                 //获取tag图标class
                 getTagIclassType: function(tagType){
@@ -305,7 +318,6 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 target.css("background-color",'#f6eedb');
                                 target.css("border",'1px #f9e7bb solid');
                                 app.$nextTick(function(){
-                                    console.log('running');
                                     if(isRender != false){
                                         if(app.chartType == 'table'){
                                             commonModule.renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
@@ -421,13 +433,25 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                         this.dimension = dimension;
                         this.measure = measure;
                     }else if(tagType == 'number'){
-                        measure.splice($.inArray(targetNodeText,dimension),1);
+                        measure.splice($.inArray(targetNodeText,measure),1);
                         dimension.push(targetNodeText);
                         this.dimension = dimension;
                         this.measure = measure;
                     }
                     //移动后保存到localStorage
                     this.saveLocalStorageInfo();
+                    setTimeout(function(){
+                        $('#side-menu ul.nav.nav-third-level li').draggable({
+                            cursor: "move",
+                            opacity: 0.7,
+                            appendTo :'body',
+                            cursorAt: { top: 10, left: 34 },
+                            helper: function(event) {
+                                var dragText = $(this).find("a").find("span").html();
+                                return $( "<div class='drag-helper'>"+dragText+"</div>" );
+                            }
+                        });
+                    },0);
                 },
                 //返回行、列、筛选标识
                 axisTagType: function(target){
@@ -503,9 +527,22 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                         app.groupParam.groupFactor = app.groupFactor;
                         commonModule.renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
                     }
+                },
+                getAllGroups: function(){
+                    $("body").loading('toggle');
+                    $(".loading-overlay").css("z-index", "100002");
+                    $.get('authority/getAllGroups',function (data) {
+                        app.allGroups = data;
+                        app.$nextTick(function(){
+                            $("body").loading('toggle');
+                        });
+                    })
                 }
             },
             mounted: function () {
+                this.isShowJobSetting = false;
+                $(".toggle-checkbox").bootstrapSwitch('state', false);
+                this.getAllGroups();
                 //日期格式化方法
                 Date.prototype.Format = function(fmt)
                 {
@@ -547,9 +584,6 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                         if(parseInt(data.isRealTime) == 0){
                             if(app.chartType == 'table'){
                                 $("#editArea").html(data.jsCode);
-                                $("#editArea").find("table").tableExport({
-                                    bootstrap: true
-                                });
                             }else {
                                 editChart.setOption(JSON.parse(data.jsCode));
                             }
@@ -594,6 +628,18 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 }
                             }
                         });
+                        //获取权限分组信息
+                        $.ajax({
+                            type: 'POST',
+                            url: 'authority/getChartGroup',
+                            data: {
+                                chartId: app.chartId
+                            },
+                            success: function(data){
+                                app.groupForRead = data.groupOfRead;
+                                app.groupForWrite = data.groupOfWrite;
+                            }
+                        })
                     }
                 });
                 //初始化插件
@@ -660,7 +706,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                             var jsCode;
                             if(app.chartType == 'table'){
                                 $("#editArea").find("table").css('width', '100%');
-                                $("#editArea").find("table").css('height', '100%');
+                                $("#editArea").find("table").css('height', '90%');
                                 $("#editArea").find("caption").remove();
                                 jsCode = $("#editArea").html();
                             }else {
@@ -669,17 +715,24 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 jsCode = JSON.stringify(option);
                             }
                             var paramId;
+                            var authority = {
+                                groupRead: app.groupForRead,
+                                groupWrite: app.groupForWrite
+                            };
+
                             var deferred01 = $.ajax({
                                 type: 'POST',
+                                contentType: "application/json; charset=utf-8",
                                 url: 'addCharts',
-                                data : {
+                                data : JSON.stringify({
                                     'chartType': app.chartType,
                                     'sqlRecordingId': app.sqlRecordingId,
                                     'buildModel': JSON.stringify(app.builderModel),
                                     'jsCode': jsCode,
                                     'chartName': app.chartName,
-                                    'isRealTime' : app.dataSourcePicked
-                                }
+                                    'isRealTime' : app.dataSourcePicked,
+                                    'authority': authority
+                                })
                             });
                             deferred01.done(function(data){
                                 paramId = data;
@@ -736,6 +789,27 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 $(form)[0].reset();
                                 $("#addChartModal").modal('toggle');
                                 top.window.location = "showPanel.page?exportId="+app.exportId;
+                            });
+
+                            //修改分组信息
+                            authority = {
+                                groupRead: app.groupForRead,
+                                groupWrite: app.groupForWrite
+                            };
+                            $.ajax({
+                               type: 'POST',
+                               contentType: "application/json; charset=utf-8",
+                               url: 'authority/updateChartGroup',
+                               data: JSON.stringify({
+                                   'id': app.chartId,
+                                   'chartType': app.chartType,
+                                   'sqlRecordingId': app.sqlRecordingId,
+                                   'buildModel': JSON.stringify(app.builderModel),
+                                   'jsCode': jsCode,
+                                   'chartName': app.chartName,
+                                   'isRealTime' : app.dataSourcePicked,
+                                   'authority': authority
+                               })
                             });
 
                             if(app.chartType != 'table'){
@@ -1027,7 +1101,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                     var queryParentDeferred = $.ajax({
                         type: 'POST',
                         dataType: 'json',
-                        url: 'sqlRecordingManage/query',
+                        url: 'sqlRecordingManage/queryAsObject',
                         data: {
                             'id': result.sqlRecordingId
                         }
@@ -1035,7 +1109,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
 
                     queryParentDeferred.done(function (v) {
                         parentNode = treeObj.getNodesByFilter(function (node) {
-                            return (node.id == v[0].connectionId && node.dbUrl);
+                            return (node.id == v.connectionId && node.dbUrl);
                         }, true); // 仅查找一个节点
                         treeObj.expandNode(parentNode, true, true, true);
                     });
@@ -1055,54 +1129,6 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                 $("#editArea").niceScroll();
             },
             watch: {
-                chartType: function () {
-                    this.resetTagContent();
-                    if(echarts.getInstanceByDom(document.getElementById('editArea')) != undefined){
-                        echarts.getInstanceByDom(document.getElementById('editArea')).dispose();
-                    }
-                    $("#editArea").html('<h3>'+
-                                            '<p><i class="glyphicon glyphicon-info-sign"></i>  请选择数据集</p>'+
-                                            '<p>将维度、度量拖入工作区（行、列、标记）</p>'+
-                                        '</h3>');
-                    // var xAxisText = this.xAxis.length > 0 ? this.xAxis[0]:'';
-                    // var yAxisText = this.yAxis.length > 0 ? this.yAxis[0]:'';
-                    // var colorText = this.color.length > 0 ? this.color[0].targetNodeText:'';
-                    // var cornerText = this.corner.length > 0 ? this.corner[0].targetNodeText:'';
-                    // if(this.chartType == 'pie'){
-                    //     if(xAxisText != ''){
-                    //         this.xAxis = [];
-                    //         this.$nextTick(function(){
-                    //             this.restoreTagStyle($('.xAxis'),'xAxis');
-                    //             this.renderTag(xAxisText,'color',$("form.make-model-region .mark-down-column .mark-item-color"),'text',this.chartType);
-                    //         });
-                    //     }
-                    //     if(yAxisText != ''){
-                    //         this.yAxis = [];
-                    //         this.$nextTick(function(){
-                    //             this.restoreTagStyle($('.yAxis'),'yAxis');
-                    //             this.renderTag(yAxisText,'corner',$("form.make-model-region .mark-down-column .mark-item-corner"),'number',this.chartType);
-                    //         });
-                    //     }
-                    // }else  if(this.chartType == 'bar' || this.chartType == 'line'){
-                    //     if(colorText != ''){
-                    //         this.color = [];
-                    //         this.$nextTick(function(){
-                    //             this.restoreTagStyle($('form.make-model-region .mark-item-color'),'color');
-                    //             this.renderTag(colorText,'xAxis',$("form.make-model-region .xAxis"),'text',this.chartType);
-                    //         });
-                    //     }
-                    //     if(cornerText != ''){
-                    //         this.corner = [];
-                    //         this.$nextTick(function(){
-                    //             this.restoreTagStyle($('form.make-model-region .mark-item-corner'),'corner');
-                    //             this.renderTag(cornerText,'yAxis',$("form.make-model-region .yAxis"),'number',this.chartType);
-                    //         });
-                    //     }
-                    //     if (this.sqlRecordingId) {
-                    //         commonModule.renderChart(this.chartType, this.sqlRecordingId, app);
-                    //     }
-                    // }
-                },
                 dataSourcePicked: function(){
                     if(this.dataSourcePicked == 0){
                         this.isShowUpdateCheck = true;

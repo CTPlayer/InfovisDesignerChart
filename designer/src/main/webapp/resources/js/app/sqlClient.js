@@ -505,6 +505,7 @@ require([
                 queryParam.dbType = nodes[0].dbType;
                 var formatSelectSqlDeferred = $.ajax({
                     type: 'POST',
+                    contentType:'application/x-www-form-urlencoded; charset=UTF-8',
                     dataType: 'text',
                     url: 'connectionManage/formatSql',
                     data: queryParam

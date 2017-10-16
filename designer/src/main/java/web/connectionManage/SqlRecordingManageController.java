@@ -49,6 +49,12 @@ public class SqlRecordingManageController {
         return sqlRecordingManageService.query(sqlRecordingManage);
     }
 
+    @RequestMapping("/queryAsObject")
+    @ResponseBody
+    public Object queryAsObject(SqlRecordingManage sqlRecordingManage){
+        return sqlRecordingManageService.queryAsObject(sqlRecordingManage);
+    }
+
     @RequestMapping("/queryTree")
     @ResponseBody
     @SuppressWarnings("unchecked")

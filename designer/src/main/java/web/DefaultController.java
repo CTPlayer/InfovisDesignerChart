@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import service.chart.ChartOption;
 import service.chart.TableData;
 import service.chart.bar.echarts.Bar;
@@ -30,6 +32,7 @@ import service.myPanel.MyPanelService;
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,27 +54,22 @@ public class DefaultController {
     private TableData tableData;
 
     @RequestMapping("/login")
-    @ResponseBody
-    public Object login(User user){
-        Map<String, Object> resMap = new HashMap<>();
+    public String login(User user,  RedirectAttributes redirectAttributes){
         final Subject subject = SecurityUtils.getSubject();
         final UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(user.getUserName(), user.getPassword());
-        System.out.println(user.getUserName()+":"+user.getPassword());
+        String redirect = "redirect:index.page";
         try {
             subject.login(usernamePasswordToken);
-            resMap.put("success", true);
+            redirect = "redirect:query.page";
         }catch (final UnknownAccountException uae){
-            resMap.put("success", false);
-            resMap.put("message","没有该用户： " + usernamePasswordToken.getPrincipal());
+            redirectAttributes.addFlashAttribute("error_message", "身份认证失败,请确认用户名和密码是否正确！");
         }catch (final IncorrectCredentialsException ice) {
-            resMap.put("success", false);
-            resMap.put("message",usernamePasswordToken.getPrincipal() + " 的密码不正确!");
+            redirectAttributes.addFlashAttribute("error_message", "身份认证失败,请确认用户名和密码是否正确！");
         }catch (final AuthenticationException ae) {
-            resMap.put("success", false);
-            resMap.put("message","身份验证失败");
+            redirectAttributes.addFlashAttribute("error_message", "身份认证失败,请确认用户名和密码是否正确！");
             usernamePasswordToken.clear();
         }
-        return resMap;
+        return redirect;
     }
 
     /**
@@ -213,9 +211,8 @@ public class DefaultController {
      */
     @RequestMapping("/addCharts")
     @ResponseBody
-    public Object addCharts(MyCharts myCharts) throws  Exception{
-        myChartsService.insert(myCharts);
-        return myCharts.getId();
+    public Object addCharts(@RequestBody MyCharts myCharts) throws  Exception{
+        return myChartsService.insert(myCharts);
     }
 
     /**

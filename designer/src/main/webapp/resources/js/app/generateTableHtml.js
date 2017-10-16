@@ -7,6 +7,12 @@ define(['jquery','tooltipster'], function($){
 
         table += "<tr>";
         for(var i=0;i<keys.length;i++){
+            table += '<td style="height: 34px;"><input type="text" class="form-control" style="width: 80%;display: inline-block;" placeholder="'+keys[i]+'"><button style="height: 34px;width: 20%;margin-top: 3px;" type="button" onclick="search(this,'+i+')" class="btn btn-sm btn-default">查询</button></td>';
+        }
+        table += "</tr>";
+
+        table += "<tr>";
+        for(var i=0;i<keys.length;i++){
             var orderTag = '';
             if(keys[i] == order.column){
                 if(order.sort == 'desc'){

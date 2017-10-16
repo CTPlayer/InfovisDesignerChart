@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@include file="/resources/include.jsp"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
 
@@ -35,45 +36,19 @@
                                     Login...
                                 </div>
                             </div>
-                            <form>
+                            <form action="login" method="post">
+                                <span style="color: red">${ error_message }</span>
                                 <div class="control">
-                                    <input type="text" class="form-control" v-model="userName" placeholder="请填写账号"/>
+                                    <input type="text" class="form-control" name="userName" placeholder="请填写账号"/>
                                 </div>
                                 <div class="control">
-                                    <input type="password" class="form-control" v-model="passWord" placeholder="请填写密码"/>
+                                    <input type="password" class="form-control" name="password" placeholder="请填写密码"/>
                                 </div>
                                 <div class="login-button text-center">
-                                    <input type="submit" class="btn btn-primary" value="登录" @click="login">
+                                    <input type="submit" class="btn btn-primary" value="登录">
                                 </div>
                             </form>
                         </div>
-                        <%--<div class="login-body" v-show="currentView === 'register'">--%>
-                            <%--<div class="progress hidden" id="register-progress">--%>
-                                <%--<div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">--%>
-                                    <%--Register...--%>
-                                <%--</div>--%>
-                            <%--</div>--%>
-                            <%--<form>--%>
-                                <%--<div class="control">--%>
-                                    <%--<input type="text" class="form-control" placeholder="请填写账号"/>--%>
-                                <%--</div>--%>
-                                <%--<div class="control">--%>
-                                    <%--<input type="password" class="form-control" placeholder="请填写密码"/>--%>
-                                <%--</div>--%>
-                                <%--<div class="control">--%>
-                                    <%--<input type="password" class="form-control" placeholder="请再次输入密码"/>--%>
-                                <%--</div>--%>
-                                <%--<div class="login-button text-center">--%>
-                                    <%--<input type="submit" class="btn btn-primary" value="注册">--%>
-                                <%--</div>--%>
-                            <%--</form>--%>
-                        <%--</div>--%>
-                        <%--<div class="login-footer">--%>
-                            <%--<span class="text-right" @click="changeView">--%>
-                                <%--<a href="#" class="color-white" v-show="'login' === currentView">点击此处注册</a>--%>
-                                <%--<a href="#" class="color-white" v-show="'register' === currentView">点击此处登录</a>--%>
-                            <%--</span>--%>
-                        <%--</div>--%>
                     </div>
                 </div>
             </div>

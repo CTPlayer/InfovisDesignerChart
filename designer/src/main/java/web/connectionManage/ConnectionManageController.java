@@ -140,7 +140,7 @@ public class ConnectionManageController {
         return dataBaseMetadataHelper.getQuerySqlInfo(jdbcProps);
     }
 
-    @RequestMapping("/formatSql")
+    @RequestMapping(value = "/formatSql", produces={"text/html;charset=UTF-8;","application/json;"})
     @ResponseBody
     public static String formatSql(ConnectionManage connectionManage) throws Exception {
         String dbType;

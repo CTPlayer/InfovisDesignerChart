@@ -7,17 +7,18 @@ import common.model.BaseModel;
  * @since 2017/9/21 14:25
  */
 public class User extends BaseModel{
-    private int id;
+    private String userId;
     private String userName;
+    private String descride;
     private int userType;
     private String password;
 
-    public int getId() {
-        return id;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getUserName() {
@@ -26,6 +27,14 @@ public class User extends BaseModel{
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getDescride() {
+        return descride;
+    }
+
+    public void setDescride(String descride) {
+        this.descride = descride;
     }
 
     public int getUserType() {

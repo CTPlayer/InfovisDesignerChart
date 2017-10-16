@@ -1,6 +1,7 @@
 package model.myPanel;
 
 import common.model.BaseModel;
+import model.authority.Authority;
 import org.apache.ibatis.type.Alias;
 
 /**
@@ -15,6 +16,7 @@ public class MyCharts extends BaseModel{
     private String jsCode;
     private String chartName;
     private String isRealTime;
+    private Authority authority;
 
     public String getId() {
         return id;
@@ -70,5 +72,13 @@ public class MyCharts extends BaseModel{
 
     public void setIsRealTime(String isRealTime) {
         this.isRealTime = isRealTime;
+    }
+
+    public Authority getAuthority() {
+        return authority;
+    }
+
+    public void setAuthority(Authority authority) {
+        this.authority = authority;
     }
 }

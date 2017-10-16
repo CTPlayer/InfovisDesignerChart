@@ -262,6 +262,10 @@
         td {
             height: auto;
         }
+
+        .tableexport-caption {
+            display: none;
+        }
     </style>
 </head>
 
@@ -293,18 +297,25 @@
                         <a href="#"  role="button"><i class="glyphicon glyphicon-floppy-save"></i>&nbsp;&nbsp;保存</a>
                     </li>
                     <li class="dropdown profile" v-bind:class="{danger: dangerIndex == 2}" @mouseenter="topMenuMouseEnter(2)">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">试用人员1<span class="caret"></span></a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><shiro:principal property="userName"/><span class="caret"></span></a>
                         <ul class="dropdown-menu animated fadeInDown">
                             <li class="profile-img">
                                 <img src="resources/js/lib/flatadmin/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img">
                             </li>
                             <li>
                                 <div class="profile-info">
-                                    <h4 class="username">试用人员1</h4>
-                                    <p>test@jiudaotech.com</p>
+                                    <h4 class="username"><shiro:principal property="userName"/></h4>
+                                    <p><shiro:principal property="descride"/></p>
                                     <div class="btn-group margin-bottom-2x" role="group">
-                                        <button type="button" class="btn btn-default"><i class="fa fa-user"></i> 个人信息</button>
-                                        <button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> 登出</button>
+                                        <button type="button" class="btn btn-default"><i class="fa fa-user"></i>
+                                            <shiro:hasRole name="consumer">
+                                                普通用户
+                                            </shiro:hasRole>
+                                            <shiro:hasRole name="admin">
+                                                超级管理员
+                                            </shiro:hasRole>
+                                        </button>
+                                        <a href="authority/logout"><button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> 登出</button></a>
                                     </div>
                                 </div>
                             </li>
@@ -505,13 +516,11 @@
             </div>
         <!-- Main Content -->
         <div class="container-fluid">
-            <%--<div class="grid-stack">--%>
-                <div v-for="item in widgets" v-bind:style="{ overflow: scrollType ,width:item.width, height:item.height, transform: 'translate(' + item.datax + 'px,' + item.datay + 'px)' }" class="draggable" v-bind:chartType="item.chartType" v-bind:id="item.id" v-bind:chartId="item.chartId" v-bind:data-x="item.datax" v-bind:data-y="item.datay">
-                    <img style="display: none" v-if="item.chartType === 'text:subGroupOfImage' " v-bind:src="item.hideImg">
-                    <div v-if="item.id  in renderFailList" v-cloak style="text-align: center;padding-top: 40%;"><span class="glyphicon glyphicon-flash" style="font-size: 40px;display:block" aria-hidden="true"></span><span class="glyphicon-class" style="font-size:25px;">当前图表渲染失败，请检查数据库链接是否正常!</span></div>
-                </div>
-                <%--${htmlCode}--%>
-            <%--</div>--%>
+            <div v-for="item in widgets" v-bind:style="{ overflow: scrollType ,width:item.width, height:item.height, transform: 'translate(' + item.datax + 'px,' + item.datay + 'px)' }" class="draggable" v-bind:chartType="item.chartType" v-bind:id="item.id" v-bind:chartId="item.chartId" v-bind:data-x="item.datax" v-bind:data-y="item.datay">
+                <img style="display: none" v-if="item.chartType === 'text:subGroupOfImage' " v-bind:src="item.hideImg">
+                <div v-if="item.id  in renderFailList" v-cloak style="text-align: center;padding-top: 40%;"><span class="glyphicon glyphicon-flash" style="font-size: 40px;display:block" aria-hidden="true"></span><span class="glyphicon-class" style="font-size:25px;">当前图表渲染失败，请检查数据库链接是否正常!</span></div>
+            </div>
+            <%--${htmlCode}--%>
         </div>
     </div>
 
@@ -701,7 +710,24 @@
     </div>
 </div>
 <input type="hidden" value="${exportId}" id="exportId">
+<script>
+    var search = function(thisObj) {
+        var table = $(thisObj).closest('table')[0];
+        var rowLength = table.rows.length;
+        for(var i=2;i<rowLength;i++){
+            var display = '';
+            $(thisObj).closest('table').find("input").each(function(index){
+                var key = $(this).val();
+                var cellText = table.rows[i].cells[index].innerHTML;
 
+                if(!cellText.match(key) && key != ''){
+                    display = 'none';
+                }
+                table.rows[i].style.display = display;
+            });
+        }
+    }
+</script>
 <script src="resources/js/lib/require.js" defer async="true" data-main="resources/js/app/designPanel"></script>
 </body>
 

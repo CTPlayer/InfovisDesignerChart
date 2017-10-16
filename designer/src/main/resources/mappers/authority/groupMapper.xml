@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.mapper.authority.GroupMapper">
+    <select id="queryByUserId" parameterType="User" resultType="Group" databaseId="oracle" >
+        SELECT * FROM R_GROUP WHERE group_id IN ( SELECT group_id FROM R_GROUP_RELATION WHERE c_user_id = #{ userId } AND R_GROUP_RELATION.group_id = R_GROUP.group_id)
+    </select>
+
+    <select id="queryNoJoinGroup" parameterType="User" resultType="Group" databaseId="oracle" >
+        SELECT * FROM R_GROUP WHERE NOT EXISTS ( SELECT group_id FROM R_GROUP_RELATION WHERE c_user_id = #{ userId } AND R_GROUP_RELATION.group_id = R_GROUP.group_id)
+    </select>
+
+    <select id="queryByGroupName" parameterType="Group" resultType="Group" databaseId="oracle" >
+        SELECT * FROM R_GROUP WHERE group_name = #{ groupName }
+    </select>
+
+    <select id="query" resultType="Group">
+        SELECT * FROM R_GROUP
+    </select>
+
+    <select id="queryGroupIdFromRelation" resultType="String">
+        SELECT group_id FROM R_GROUP_RELATION WHERE c_user_id = #{ userId }
+    </select>
+
+    <select id="queryGroupIdFromPrivs" resultType="String">
+        SELECT ID FROM R_RESOURCE WHERE RESOURCE_ID IN ( SELECT PRIVS_RESOURCE_ID FROM R_PRIVS WHERE REPORTER_ID = #{ reporterId } AND READ = 1 AND WRITE = #{ write } AND R_RESOURCE.RESOURCE_ID = R_PRIVS.PRIVS_RESOURCE_ID ) AND TYPE = 2
+    </select>
+
+    <insert id="addGroup" parameterType="Group" databaseId="oracle">
+        insert into R_GROUP(group_name,descride) values (#{groupName},#{descride})
+    </insert>
+
+    <insert id="addUserToGroup" databaseId="oracle">
+        insert into R_GROUP_RELATION(group_id,c_user_id) values (#{groupId,jdbcType=VARCHAR},#{userId,jdbcType=VARCHAR})
+    </insert>
+
+    <delete id="deleteUserFromGroup" databaseId="oracle">
+        delete from R_GROUP_RELATION where c_user_id = #{ userId,jdbcType=VARCHAR } AND group_id = #{ groupId,jdbcType=VARCHAR }
+    </delete>
+
+    <delete id="deleteGroupAuthorityByChart" parameterType="String" databaseId="oracle">
+        DELETE FROM R_PRIVS WHERE REPORTER_ID = #{ reporterId } AND PRIVS_RESOURCE_ID = #{ privsResourceId }
+    </delete>
+</mapper>

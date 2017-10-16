@@ -26,18 +26,24 @@ require.config({
         "interact": "lib/interact/interact",
         "echarts": "lib/charts/echarts",
         "theme": "lib/charts/theme",
-        "nicescroll": "lib/nicescroll/jquery.nicescroll.min"
+        "nicescroll": "lib/nicescroll/jquery.nicescroll.min",
+        "tableExport": "lib/tableExport/tableexport.min",
+        "file-saverjs": "lib/tableExport/FileSaver",
+        "blobjs": "lib/tableExport/Blob",
+        "xlsx": "lib/tableExport/xlsx",
+        "jzip": "lib/tableExport/jszip"
     },
     shim : {
         "bootstrap" : { "deps" :['jquery'] },
         "confirmModal" : { "deps" :['jquery'] },
-        "bootstrapFileStyle" : { "deps" :['bootstrap'] }
+        "bootstrapFileStyle" : { "deps" :['bootstrap'] },
+        "tableExport": { "deps" :['blobjs', 'file-saverjs', 'xlsx', 'jzip'] }
     },
     waitSeconds: 30
 });
 
 require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','interact','formatData','CanvasTag','zrender','theme',
-        'bootstrapFileStyle','spectrum','confirmModal','nicescroll'],
+        'bootstrapFileStyle','spectrum','confirmModal','nicescroll','tableExport'],
     function ($,domReady,vue,CanvasTagOfImage,renderMenu,echarts,interact,formatData,CanvasTag,zrender,theme) {
         domReady(function () {
             //charts配置双向绑定组件
@@ -506,29 +512,42 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                         confirmStyle     : 'primary',
                                         confirmCallback  : function (target) {
                                             var cid = target.parent().attr('data-cid');
-                                            var deferred = $.ajax({
+                                            $.ajax({
                                                 type: 'POST',
-                                                dataType: 'json',
-                                                url: 'myChart/deleteOneChart',
-                                                data : {
-                                                    "chartId": cid
+                                                url: 'authority/checkUserAuthority',
+                                                data: {
+                                                    chartId: cid
                                                 },
-                                                headers :{
-                                                    oper : 'delete'
+                                                success: function(data){
+                                                    if(data.haveAuthority == true){
+                                                        var deferred = $.ajax({
+                                                            type: 'POST',
+                                                            dataType: 'json',
+                                                            url: 'myChart/deleteOneChart',
+                                                            data : {
+                                                                "chartId": cid
+                                                            },
+                                                            headers :{
+                                                                oper : 'delete'
+                                                            }
+                                                        });
+                                                        deferred.done(function(data){
+                                                            if(data.isDelete == true){
+                                                                target.parent().remove();//当前面板的图表类型选择框删除
+                                                                $.each($('.draggable'),function (index,target) {//删除panel中该图表的div元素
+                                                                    if(cid == $(target).attr("chartid")){
+                                                                        $(target).remove();
+                                                                    }
+                                                                });
+                                                            }else{
+                                                                alert("部分设计面板中使用了本图表，暂不可删除!");
+                                                            }
+                                                        })
+                                                    }else if(data.haveAuthority == false){
+                                                        alert("您没有权限！");
+                                                    }
                                                 }
                                             });
-                                            deferred.done(function(data){
-                                                if(data.isDelete == true){
-                                                    target.parent().remove();//当前面板的图表类型选择框删除
-                                                    $.each($('.draggable'),function (index,target) {//删除panel中该图表的div元素
-                                                        if(cid == $(target).attr("chartid")){
-                                                            $(target).remove();
-                                                        }
-                                                    });
-                                                }else{
-                                                    alert("部分设计面板中使用了本图表，暂不可删除!");
-                                                }
-                                            })
                                         },
                                         confirmDismiss   : true,
                                         confirmAutoOpen  : false
@@ -754,8 +773,8 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             }
 
                             var target = $('#'+containerId);
-                            this.widgets[i].datax = typeof($(target).attr('data-x')) == 'undefined' ? 0 : $(target).attr('data-x');
-                            this.widgets[i].datay = typeof($(target).attr('data-y')) == 'undefined' ? 0 : $(target).attr('data-y');
+                            this.widgets[i].datax = typeof($(target).attr('data-x')) == 'undefined' ? target.css('transform').toString().split(',')[4] : $(target).attr('data-x');
+                            this.widgets[i].datay = typeof($(target).attr('data-y')) == 'undefined' ? target.css('transform').toString().split(',')[5].replace(')','') : $(target).attr('data-y');
                             this.widgets[i].width = target.css('width');
                             this.widgets[i].height = target.css('height');
                             if(this.currentTheme != '' && widgets[i].chartType.indexOf('text') < 0 && widgets[i].chartType.indexOf('table') < 0){
@@ -921,7 +940,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                 echarts.getInstanceByDom(document.getElementById(id)).resize();
                             }else if( chartType == 'table' ){
                                 width = parseInt($(target).css('width').replace('px',''));
-                                height = parseInt($(target).css('height').replace('px',''));
+                                height = parseInt($(target).css('height').replace('px',''))*0.9;
                                 $(target).find('table').css('width', width);
                                 $(target).find('table').css('height', height);
                             }

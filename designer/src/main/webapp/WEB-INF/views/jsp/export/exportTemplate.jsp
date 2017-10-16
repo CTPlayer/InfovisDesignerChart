@@ -23,6 +23,8 @@
     <link href="resources/css/dataAnalysis.css" rel="stylesheet">
     <!--jRange CSS-->
     <link href="resources/js/lib/jRange/jquery.range.css" rel="stylesheet">
+    <!--table CSS-->
+    <link href="resources/css/svgTable.css" rel="stylesheet">
 
     <style>
         .filterIcon{
@@ -82,6 +84,24 @@
         </div>
     </div>
 </div>
+<script>
+    var search = function(thisObj) {
+        var table = $(thisObj).closest('table')[0];
+        var rowLength = table.rows.length;
+        for(var i=2;i<rowLength;i++){
+            var display = '';
+            $(thisObj).closest('table').find("input").each(function(index){
+                var key = $(this).val();
+                var cellText = table.rows[i].cells[index].innerHTML;
+
+                if(!cellText.match(key) && key != ''){
+                    display = 'none';
+                }
+                table.rows[i].style.display = display;
+            });
+        }
+    }
+</script>
 <script src="resources/js/lib/require.js" defer async="true" data-main="resources/js/app/exportPanel"></script>
 </body>
 </html>

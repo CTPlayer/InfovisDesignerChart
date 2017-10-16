@@ -401,7 +401,7 @@ public class DataBaseMetadataHelper {
         }
 
         //此部分为临时添加，后期需改进
-        if(xAxis.size() > 0){
+        if(!sql.contains("group") && xAxis.size() > 0){
             sql = sql + " group by ";
             for(int i=0;i<xAxis.size();i++){
                 if(i == 0){

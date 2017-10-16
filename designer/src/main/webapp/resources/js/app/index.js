@@ -17,33 +17,10 @@ require(['jquery', 'domReady', 'vue'], function ($,domReady,vue) {
         var app = new vue({
            el: '#app',
            data: {
-               userName: '',
-               passWord: ''
-               // currentView: 'login'
+
            },
            methods: {
-               login: function(){
-                   $.ajax({
-                       type: "POST",
-                       url: "login",
-                       data:{
-                           userName: this.userName,
-                           password: this.passWord
-                       },
-                       async: false,
-                       success: function(data) {
-                           alert(JSON.stringify(data));
-                           // console.log(data);
-                       }
-                   });
-               }
-               // changeView: function(){
-               //      if(this.currentView == 'login'){
-               //          this.currentView = 'register';
-               //      }else if(this.currentView == 'register'){
-               //          this.currentView = 'login';
-               //      }
-               // }
+
            }
         });
     })

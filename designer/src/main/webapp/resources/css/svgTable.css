@@ -1,8 +1,8 @@
-tr:first-child {
+tr:nth-child(2) {
     font: bold 16px Verdana, Helvetica, Arial, sans-serif;
 }
 
-tr:not(:first-child){
+tr:not(:nth-child(2)){
     font-size: 14px;
 }
 
