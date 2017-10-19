@@ -244,7 +244,9 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                     app.filterType = 'text';
                     var textResult = [];
                     for(var i=0;i<data.filterResult.length;i++) {
-                        textResult.push(data.filterResult[i][targetText]);
+                        if($.inArray(data.filterResult[i][targetText], textResult) === -1){
+                            textResult.push(data.filterResult[i][targetText]);
+                        }
                     }
                     app.filterContent.push({tagText: targetText,result: textResult,tagType: 'text'});
                     app.checkedNames[targetText] = textResult;

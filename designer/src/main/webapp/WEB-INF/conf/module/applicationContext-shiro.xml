@@ -47,7 +47,7 @@
         <property name="filterChainDefinitions">
             <value>
                 /addPanel=authc
-                /showPanel.page=authc
+                <!--/showPanel.page=authc-->
                 <!--/export=authc-->
                 <!--/share.page=authc-->
                 <!--/getShareOptions=authc-->
@@ -62,12 +62,12 @@
                 /updateChartsInfo=authc
                 /selectOneChartInfo=authc
                 /selectChartInfo=authc
-                /imgToBase64=authc
-                /render=authc
+                <!--/imgToBase64=authc-->
+                <!--/render=authc-->
                 /connectionManage/*=authc
                 /sqlRecordingManage/*=authc
                 /myChart/*=authc
-                /myPanel/*=authc
+                <!--/myPanel/*=authc-->
                 /panelChartsWrapper/*=authc
                 /authority/*=authc
             </value>

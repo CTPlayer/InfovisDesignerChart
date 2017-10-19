@@ -2,6 +2,7 @@ package service.chart.common.echarts;
 
 import common.util.TemplateUtil;
 import model.chart.ChartBuilderParams;
+import model.chart.FilterModel;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Transformer;
 import org.springframework.stereotype.Service;
@@ -108,6 +109,33 @@ public class CommonUtilImpl implements ChartsUtil {
                     }
                 }
                 break;
+            case "table":
+                List<String> text = chartBuilderParams.getBuilderModel().getxAxis();
+                List<String> number = chartBuilderParams.getBuilderModel().getyAxis();
+                List<FilterModel> filterModels = chartBuilderParams.getFilterModels();
+                for(FilterModel filterModel : filterModels){
+                    for(int i=0;i<dataSet.size();i++){
+                        if("text".equals(filterModel.getColumnType())){
+                            boolean isContain = false;
+                            for(String columnValue : filterModel.getValue()){
+                                if(columnValue.equals(dataSet.get(i).get(filterModel.getColumn()))){
+                                    isContain = true;
+                                }
+                            }
+                            if(!isContain){
+                                dataSet.remove(i);
+                                i--;
+                            }
+                        }else if("number".equals(filterModel.getColumnType())){
+                            int value = Integer.parseInt(dataSet.get(i).get(filterModel.getColumn()).toString());
+                            if(value < filterModel.getMin() || value > filterModel.getMax()){
+                                dataSet.remove(i);
+                                i--;
+                            }
+                        }
+                    }
+                }
+                break;
         }
     }
 
@@ -136,7 +164,7 @@ public class CommonUtilImpl implements ChartsUtil {
         if(xAxis.size() > 0 && yAxis.size() > 0){
             String xValue = "";
             Integer yValue = 0;
-            HashMap<String, List<Integer>> map = new HashMap<>();
+            LinkedHashMap<String, List<Integer>> map = new LinkedHashMap<>();
             for(Map<String, Object> data : dataSet){
                 if(data.containsKey(xAxis.get(0))){
                     Object object = data.get(xAxis.get(0));
@@ -156,7 +184,7 @@ public class CommonUtilImpl implements ChartsUtil {
                 }
             }
             for(String key:map.keySet()){
-                Map<String, Object> newMap = new HashMap<>();
+                LinkedHashMap<String, Object> newMap = new LinkedHashMap<>();
                 newMap.put(xAxis.get(0),key);
                 for(int i=0;i<yAxis.size();i++){
                     newMap.put(yAxis.get(i), map.get(key).get(i));

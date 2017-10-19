@@ -211,7 +211,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                 },
                 //tag恢复样式
                 restoreTagStyle: function(target,tagType){
-                    if(tagType == 'xAxis' || tagType == 'yAxis'){
+                    if(tagType == 'xAxis' || tagType == 'yAxis' || tagType == 'filter'){
                         target.css("background-color",'#ffffff');
                         target.css("border",'1px dashed #ccc');
                     }else if(tagType == 'corner' || tagType == 'color'){
@@ -381,6 +381,8 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                     this.color = [];
                     this.restoreTagStyle($('form.make-model-region .mark-item-corner'),'corner');
                     this.corner = [];
+                    this.restoreTagStyle($('.column-filter'), 'filter');
+                    this.filter = [];
                     echarts.dispose(document.getElementById("editArea"));
                 },
                 //获取localStorage中的维度与度量

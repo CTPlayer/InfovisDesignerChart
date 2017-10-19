@@ -57,13 +57,15 @@ public class Line implements ChartOption {
         option.title("标题", "副标题");
         // tooltip
         option.tooltip().trigger(Trigger.axis);
+        //legend
+        option.legend().data().addAll(chartBuilderParams.getBuilderModel().getyAxis());
         // xAxis
         final Axis axis = new CategoryAxis();
         Collection<Map<String, Object>> xAxisData = CollectionUtils.collect(dataSet, new Transformer<Map<String, Object>, Map<String, Object>>() {
             @Override
             public Map<String, Object> transform(Map<String, Object> input) {
                 Object obj = input.get(chartBuilderParams.getBuilderModel().getxAxis().get(0));
-                Map<String, Object> category = new HashMap<>();
+                LinkedHashMap<String, Object> category = new LinkedHashMap<>();
                 if (obj != null && StringUtils.isNoneEmpty(obj.toString())) {
                     category.put("value", String.valueOf(obj));
                 }

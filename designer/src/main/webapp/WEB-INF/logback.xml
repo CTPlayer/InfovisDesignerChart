@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
   <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径 -->
-  <property name="LOG_HOME" value="${designer.root}/logs" />
+  <property name="LOG_HOME" value="logs" />
   <property scope="context" name="FILE_NAME" value="app_runtime" />
   <timestamp key="byDay" datePattern="yyyy-MM-dd" />
   <!-- 控制台输出 -->
@@ -62,6 +62,23 @@
     </filter>
   </appender>
 
+  <appender name="FILE_ALL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_HOME}/log_all.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+      <fileNamePattern>${LOG_HOME}/all.%i.log.zip</fileNamePattern>
+      <minIndex>1</minIndex>
+      <maxIndex>3</maxIndex>
+    </rollingPolicy>
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <!--格式化输出,%d:日期;%thread:线程名;%-5level：级别,从左显示5个字符宽度;%msg:日志消息;%n:换行符 -->
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+    </encoder>
+    <!--日志文件最大的大小 -->
+    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+      <MaxFileSize>10MB</MaxFileSize>
+    </triggeringPolicy>
+  </appender>
+
   <!--Mybatis log configure -->
   <logger name="java.sql" level="DEBUG" additivity="false">
     <appender-ref ref="STDOUT" />
@@ -99,5 +116,6 @@
     <appender-ref ref="STDOUT" />
     <appender-ref ref="FILE_WARN" />
     <appender-ref ref="FILE_ERROR" />
+    <appender-ref ref="FILE_ALL" />
   </root>
 </configuration>

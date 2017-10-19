@@ -5,6 +5,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Transformer;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.springframework.stereotype.Service;
+import service.chart.ChartsUtil;
 import service.chart.TableData;
 import service.system.helper.DataSetProvider;
 
@@ -21,11 +22,15 @@ public class TableDataImpl implements TableData {
     @Resource
     private DataSetProvider dataSetProvider;
 
+    @Resource
+    private ChartsUtil chartsUtil;
+
     @Override
     public Map<String, Object> getTableData(final ChartBuilderParams chartBuilderParams) throws Exception {
         Map<String, Object> map = new HashMap<>();
         ArrayList list = (ArrayList) dataSetProvider.prepareDataSetForTable(chartBuilderParams);
         List<Map<String, Object>> dataSet = (List<Map<String, Object>>) list.get(0);
+        chartsUtil.dataFilter(dataSet,chartBuilderParams,"table");
         Collection<Map<String, Object>> data = CollectionUtils.collect(dataSet, new Transformer<Map<String, Object>, Map<String, Object>>() {
             @Override
             public Map<String, Object> transform(Map<String, Object> input) {

@@ -116,16 +116,11 @@ public final class DataSetProvider {
         }
 
         //拼接字段名
-        List<String> xAxis = new ArrayList<>();
-        List<String> yAxis = new ArrayList<>();
         List<String> allAxis = new ArrayList<>();
-        if (chartBuilderParams.getChartType() == ChartBuilderParams.ChartType.pie) {
-            xAxis.add(chartBuilderParams.getBuilderModel().getMark().getColor());
-            yAxis.add(chartBuilderParams.getBuilderModel().getMark().getAngle());
-        } else {
-            xAxis = chartBuilderParams.getBuilderModel().getxAxis();
-            yAxis = chartBuilderParams.getBuilderModel().getyAxis();
-        }
+
+        List<String> xAxis = chartBuilderParams.getBuilderModel().getxAxis();
+        List<String> yAxis = chartBuilderParams.getBuilderModel().getyAxis();
+
         StringBuffer sb = new StringBuffer();
         String sql = jdbcProps.getSql();
         if (xAxis.size() > 0) {
@@ -180,7 +175,7 @@ public final class DataSetProvider {
 
         String sql = sqlRecordingManage.getSqlRecording();
         List<String> filters = chartBuilderParams.getBuilderModel().getFilter();
-        if(jdbcProps.getSql().contains("*") && !jdbcProps.getSql().contains("group")) {
+        if(sql.contains("*") && !sql.contains("group")) {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < filters.size(); i++) {
                 if (i == filters.size() - 1) {
@@ -192,7 +187,7 @@ public final class DataSetProvider {
                 sql += " GROUP BY " + filters.get(i);
             }
             sql = sql.replace("*", sb.toString());
-        }else if(!jdbcProps.getSql().contains("*") && !jdbcProps.getSql().contains("group")){
+        }else if(sql.contains("*") && !sql.contains("group")){
             for (int i = 0; i < filters.size(); i++) {
                 sql += " GROUP BY " + filters.get(i);
             }

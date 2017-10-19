@@ -692,7 +692,7 @@ require([
                 var UrlTemplate = {
                     MySql:"jdbc:mysql://{dbHost}:{dbPort}/{dbName}",
                     SqlServer:"jdbc:sqlserver://{dbHost}:{dbPort};databaseName={dbName}",
-                    Oracle:"jdbc:oracle:thin:@//{dbHost}:{dbPort}/{dbName}"
+                    Oracle:"jdbc:oracle:thin:@{dbHost}:{dbPort}:{dbName}"
                 }
                 var template = UrlTemplate[dbType];
                 return template.replace(/{dbHost}/,dbHost).replace(/{dbPort}/,dbPort).replace(/{dbName}/,dbName);

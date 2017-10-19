@@ -31,10 +31,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 数据库元数据获取、动态查询sql辅助类
@@ -353,7 +350,7 @@ public class DataBaseMetadataHelper {
                         columnNameDatas[i - 1] = rsmd.getColumnLabel(i);
                     }
                     while (cRs.next()) {
-                        Map<String, Object> rawDataMap = new HashMap<>();
+                        LinkedHashMap<String, Object> rawDataMap = new LinkedHashMap<>();
                         for (int j = 1; j <= rsmd.getColumnCount(); j++) {
                             rawDataMap.put(columnNameDatas[j - 1], cRs.getObject(j));
                         }
@@ -389,7 +386,7 @@ public class DataBaseMetadataHelper {
         dynamicDataSource.selectDataSource(jdbcProps.getUrl(), jdbcProps.getUsername(), jdbcProps.getPassword());
         conn = dynamicDataSource.getConnection();
         String sql = jdbcProps.getSql();
-        if(jdbcProps.isFilterOrNo()){
+        if(jdbcProps.isFilterOrNo() && sql.contains("*")){
             sql = sql + " where";
             List<FilterModel> filterModels = jdbcProps.getFilterModels();
             for(int i=0;i<filterModels.size();i++){
@@ -401,7 +398,7 @@ public class DataBaseMetadataHelper {
         }
 
         //此部分为临时添加，后期需改进
-        if(!sql.contains("group") && xAxis.size() > 0){
+        if(!sql.contains("group") && xAxis.size() > 0 && sql.contains("*")){
             sql = sql + " group by ";
             for(int i=0;i<xAxis.size();i++){
                 if(i == 0){
