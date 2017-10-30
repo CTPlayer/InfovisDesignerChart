@@ -16,7 +16,12 @@ require.config({
         "jrange" : 'lib/jRange/jquery.range',
         "vue": "lib/vue/vue",
         "echarts": "lib/charts/echarts",
-        "theme": "lib/charts/theme"
+        "theme": "lib/charts/theme",
+        "formatData": "lib/charts/formatData",
+        "generateTableHtml": "app/generateTableHtml",
+        "spectrum": "lib/bootstrap/js/spectrum",
+        "renderMenu" : 'app/renderMenu',
+        "tooltipster": "lib/gridly/tooltipster.bundle.min"
     },
     shim : {
         "bootstrap" : { "deps" :['jquery'] },
@@ -25,16 +30,18 @@ require.config({
     waitSeconds: 30
 });
 
-require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady','theme',
+require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady','theme','generateTableHtml','renderMenu',
         'jrange', 'bootstrap'],
-    function($,CanvasTag,CanvasTagOfImage,echarts,vue,domReady,theme){
+    function($,CanvasTag,CanvasTagOfImage,echarts,vue,domReady,theme,generateTableHtml,renderMenu){
         domReady(function(){
             var app = new vue({
                 el: '#app',
                 data: {
                     widgets: [],
                     // isRenderFail: false,
-                    renderFailList: []
+                    renderFailList: [],
+                    tableCurrentPage: {},
+                    currentPage: 1
                 },
                 methods: {
                     overloadItemStyle: function(optItem, theme) {
@@ -133,7 +140,9 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady','the
                                             var exportChart = echarts.init($("#" + containerIds[i])[0]);
                                             if(parseInt(data[i].isRealTime) == 0){
                                                 if(data[i].chartType == 'table'){
-                                                    $("#"+containerIds[i]).html(data[i].jsCode);
+                                                    // $("#"+containerIds[i]).html(data[i].jsCode);
+                                                    app.tableCurrentPage[data[i].id] = 1;
+                                                    renderMenu.renderTableInPanel($("#"+containerIds[i]),data[i],app);
                                                 }else {
                                                     exportChart.setOption(JSON.parse(data[i].jsCode));
                                                 }

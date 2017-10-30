@@ -130,12 +130,44 @@ require(['jquery', 'domReady', 'vue', 'validate',
                            });
                        }
                    });
+               },
+               deleteOneUser: function(index){
+                   $.confirm({
+                       title: '警告!',
+                       content: '确认删除此用户？',
+                       buttons: {
+                           '确认': function(){
+                               $.ajax({
+                                   type: 'POST',
+                                   url: 'deleteOneUser',
+                                   data: {
+                                       userId: app.userInfo[index].userId
+                                   },
+                                   success: function(data){
+                                       app.userInfo = data;
+                                       $.dialog({
+                                           title: '提示',
+                                           content: '操作成功！'
+                                       });
+                                   },
+                                   error: function(){
+                                       $.dialog({
+                                           title: '提示',
+                                           content: '操作失败！'
+                                       });
+                                   }
+                               })
+                           },
+                           '取消': function(){
+
+                           }
+                       }
+                   });
                }
            },
            mounted: function () {
                $('.card-body').loading('toggle');
                $.get("getAllUsersInfo",function(result){
-                   console.log(result);
                    $('.card-body').loading('toggle');
                    app.userInfo = result;
                    app.$nextTick(function(){

@@ -1,5 +1,6 @@
 package service.myPanel.impl;
 
+import common.util.TemplateUtil;
 import dao.BaseMapper;
 import dao.mapper.authority.GroupMapper;
 import dao.mapper.authority.UserRealmMapper;
@@ -14,10 +15,7 @@ import service.authority.UserService;
 import service.myPanel.MyChartsService;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by ct on 2016/8/30.
@@ -42,36 +40,58 @@ public class MyChartsServiceImpl implements MyChartsService{
         baseMapper.insert(myCharts);
         int reporterId = Integer.parseInt(myCharts.getId()) - 1;
 
-        Authority authority = myCharts.getAuthority();
-//        List<User> consumers = userRealmMapper.queryByUserType(0);
-//        List<User> admins = userRealmMapper.queryByUserType(1);
-        List<String> groupsForRead = authority.getGroupRead();
-        List<String> groupsForWrite = authority.getGroupWrite();
-        String currentUserId = userRealmMapper.queryAsObject(currentUser.getUserName()).getUserId();
+        Authority authority = TemplateUtil.genObjFormJson(myCharts.getAuthority(), Authority.class);
+        if(!"".equals(authority) && authority != null){
+            //有读权限的用户组
+            List<String> groupsForRead = authority.getGroupRead();
+            //有写权限的用户组
+            List<String> groupsForWrite = authority.getGroupWrite();
+            //当前用户id
+            String currentUserId = userRealmMapper.queryAsObject(currentUser.getUserName()).getUserId();
+            //所有普通用户
+            List<User> consumers = userRealmMapper.queryByUserType(0);
+            //所有超级用户
+            List<User> admins = userRealmMapper.queryByUserType(1);
 
-        userRealmMapper.insertAuthority(Integer.toString(reporterId), "US"+currentUserId,1,1);
-//        //添加普通用户权限
-//        for(User user : consumers){
-//            if(!user.getUserId().equals(currentUserId) && authority.getConsumerRead() == 1){
-//                userRealmMapper.insertAuthority(Integer.toString(reporterId), "US"+user.getUserId(),1,0);
-//            }
-//        }
-//        //添加超级用户权限
-//        for(User user : admins) {
-//            if(!user.getUserId().equals(currentUserId)) {
-//                userRealmMapper.insertAuthority(Integer.toString(reporterId), "US"+user.getUserId(), 1, 1);
-//            }
-//        }
-        //添加有读权限分组
-        for(String groupId : groupsForRead){
-            userRealmMapper.insertAuthority(Integer.toString(reporterId),"GR"+groupId,1,0);
-        }
-        //添加有写权限的分组
-        for(String groupId : groupsForWrite){
-            if(groupsForRead.contains(groupId)){
-                userRealmMapper.updateAuthority("GR"+groupId);
-            }else {
-                userRealmMapper.insertAuthority(Integer.toString(reporterId),"GR"+groupId,1,1);
+            List<Map<String, Object>> paramList = new ArrayList<>();
+
+            //添加普通用户对于该图表的权限
+            for(User user : consumers){
+                Map<String, Object> map = new HashMap<>();
+                map.put("reporterId", reporterId);
+                map.put("privsResourceId", "US"+user.getUserId());
+                if(user.getUserId().equals(currentUserId)){
+                    map.put("read", 1);
+                    map.put("write", 1);
+                }else {
+                    map.put("read", authority.getConsumerRead());
+                    map.put("write", authority.getConsumerWrite());
+                }
+                paramList.add(map);
+            }
+            //添加超级用户对于该表的权限
+            userRealmMapper.insertAuthorityForBatch(paramList);
+            paramList.clear();
+            for(User user : admins){
+                Map<String, Object> map = new HashMap<>();
+                map.put("reporterId", reporterId);
+                map.put("privsResourceId", "US"+user.getUserId());
+                map.put("read", 1);
+                map.put("write", 1);
+                paramList.add(map);
+            }
+            userRealmMapper.insertAuthorityForBatch(paramList);
+            //添加有读权限分组
+            for(String groupId : groupsForRead){
+                userRealmMapper.insertAuthority(Integer.toString(reporterId),"GR"+groupId,1,0);
+            }
+            //添加有写权限的分组
+            for(String groupId : groupsForWrite){
+                if(groupsForRead.contains(groupId)){
+                    userRealmMapper.updateAuthority("GR"+groupId);
+                }else {
+                    userRealmMapper.insertAuthority(Integer.toString(reporterId),"GR"+groupId,1,1);
+                }
             }
         }
         return reporterId;
@@ -97,37 +117,27 @@ public class MyChartsServiceImpl implements MyChartsService{
 
     @Override
     public List<MyCharts> selectChartInfo(MyCharts myCharts) throws Exception {
-//        Set<String> reporterIdsSet = new HashSet<>();
-//        List<MyCharts> list = new ArrayList<>();
-//        User user = (User)SecurityUtils.getSubject().getPrincipal();
-//        User currentUser = userRealmMapper.queryAsObject(user.getUserName());
-//        List<String> groupIdsByGroup = groupMapper.queryGroupIdFromRelation(currentUser.getUserId());
-//
-//        for(String groupId : groupIdsByGroup){
-//            List<String> reporterIds = userRealmMapper.queryReporterIdByGroupId("GR"+groupId);
-//            for(String reporterId : reporterIds){
-//                reporterIdsSet.add(reporterId);
-//            }
-//        }
-//
-//        String userId = user.getUserId();
-//        currentUser.setUserId("US"+userId);
-//        List<String> reporeterIdsByUser = userRealmMapper.queryReporterIdByUser(currentUser);
-//        for(String reporterId : reporeterIdsByUser){
-//            reporterIdsSet.add(reporterId);
-//        }
-//
-//        System.out.println("此用户拥有的报表id："+reporterIdsSet);
-//
-//        myCharts.setStatmentId(NAMESPACE + ".selectOne");
-//        for(String reporterId : reporterIdsSet){
-//            myCharts.setId(reporterId);
-//            list.add(baseMapper.selectOne(myCharts));
-//        }
-//
-//        return list;
+        HashSet<String> reporterIdSet = new HashSet<>();
+        User currentUser = (User)SecurityUtils.getSubject().getPrincipal();
 
-        myCharts.setStatmentId(NAMESPACE + ".selectList");
-        return baseMapper.selectList(myCharts);
+        User paramUser = userRealmMapper.queryAsObject(currentUser.getUserName());
+        paramUser.setUserId("US"+currentUser.getUserId());
+        //当前用户所在的用户组
+        List<String> groupIds = groupMapper.queryGroupIdFromRelation(paramUser.getUserId());
+
+        List<String> reporterIds1 = userRealmMapper.queryReporterIdByUser(paramUser);
+        reporterIdSet.addAll(reporterIds1);
+        for(String groupId : groupIds){
+            List<String> reporterIds2 = userRealmMapper.queryReporterIdByGroupId(groupId);
+            reporterIdSet.addAll(reporterIds2);
+        }
+
+        List<MyCharts> result = new ArrayList<>();
+        myCharts.setStatmentId(NAMESPACE + ".selectOne");
+        for(String reporterId : reporterIdSet){
+            myCharts.setId(reporterId);
+            result.add(baseMapper.selectOne(myCharts));
+        }
+        return result;
     }
 }

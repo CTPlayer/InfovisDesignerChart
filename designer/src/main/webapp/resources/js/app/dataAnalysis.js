@@ -402,7 +402,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                             measure :[]
                         };
                         $.each(res,function(index,element){
-                            if(element.type === 'varchar') {
+                            if(element.type == 'varchar') {
                                 columnModle.dimension.push(element.name);
                             }else{
                                 columnModle.measure.push(element.name);
@@ -542,8 +542,6 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                 }
             },
             mounted: function () {
-                this.isShowJobSetting = false;
-                $(".toggle-checkbox").bootstrapSwitch('state', false);
                 this.getAllGroups();
                 //日期格式化方法
                 Date.prototype.Format = function(fmt)
@@ -585,7 +583,8 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                         app.builderModel = JSON.parse(data.buildModel);
                         if(parseInt(data.isRealTime) == 0){
                             if(app.chartType == 'table'){
-                                $("#editArea").html(data.jsCode);
+                                // $("#editArea").html(data.jsCode);
+                                commonModule.renderTableInPanel($("#editArea"), data, app)
                             }else {
                                 editChart.setOption(JSON.parse(data.jsCode));
                             }
@@ -638,6 +637,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 chartId: app.chartId
                             },
                             success: function(data){
+                                app.authorityForConsumer = data.authorityForConsumer;
                                 app.groupForRead = data.groupOfRead;
                                 app.groupForWrite = data.groupOfWrite;
                             }
@@ -704,6 +704,23 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                         }
                     },
                     submitHandler : function(form){
+                        var authority = {
+                            adminRead: 1,
+                            adminWrite: 1,
+                            groupRead: app.groupForRead,
+                            groupWrite: app.groupForWrite
+                        };
+                        if(app.authorityForConsumer == 'none'){
+                            authority.consumerRead = 0;
+                            authority.consumerWrite = 0;
+                        }else if(app.authorityForConsumer == 'read'){
+                            authority.consumerRead = 1;
+                            authority.consumerWrite = 0;
+                        }else if(app.authorityForConsumer == 'write'){
+                            authority.consumerRead = 1;
+                            authority.consumerWrite = 1;
+                        }
+
                         if(app.chartId == 0){
                             var jsCode;
                             if(app.chartType == 'table'){
@@ -717,24 +734,18 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 jsCode = JSON.stringify(option);
                             }
                             var paramId;
-                            var authority = {
-                                groupRead: app.groupForRead,
-                                groupWrite: app.groupForWrite
-                            };
-
                             var deferred01 = $.ajax({
                                 type: 'POST',
-                                contentType: "application/json; charset=utf-8",
                                 url: 'addCharts',
-                                data : JSON.stringify({
+                                data : {
                                     'chartType': app.chartType,
                                     'sqlRecordingId': app.sqlRecordingId,
                                     'buildModel': JSON.stringify(app.builderModel),
                                     'jsCode': jsCode,
                                     'chartName': app.chartName,
                                     'isRealTime' : app.dataSourcePicked,
-                                    'authority': authority
-                                })
+                                    'authority': JSON.stringify(authority)
+                                }
                             });
                             deferred01.done(function(data){
                                 paramId = data;
@@ -793,25 +804,20 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 top.window.location = "showPanel.page?exportId="+app.exportId;
                             });
 
-                            //修改分组信息
-                            authority = {
-                                groupRead: app.groupForRead,
-                                groupWrite: app.groupForWrite
-                            };
                             $.ajax({
                                type: 'POST',
-                               contentType: "application/json; charset=utf-8",
+                               // contentType: "application/json; charset=utf-8",
                                url: 'authority/updateChartGroup',
-                               data: JSON.stringify({
+                               data: {
                                    'id': app.chartId,
-                                   'chartType': app.chartType,
-                                   'sqlRecordingId': app.sqlRecordingId,
-                                   'buildModel': JSON.stringify(app.builderModel),
-                                   'jsCode': jsCode,
-                                   'chartName': app.chartName,
-                                   'isRealTime' : app.dataSourcePicked,
-                                   'authority': authority
-                               })
+                                   // 'chartType': app.chartType,
+                                   // 'sqlRecordingId': app.sqlRecordingId,
+                                   // 'buildModel': JSON.stringify(app.builderModel),
+                                   // 'jsCode': jsCode,
+                                   // 'chartName': app.chartName,
+                                   // 'isRealTime' : app.dataSourcePicked,
+                                   'authority': JSON.stringify(authority)
+                               }
                             });
 
                             if(app.chartType != 'table'){
@@ -845,7 +851,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                         dataFilter: function(treeId, parentNode, responseData) {
                             //批量增加iconSkin
                             $.each(responseData,function(index,object){
-                                if(object.type === 'database'){
+                                if(object.type == 'database'){
                                     switch(object.dbType)
                                     {
                                         case 'Oracle':

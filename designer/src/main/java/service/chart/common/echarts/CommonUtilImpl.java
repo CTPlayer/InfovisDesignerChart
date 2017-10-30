@@ -112,7 +112,7 @@ public class CommonUtilImpl implements ChartsUtil {
             case "table":
                 List<String> text = chartBuilderParams.getBuilderModel().getxAxis();
                 List<String> number = chartBuilderParams.getBuilderModel().getyAxis();
-                List<FilterModel> filterModels = chartBuilderParams.getFilterModels();
+                List<FilterModel> filterModels = chartBuilderParams.getBuilderModel().getFilterModels();
                 for(FilterModel filterModel : filterModels){
                     for(int i=0;i<dataSet.size();i++){
                         if("text".equals(filterModel.getColumnType())){

@@ -5,6 +5,7 @@ import model.authority.User;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author CTPlayer
@@ -44,6 +45,8 @@ public interface UserRealmMapper {
      */
     int insertAuthority(@Param("reporterId")String reporterId, @Param("privsResourceId")String privsResourceId, @Param("read")int read, @Param("write")int write);
 
+    int insertAuthorityForBatch(List<Map<String, Object>> list);
+
     List<User> queryByUserType(int userType);
 
     List<String> queryReporterIdByUser(User user);
@@ -52,7 +55,12 @@ public interface UserRealmMapper {
 
     int updateAuthority(@Param("privsResourceId")String privsResourceId);
 
+    int updateAuthorityForBatch(List<Map<String, Object>> list);
+
     List<String> queryReporterIdOfWriteByUser(@Param("userId")String userId);
 
     List<String> queryReporterIdOfWriteByGroup(@Param("groupId")String groupId);
+
+
+    int deleteOneUser(User user);
 }

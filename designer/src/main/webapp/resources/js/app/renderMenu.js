@@ -1,8 +1,8 @@
 /**
  * Created by ct on 2016/9/7.
  */
-define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'echarts',
-    'bootstrap', 'spectrum'],function($,formatData,zrender,CanvasTag,CanvasTagOfImage,echarts){
+define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'echarts', 'generateTableHtml',
+    'bootstrap', 'spectrum'],function($,formatData,zrender,CanvasTag,CanvasTagOfImage,echarts,generateTableHtml){
     /**
      * 渲染设计面板图表菜单
      * @param target
@@ -36,8 +36,9 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
                 '<a href="#"><i class="glyphicon glyphicon-download-alt" style="color: white"></i></a>' +
                 '</span>' +
                 '</div>');
-            target.find("table").prepend('<caption align="top" style="text-align: center;font-weight: 900;height: 10%;">'+
+            target.find("table").prepend('<caption align="top" style="text-align: center;font-weight: 900;height: 15%;">'+
                                             '<div>'+chartName+'</div>'+
+                                            '<div><button style="margin-top: 3px;width: 50px;" type="button" onclick="search(this)" class="btn btn-xs">查询</button></div>'+
                                          '</caption>');
         }
 
@@ -57,7 +58,7 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
         });
 
         //删除当前容器
-        target.find('a').eq(0).click(function(){
+        target.find('#operate').find('a').eq(0).click(function(){
             var ids = [];
             for(var i=0;i<app.widgets.length;i++){
                 ids.push(app.widgets[i].id);
@@ -105,7 +106,7 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
                 });
             });
         }else if(charttype.indexOf("text") >= 0) {
-            target.find('a').eq(1).click(function () {
+            target.find('#operate').find('a').eq(1).click(function () {
                 var pzr = zrender.getInstance(target.attr("zid"));//原控件
                 var option = $.extend(true, {}, pzr.storage.getShapeList()[0].style);
                 if(charttype.indexOf("subGroupOfImage") < 0){
@@ -117,7 +118,7 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
                 }
             });
         }else if(charttype == 'table'){
-            target.find('a').eq(1).click(function () {
+            target.find('#operate').find('a').eq(1).click(function () {
                 var index = $(this).parent().parent().parent().attr("chartId");
                 $.ajax({
                     type: 'POST',
@@ -138,7 +139,7 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
                     }
                 });
             });
-            target.find('a').eq(2).click(function () {
+            target.find('#operate').find('a').eq(2).click(function () {
                 var table = target.find("table").tableExport({
                     exportButtons: true,
                     formats: ['xls'],
@@ -151,7 +152,69 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
         }
     };
 
+    /**
+     * panel页面table渲染
+     * @param dom
+     * @param data
+     * @param app
+     */
+    var renderTableInPanel = function(dom, data, app){
+        var backupsData = data;
+        app.currentPage = app.tableCurrentPage[data.id];
+        var chartName = data.chartName;
+        var xAxis = JSON.parse(data.buildModel).xAxis;
+        var yAxis = JSON.parse(data.buildModel).yAxis;
+        var allColumn = [];
+        for(var i=0;i<xAxis.length;i++){
+            allColumn.push(xAxis[i]);
+        }
+        for(var i=0;i<yAxis.length;i++){
+            allColumn.push(yAxis[i]);
+        }
+        $.ajax({
+            async: false,
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            url: 'render',
+            data: JSON.stringify({
+                'chartType': data.chartType,
+                'dataRecordId': data.sqlRecordingId,
+                'builderModel': JSON.parse(data.buildModel),
+                'page': app.currentPage,
+                'pageSize': 12,
+                'pageOrNo': "true"
+                // 'filterModels': [],
+                // 'filterOrNo': false
+            }),
+            success: function(result){
+                console.log(result);
+                generateTableHtml.render(dom, result.data, allColumn, result.totalPages, {}, result.totalCount, app);
+                //点击翻页
+                dom.find(".paging").find("li").click(function(){
+                    if($(this).hasClass("pagePre")){
+                        if(app.currentPage > 1){
+                            dom.find(".paging").find(".pageNumber").removeClass("active");
+                            app.tableCurrentPage[data.id]--;
+                            renderTableInPanel(dom, backupsData, app);
+                        }
+                    }else if($(this).hasClass("pageNext")){
+                        if(app.currentPage < result.totalPages){
+                            dom.find(".paging").find(".pageNumber").removeClass("active");
+                            app.tableCurrentPage[data.id]++;
+                            renderTableInPanel(dom, backupsData, app);
+                        }
+                    }else{
+                        app.tableCurrentPage[data.id] = $(this).text().trim();
+                        renderTableInPanel(dom, backupsData, app);
+                    }
+                });
+                renderMenu(dom,chartName,app);
+            }
+        })
+    };
+
     return {
-        renderMenu : renderMenu
+        renderMenu : renderMenu,
+        renderTableInPanel : renderTableInPanel
     }
 });

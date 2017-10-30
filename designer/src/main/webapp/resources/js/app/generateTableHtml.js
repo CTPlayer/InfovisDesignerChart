@@ -3,11 +3,11 @@ define(['jquery','tooltipster'], function($){
         var tableWidth = dom.width();
         var table = '';
         var dataType = '';
-        // var pageTag = '';
+        var pageTag = '';
 
         table += "<tr>";
         for(var i=0;i<keys.length;i++){
-            table += '<td style="height: 34px;"><input type="text" class="form-control" style="width: 80%;display: inline-block;" placeholder="'+keys[i]+'"><button style="height: 34px;width: 20%;margin-top: 3px;" type="button" onclick="search(this,'+i+')" class="btn btn-sm btn-default">查询</button></td>';
+            table += '<td style="height: 34px;"><input type="text" class="form-control" style="display: inline-block;" placeholder="'+keys[i]+'"></td>';
         }
         table += "</tr>";
 
@@ -39,47 +39,47 @@ define(['jquery','tooltipster'], function($){
             table += "</tr>";
         }
 
-        // if(!$.isEmptyObject(data[0])){
-            // pageTag += '<nav aria-label="...">';
-            // pageTag += '<ul class="pagination">';
-            // pageTag += '<li class="pagePre"><a href="javascript:void(0)" aria-label="Previous"><span aria-hidden="true">«</span></a></li>';
-            // if(totalPages < 6){
-            //     for(var i=1;i<(totalPages + 1);i++){
-            //         pageTag += '<li class="pageNumber"><a href="javascript:void(0)">'+i+'</a></li>';
-            //     }
-            // }else {
-            //     var startPage = parseInt(window.currentPage%5) == 0 ? (window.currentPage/5-1)*5+1 : parseInt(window.currentPage/5)*5+1;
-            //     var endPage = startPage+5 > totalPages+1 ? totalPages+1 : startPage+5;
-            //     for(var i=startPage;i<endPage;i++){
-            //         pageTag += '<li class="pageNumber"><a href="javascript:void(0)">'+i+'</a></li>';
-            //     }
-            // }
-            // pageTag += '<li class="pageNext"><a href="javascript:void(0)" aria-label="Next"><span aria-hidden="true">»</span></a></li>';
-            // pageTag += '</ul>';
-            // pageTag += '<span style="line-height: 47px;font-size: 15px;"><strong>&nbsp;&nbsp;总计&nbsp;&nbsp;' + totalCount + '&nbsp;&nbsp;条数据</strong></span>';
-            // pageTag += '</nav>';
-        // }
+        if(!$.isEmptyObject(data[0])){
+            pageTag += '<nav aria-label="...">';
+            pageTag += '<ul class="pagination" style="margin-bottom: -10px">';
+            pageTag += '<li class="pagePre"><a href="javascript:void(0)" aria-label="Previous"><span aria-hidden="true">«</span></a></li>';
+            if(totalPages < 6){
+                for(var i=1;i<(totalPages + 1);i++){
+                    pageTag += '<li class="pageNumber"><a href="javascript:void(0)">'+i+'</a></li>';
+                }
+            }else {
+                var startPage = parseInt(app.currentPage%5) == 0 ? (app.currentPage/5-1)*5+1 : parseInt(app.currentPage/5)*5+1;
+                var endPage = startPage+5 > totalPages+1 ? totalPages+1 : startPage+5;
+                for(var i=startPage;i<endPage;i++){
+                    pageTag += '<li class="pageNumber"><a href="javascript:void(0)">'+i+'</a></li>';
+                }
+            }
+            pageTag += '<li class="pageNext"><a href="javascript:void(0)" aria-label="Next"><span aria-hidden="true">»</span></a></li>';
+            pageTag += '</ul>';
+            pageTag += '<span style="line-height: 47px;font-size: 15px;"><strong>&nbsp;&nbsp;总计&nbsp;&nbsp;' + totalCount + '&nbsp;&nbsp;条数据</strong></span>';
+            pageTag += '</nav>';
+        }
 
         dom.html([
             '<table  border="0" cellpadding="0" cellspacing="10"  width="'+tableWidth+'">',
                 table,
-            '</table>'
-            // '<div class="paging">',
-            //     pageTag,
-            // '</div>'
+            '</table>',
+            '<div class="paging">',
+                pageTag,
+            '</div>'
         ].join(''));
 
-        // if(window.currentPage <= 1){
-        //     $(".paging").find(".pagePre").addClass("disabled");
-        // }
-        // if(window.currentPage >= totalPages){
-        //     $(".paging").find(".pageNext").addClass("disabled");
-        // }
-        // $(".paging").find(".pageNumber").eq(window.currentPage%5 == 0 ? 4 : window.currentPage%5 - 1).addClass("active");
+        if(app.currentPage <= 1){
+            dom.find(".paging").find(".pagePre").addClass("disabled");
+        }
+        if(app.currentPage >= totalPages){
+            dom.find(".paging").find(".pageNext").addClass("disabled");
+        }
+        dom.find(".paging").find(".pageNumber").eq(app.currentPage%5 == 0 ? 4 : app.currentPage%5 - 1).addClass("active");
 
-        $('.tip').tooltipster({
-            delay: 0
-        });
+        // dom.find('.tip').tooltipster({
+        //     delay: 0
+        // });
     };
 
     return {

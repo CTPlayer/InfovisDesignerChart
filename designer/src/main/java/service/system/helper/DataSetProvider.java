@@ -108,9 +108,9 @@ public final class DataSetProvider {
         }
 
         //过滤
-        if(chartBuilderParams.isFilterOrNo()){
+        if(chartBuilderParams.getBuilderModel().isFilterOrNo()){
             jdbcProps.setFilterOrNo(true);
-            jdbcProps.setFilterModels(chartBuilderParams.getFilterModels());
+            jdbcProps.setFilterModels(chartBuilderParams.getBuilderModel().getFilterModels());
         }else {
             jdbcProps.setFilterOrNo(false);
         }

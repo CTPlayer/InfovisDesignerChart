@@ -266,6 +266,18 @@
         .tableexport-caption {
             display: none;
         }
+
+        .paging {
+            text-align: center;
+        }
+
+        .container-fluid table {
+            height: 77%;
+        }
+
+        .container-fluid tr {
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -307,12 +319,12 @@
                                     <h4 class="username"><shiro:principal property="userName"/></h4>
                                     <p><shiro:principal property="descride"/></p>
                                     <div class="btn-group margin-bottom-2x" role="group">
-                                        <button type="button" class="btn btn-default"><i class="fa fa-user"></i>
+                                        <button type="button" class="btn btn-default">
                                             <shiro:hasRole name="consumer">
                                                 普通用户
                                             </shiro:hasRole>
                                             <shiro:hasRole name="admin">
-                                                超级管理员
+                                                超级用户
                                             </shiro:hasRole>
                                         </button>
                                         <a href="authority/logout"><button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> 登出</button></a>

@@ -155,10 +155,16 @@ public class AuthorityController {
 
     @RequestMapping("/updateChartGroup")
     @ResponseBody
-    public Object updateChartGroup(@RequestBody MyCharts myCharts){
+    public Object updateChartGroup(MyCharts myCharts) throws Exception {
         Map<String, Object> resMap = new HashMap<>();
         userService.updateGroupAuthorityOfChart(myCharts);
         resMap.put("success", true);
         return resMap;
+    }
+
+    @RequestMapping("/deleteOneUser")
+    @ResponseBody
+    public Object deleteOneUser(User user){
+        return userService.deleteOneUser(user);
     }
 }

@@ -1,3 +1,4 @@
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@include file="/resources/include.jsp"%>
 <!DOCTYPE html>
@@ -36,6 +37,11 @@
 
         .card-title, .flat-blue .navbar .navbar-nav > li > a, .flat-blue .navbar.navbar-default .navbar-nav > li > a{
             color: #0f77b1;
+            margin-top: 0px;
+        }
+
+        .card-title button {
+            float: right;
         }
 
         #operate i {
@@ -101,8 +107,14 @@
                 <div class="col-xs-12">
                     <div class="card">
                         <div class="card-header">
-                            <div class="card-title">
-                                <div class="title">系统用户</div>
+                            <div class="card-title" style="width: 100%">
+                                <div class="title" style="width: 100%;font-size: 23px;">系统用户
+                                    <shiro:hasRole name="admin">
+                                        <a href="#"  role="button" data-toggle="modal" data-target="#addUserModal"><button type="button" class="btn btn-danger">新增用户</button></a>
+                                        <a href="#"  role="button" data-toggle="modal" data-target="#addGroupModal"><button type="button" class="btn btn-warning">新增用户组</button></a>
+                                    </shiro:hasRole>
+                                    <a href="#"  role="button" data-toggle="modal" data-target="#updateUserModal"><button type="button" class="btn btn-success">修改密码</button></a>
+                                </div>
                             </div>
                         </div>
                         <div class="card-body">
@@ -123,12 +135,10 @@
                                     <td style="vertical-align:middle">{{ item.descride }}</td>
                                     <td style="vertical-align:middle">
                                         <shiro:hasRole name="admin">
-                                            <button type="button" class="btn btn-xs btn-primary" @click="upToAdmin(index)" v-if="item.userType === 'consumer'">提升为超级用户</button>
                                             <a href="#"  role="button" data-toggle="modal" data-target="#groupManageModal"><button type="button" @click="getGroupInfo(index)" class="btn btn-xs btn-info">用户组管理</button></a>
-                                            <a href="#"  role="button" data-toggle="modal" data-target="#addUserModal" v-if=" 0 === index "><button type="button" class="btn btn-xs btn-danger">新增用户</button></a>
-                                            <a href="#"  role="button" data-toggle="modal" data-target="#addGroupModal" v-if=" 0 === index "><button type="button" class="btn btn-xs btn-warning">新增用户组</button></a>
+                                            <button type="button" class="btn btn-xs btn-primary" @click="deleteOneUser(index)" v-if="0 !== index"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></button>
+                                            <button type="button" class="btn btn-xs" @click="upToAdmin(index)" v-if="item.userType === 'consumer'">提升为超级用户</button>
                                         </shiro:hasRole>
-                                        <a href="#"  role="button" data-toggle="modal" data-target="#updateUserModal" v-if=" 0 === index "><button type="button" class="btn btn-xs btn-success">修改密码</button></a>
                                         <span class="glyphicon glyphicon-user" aria-hidden="true" v-if=" 0 === index "></span>
                                     </td>
                                 </tr>
@@ -237,7 +247,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">修改密码</h4>
+                    <h4 class="modal-title">新增用户组</h4>
                 </div>
                 <div class="modal-body">
                     <form class="form-horizontal" id="addGroupForm" method="post">

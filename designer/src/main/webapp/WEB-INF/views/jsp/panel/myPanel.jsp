@@ -70,9 +70,11 @@
                 <li class="dropdown danger">
                     <a href="query.page"  role="button"><i class="glyphicon glyphicon-folder-close"></i>&nbsp;&nbsp;我的作品</a>
                 </li>
+                <shiro:hasRole name="admin">
                 <li class="dropdown">
                     <a href="sqlClient.page"  role="button"><i class="icon fa fa-database"></i>&nbsp;&nbsp;数据源</a>
                 </li>
+                </shiro:hasRole>
                 <li class="dropdown" id="exportHtml">
                     <a href="#"  role="button" data-toggle="modal" data-target="#addPanelModal"><i class="glyphicon glyphicon-plus"></i>&nbsp;&nbsp;新建面板</a>
                 </li>

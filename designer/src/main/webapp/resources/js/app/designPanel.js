@@ -31,7 +31,13 @@ require.config({
         "file-saverjs": "lib/tableExport/FileSaver",
         "blobjs": "lib/tableExport/Blob",
         "xlsx": "lib/tableExport/xlsx",
-        "jzip": "lib/tableExport/jszip"
+        "jzip": "lib/tableExport/jszip",
+        "tooltipster": "lib/gridly/tooltipster.bundle.min",
+        "generateTableHtml": "app/generateTableHtml",
+        "commonModule" : 'app/commonModule',
+        "thenBy": "lib/thenBy",
+        "jquery-confirm": "lib/confirm/jquery-confirm.min",
+        "jquery-loading": "lib/jqueryLoading/jquery.loading"
     },
     shim : {
         "bootstrap" : { "deps" :['jquery'] },
@@ -42,9 +48,9 @@ require.config({
     waitSeconds: 30
 });
 
-require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','interact','formatData','CanvasTag','zrender','theme',
+require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','interact','formatData','CanvasTag','zrender','theme','commonModule',
         'bootstrapFileStyle','spectrum','confirmModal','nicescroll','tableExport'],
-    function ($,domReady,vue,CanvasTagOfImage,renderMenu,echarts,interact,formatData,CanvasTag,zrender,theme) {
+    function ($,domReady,vue,CanvasTagOfImage,renderMenu,echarts,interact,formatData,CanvasTag,zrender,theme,commonModule) {
         domReady(function () {
             //charts配置双向绑定组件
             vue.component('chart-option-component',{
@@ -310,7 +316,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                         self.option = self.subGroupOption;
                         $("#textOptionModal").unbind("shown.bs.modal");
                         $("#textOptionModal").on("shown.bs.modal", function (e)  {
-                            CanvasTagOfImage().render("textOptionContainer",'',self.option);
+                            CanvasTagOfImage().render("textOptionContainer",'',self.option,false);
                         });
                     },
                     optionSetting: {
@@ -318,7 +324,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             this.option.text = this.optionSetting.subGroupText;
                             this.option.textColor = this.optionSetting.subGroupTextColor;
                             this.option.textFont = this.subGroupOption.textFont.split(" ")[0] + " " +this.optionSetting.subGroupFontSize+ "px " + this.subGroupOption.textFont.split(" ")[2];
-                            CanvasTagOfImage().render("textOptionContainer",'',this.option);
+                            CanvasTagOfImage().render("textOptionContainer",'',this.option,false);
                         },
                         deep: true
                     }
@@ -375,7 +381,9 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                     currentTheme: '',
                     renderFailList: [],
                     //每一个图表container的overflow属性
-                    scrollType: 'visible'
+                    scrollType: 'visible',
+                    tableCurrentPage: {},
+                    currentPage: 1
                 },
                 methods: {
                     //背景样式切换
@@ -600,13 +608,15 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                             $targetDiv = $("#"+app.order);
                                             if(data.chartType == 'table'){
                                                 app.scrollType = 'auto';
-                                                $targetDiv.html(data.jsCode);
+                                                // $targetDiv.html(data.jsCode);
+                                                app.tableCurrentPage[data.id] = 1;
+                                                renderMenu.renderTableInPanel($targetDiv,data,app);
                                             }else {
                                                 echarts.init($targetDiv[0]).setOption(JSON.parse(data.jsCode));
+                                                app.$nextTick(function(){
+                                                    renderMenu.renderMenu($targetDiv, data.chartName, app);
+                                                });
                                             }
-                                            app.$nextTick(function(){
-                                                renderMenu.renderMenu($targetDiv, data.chartName, app);
-                                            });
                                         }else if(parseInt(data.isRealTime) == 1){
                                             $.ajax({
                                                 async: false,
@@ -664,7 +674,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                 data : {
                                     'chartType': "text:subGroupOfImage",
                                     'sqlRecordingId': "0",
-                                    'buildModel': "",
+                                    'buildModel': JSON.stringify({}),
                                     'jsCode': JSON.stringify(option),
                                     'chartName': "自定义组件"
                                 }
@@ -713,22 +723,26 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             if(this.chartType.indexOf("subGroupOfImage") < 0){
                                 domOption.text =  option.text;
                                 domOption.textColor = option.textColor;
-                                domOption.fontSize = option.fontSize;
+                                domOption.textFont = option.textFont;
                                 domOption.color = option.color;
                                 domOption.strokeColor = option.strokeColor;
                                 //文字组件不存在复用，不保存到T_MY_CHARTS表中
                                 var index= this.order - 1;
                                 this.widgets[index].option = domOption;
-                                domPzr.storage.getShapeList()[0].style = domOption;
-                                domPzr.refresh();
+                                // domPzr.storage.getShapeList()[0].style = domOption;
+                                CanvasTag().render(this.domId,domOption);
+                                renderMenu.renderMenu($("#" + this.domId),'',app);
+                                // domPzr.refresh();
                             }else {
                                 domOption.text = option.text;
                                 domOption.textColor = option.textColor;
                                 domOption.textFont = option.textFont;
                                 //不能直接把option给domPzr实例，有些属性不能同步，例如画布宽高
-                                domPzr.storage.getShapeList()[0].style = domOption;
-                                domPzr.refresh();
-                                domOption.image = option.image.currentSrc.split(',')[1];
+                                // domPzr.storage.getShapeList()[0].style = domOption;
+                                CanvasTagOfImage().render(this.domId,'',domOption,false);
+                                renderMenu.renderMenu($("#"+this.domId),'',app);
+                                // domPzr.refresh();
+                                // domOption.image = option.image.currentSrc.split(',')[1];
                             }
                         }else if(this.chartType.indexOf('chart') >= 0){
                             var instance = echarts.getInstanceByDom(document.getElementById("optionContainer"));
@@ -739,6 +753,9 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             $.ajax({
                                 type: 'POST',
                                 url: 'updateChartInfo',
+                                headers: {
+                                    imgBase64: domOption.image.currentSrc.split(',')[1]
+                                },
                                 data: {
                                     'id': $("#"+this.domId).attr("chartId"),
                                     'jsCode': JSON.stringify(domOption)
@@ -773,10 +790,20 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             }
 
                             var target = $('#'+containerId);
-                            this.widgets[i].datax = typeof($(target).attr('data-x')) == 'undefined' ? target.css('transform').toString().split(',')[4] : $(target).attr('data-x');
-                            this.widgets[i].datay = typeof($(target).attr('data-y')) == 'undefined' ? target.css('transform').toString().split(',')[5].replace(')','') : $(target).attr('data-y');
-                            this.widgets[i].width = target.css('width');
-                            this.widgets[i].height = target.css('height');
+                            if(widgets[i].width == 0 && widgets[i].height == 0){     //如果已删除，height和width为0
+                                this.widgets[i].datax = 0;
+                                this.widgets[i].datay = 0
+                            }else {
+                                if(target.css('transform').toString() == 'none'){     //如果未拖动，css属性transform属性为none
+                                    this.widgets[i].datax = 0;
+                                    this.widgets[i].datay = 0;
+                                }else {
+                                    this.widgets[i].datax = typeof($(target).attr('data-x')) == 'undefined' ? target.css('transform').toString().split(',')[4] : $(target).attr('data-x');
+                                    this.widgets[i].datay = typeof($(target).attr('data-y')) == 'undefined' ? target.css('transform').toString().split(',')[5].replace(')','') : $(target).attr('data-y');
+                                }
+                                this.widgets[i].width = target.css('width');
+                                this.widgets[i].height = target.css('height');
+                            }
                             if(this.currentTheme != '' && widgets[i].chartType.indexOf('text') < 0 && widgets[i].chartType.indexOf('table') < 0){
                                 this.widgets[i].themeName = this.currentTheme;
                             }
@@ -940,7 +967,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                 echarts.getInstanceByDom(document.getElementById(id)).resize();
                             }else if( chartType == 'table' ){
                                 width = parseInt($(target).css('width').replace('px',''));
-                                height = parseInt($(target).css('height').replace('px',''))*0.9;
+                                height = parseInt($(target).css('height').replace('px',''))*0.77;
                                 $(target).find('table').css('width', width);
                                 $(target).find('table').css('height', height);
                             }
@@ -1030,7 +1057,9 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                             if (parseInt(data[i].isRealTime) == 0) {
                                                 if(data[i].chartType == 'table'){
                                                     app.scrollType = 'auto';
-                                                    $("#"+containerIds[i]).html(data[i].jsCode);
+                                                    // $("#"+containerIds[i]).html(data[i].jsCode);
+                                                    app.tableCurrentPage[data[i].id] = 1;
+                                                    renderMenu.renderTableInPanel(target,data[i],app);
 
                                                     var menuInfo = [];
                                                     menuInfo.push(target);
@@ -1081,9 +1110,9 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                     }
                                     app.$nextTick(function(){
                                         //table的menu渲染
-                                        for(var i=0;i<chartNames.length;i++){
-                                            renderMenu.renderMenu(chartNames[i][0], chartNames[i][1], app);
-                                        }
+                                        // for(var i=0;i<chartNames.length;i++){
+                                        //     renderMenu.renderMenu(chartNames[i][0], chartNames[i][1], app);
+                                        // }
                                         $(".draggable").niceScroll();
                                     });
                                     //theme
@@ -1115,13 +1144,15 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                         if(parseInt(data.isRealTime) == 0){
                                             if(data.chartType == 'table'){
                                                 app.scrollType = 'auto';
-                                                $("#"+app.order).html(data.jsCode);
+                                                // $("#"+app.order).html(data.jsCode);
+                                                app.tableCurrentPage[data.id] = 1;
+                                                renderMenu.renderTableInPanel($("#"+app.order),data,app);
                                             }else {
                                                 echarts.init($("#"+app.order)[0]).setOption(JSON.parse(data.jsCode));
+                                                setTimeout(function(){
+                                                    renderMenu.renderMenu($("#"+app.order),data.chartName,app);
+                                                }, 0);
                                             }
-                                            setTimeout(function(){
-                                                renderMenu.renderMenu($("#"+app.order),data.chartName,app);
-                                            }, 0);
                                         }else if(parseInt(data.isRealTime) == 1){
                                             $.ajax({
                                                 type: 'POST',

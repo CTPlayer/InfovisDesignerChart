@@ -1,5 +1,7 @@
 package service.authority.impl;
 
+import common.util.TemplateUtil;
+import dao.BaseMapper;
 import dao.mapper.authority.GroupMapper;
 import dao.mapper.authority.UserRealmMapper;
 import model.authority.Authority;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import realm.UserRealm;
 import service.authority.UserService;
+import service.myPanel.MyChartsService;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -24,11 +27,18 @@ import java.util.*;
 public class UserServiceImpl implements UserService{
     private static final Logger log = LoggerFactory.getLogger(UserRealm.class);
 
+    private static final String NAMESPACE = MyCharts.class.getName();
+    @Resource
+    private BaseMapper<MyCharts> baseMapper;
+
     @Resource
     private UserRealmMapper userRealmMapper;
 
     @Resource
     private GroupMapper groupMapper;
+
+    @Resource
+    private MyChartsService myChartsService;
 
     @Override
     public User findByUsername(String userName) {
@@ -108,12 +118,28 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public List<Map<String, Object>> addNewUser(User user) {
-        userRealmMapper.insert(user);
-        if(user.getUserType() == 0){
-
-        }else if(user.getUserType() == 1){
-
+        if("".equals(user.getDescride()) || user.getDescride() == null){
+            user.setDescride("未添加描述");
         }
+        userRealmMapper.insert(user);
+        String userId = user.getUserId();
+
+        MyCharts myCharts = new MyCharts();
+        myCharts.setPaging(false);
+        myCharts.setStatmentId(NAMESPACE + ".selectList");
+        List<MyCharts> list = baseMapper.selectList(myCharts);
+
+        List<Map<String, Object>> paramList = new ArrayList<>();
+        for(MyCharts chart : list){
+            Authority authority = TemplateUtil.genObjFormJson(chart.getAuthority(), Authority.class);
+            Map<String, Object> map = new HashMap<>();
+            map.put("reporterId", chart.getId());
+            map.put("privsResourceId", "US"+userId);
+            map.put("read", authority.getConsumerRead());
+            map.put("write", authority.getConsumerWrite());
+            paramList.add(map);
+        }
+        userRealmMapper.insertAuthorityForBatch(paramList);
         return findAllUsersInfo();
     }
 
@@ -146,10 +172,10 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public List<Map<String, Object>> updateToAdmin(String userName) {
-//        User user = userRealmMapper.queryAsObject(userName);
-        User user = (User)SecurityUtils.getSubject().getPrincipal();
+        User user = userRealmMapper.queryAsObject(userName);
         user.setUserType(1);
         userRealmMapper.update(user);
+        userRealmMapper.updateAuthority("US"+user.getUserId());
         return findAllUsersInfo();
     }
 
@@ -221,31 +247,42 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public Set<String> getAllChartsOfWriteByUser() {
-        Set<String> reporterIdsSet = new HashSet<>();
-        User user = (User)SecurityUtils.getSubject().getPrincipal();
-        User currentUser = userRealmMapper.queryAsObject(user.getUserName());
+        HashSet<String> reporterIdSet = new HashSet<>();
+        User currentUser = (User)SecurityUtils.getSubject().getPrincipal();
 
-        if(SecurityUtils.getSubject().hasRole("consumer")){
-            List<String> groupIdsByGroup = groupMapper.queryGroupIdFromRelation(currentUser.getUserId());
+        User paramUser = userRealmMapper.queryAsObject(currentUser.getUserName());
+        paramUser.setUserId("US"+currentUser.getUserId());
+        //当前用户所在的用户组
+        List<String> groupIds = groupMapper.queryGroupIdFromRelation(paramUser.getUserId());
 
-            for(String groupId : groupIdsByGroup){
-                List<String> reporterIds = userRealmMapper.queryReporterIdOfWriteByGroup("GR"+groupId);
-                for(String reporterId : reporterIds){
-                    reporterIdsSet.add(reporterId);
-                }
-            }
+        List<String> reporterIds1 = userRealmMapper.queryReporterIdOfWriteByUser(paramUser.getUserId());
+        reporterIdSet.addAll(reporterIds1);
+        for(String groupId : groupIds){
+            List<String> reporterIds2 = userRealmMapper.queryReporterIdOfWriteByGroup(groupId);
+            reporterIdSet.addAll(reporterIds2);
         }
-
-//        List<String> reporeterIdsByUser = userRealmMapper.queryReporterIdOfWriteByUser("US"+currentUser.getUserId());
-//        for(String reporterId : reporeterIdsByUser){
-//            reporterIdsSet.add(reporterId);
-//        }
-        return reporterIdsSet;
+        return reporterIdSet;
     }
 
     @Override
-    public Map<String, List<String>> getChartGroup(String chartId) {
-        Map<String, List<String>> groupMap = new HashMap<>();
+    public Map<String, Object> getChartGroup(String chartId) {
+        Map<String, Object> groupMap = new HashMap<>();
+
+        MyCharts myCharts = new MyCharts();
+        myCharts.setId(chartId);
+        myCharts.setStatmentId(NAMESPACE + ".selectOne");
+        myCharts = baseMapper.selectOne(myCharts);
+        System.out.println(myCharts.getAuthority());
+        Authority authority = TemplateUtil.genObjFormJson(myCharts.getAuthority(), Authority.class);
+
+        if(authority.getConsumerRead() == 0){
+            groupMap.put("authorityForConsumer", "none");
+        }else if(authority.getConsumerRead() == 1 && authority.getConsumerWrite() == 0){
+            groupMap.put("authorityForConsumer", "read");
+        }else if(authority.getConsumerRead() == 1 && authority.getConsumerWrite() == 1){
+            groupMap.put("authorityForConsumer", "write");
+        }
+
         List<String> groupOfRead = groupMapper.queryGroupIdFromPrivs(chartId, 0);
         List<String> groupOfWrite = groupMapper.queryGroupIdFromPrivs(chartId,1);
         groupMap.put("groupOfRead", groupOfRead);
@@ -254,25 +291,50 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void updateGroupAuthorityOfChart(MyCharts myCharts) {
-        List<Group> groups = groupMapper.query();
-        for(Group group : groups){
-            groupMapper.deleteGroupAuthorityByChart(myCharts.getId(), "GR"+group.getGroupId());
-        }
+    public void updateGroupAuthorityOfChart(MyCharts myCharts) throws Exception {
+        User currentUser = (User)SecurityUtils.getSubject().getPrincipal();
+        Authority authority = TemplateUtil.genObjFormJson(myCharts.getAuthority(), Authority.class);
+        if(!"".equals(authority) && authority != null){
+            //有读权限的用户组
+            List<String> groupsForRead = authority.getGroupRead();
+            //有写权限的用户组
+            List<String> groupsForWrite = authority.getGroupWrite();
+            //所有普通用户
+            List<User> consumers = userRealmMapper.queryByUserType(0);
 
-        Authority authority = myCharts.getAuthority();
-        List<String> groupsForRead = authority.getGroupRead();
-        List<String> groupsForWrite = authority.getGroupWrite();
-        for(String groupId : groupsForRead){
-            userRealmMapper.insertAuthority(myCharts.getId(),"GR"+groupId,1,0);
-        }
-        //添加有写权限的分组
-        for(String groupId : groupsForWrite){
-            if(groupsForRead.contains(groupId)){
-                userRealmMapper.updateAuthority("GR"+groupId);
-            }else {
-                userRealmMapper.insertAuthority(myCharts.getId(),"GR"+groupId,1,1);
+            List<Map<String, Object>> paramList = new ArrayList<>();
+            for(User user : consumers){
+                Map<String, Object> map = new HashMap<>();
+                map.put("reporterId", myCharts.getId());
+                map.put("privsResourceId", "US"+user.getUserId());
+                map.put("read", authority.getConsumerRead());
+                map.put("write", authority.getConsumerWrite());
+                paramList.add(map);
+            }
+            userRealmMapper.updateAuthorityForBatch(paramList);
+
+            List<Group> groups = groupMapper.query();
+            for(Group group : groups){
+                groupMapper.deleteGroupAuthorityByChart(myCharts.getId(), "GR"+group.getGroupId());
+            }
+            for(String groupId : groupsForRead){
+                userRealmMapper.insertAuthority(myCharts.getId(),"GR"+groupId,1,0);
+            }
+            //添加有写权限的分组
+            for(String groupId : groupsForWrite){
+                if(groupsForRead.contains(groupId)){
+                    userRealmMapper.updateAuthority("GR"+groupId);
+                }else {
+                    userRealmMapper.insertAuthority(myCharts.getId(),"GR"+groupId,1,1);
+                }
             }
         }
+        myChartsService.update(myCharts);
+    }
+
+    @Override
+    public List<Map<String, Object>> deleteOneUser(User user) {
+        userRealmMapper.deleteOneUser(user);
+        return findAllUsersInfo();
     }
 }

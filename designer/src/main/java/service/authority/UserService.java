@@ -124,7 +124,9 @@ public interface UserService {
      * @param chartId
      * @return
      */
-    Map<String, List<String>> getChartGroup(String chartId);
+    Map<String, Object> getChartGroup(String chartId);
 
-    void updateGroupAuthorityOfChart(MyCharts myCharts);
+    void updateGroupAuthorityOfChart(MyCharts myCharts) throws Exception;
+
+    List<Map<String, Object>> deleteOneUser(User user);
 }

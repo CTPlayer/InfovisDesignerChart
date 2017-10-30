@@ -72,7 +72,6 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
             'xAxis': xAxis,
             'yAxis': yAxis
         };
-        var showNumer = 20;
 
         app.builderModel = builderModel;         //用于插入图表关联信息
 
@@ -101,6 +100,9 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
             isFilter = "true";
         }
 
+        builderModel.filterModels = filterModels;
+        builderModel.filterOrNo = isFilter;
+
         $.ajax({
             type: 'POST',
             contentType: "application/json; charset=utf-8",
@@ -110,12 +112,12 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                 'dataRecordId': sqlRecordingId,
                 'builderModel': builderModel,
                 'page': Math.ceil(currentPage),
-                'pageSize': showNumer,
-                'pageOrNo': "false",
+                'pageSize': 12,
+                'pageOrNo': "true",
                 'sidx': order.column,
-                'sord': order.sort,
-                'filterModels': filterModels,
-                'filterOrNo': isFilter
+                'sord': order.sort
+                // 'filterModels': filterModels,
+                // 'filterOrNo': isFilter
             }),
             success: function(result){
                 var data = result.data;
@@ -165,28 +167,25 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                 if(!$.isEmptyObject(groupParam)){
                     mergeCell(data, groupParam, allColumn);
                 }
-                // $("#editArea").find("table").tableExport({
-                //     bootstrap: false
-                // });
                 //点击翻页
-                // $(".paging").find("li").click(function(){
-                //     if($(this).hasClass("pagePre")){
-                //         if(window.currentPage > 1){
-                //             $(".paging").find(".pageNumber").removeClass("active");
-                //             window.currentPage--;
-                //             renderChart(chartType,window.sqlRecordingId,filterParam,groupParam,window.currentPage,window.order);
-                //         }
-                //     }else if($(this).hasClass("pageNext")){
-                //         if(window.currentPage < result.totalPages){
-                //             $(".paging").find(".pageNumber").removeClass("active");
-                //             window.currentPage++;
-                //             renderChart(chartType,window.sqlRecordingId,filterParam,groupParam,window.currentPage,window.order);
-                //         }
-                //     }else{
-                //         window.currentPage = $(this).text().trim();
-                //         renderChart(chartType,window.sqlRecordingId,filterParam,groupParam,window.currentPage,window.order);
-                //     }
-                // });
+                $(".paging").find("li").click(function(){
+                    if($(this).hasClass("pagePre")){
+                        if(app.currentPage > 1){
+                            $(".paging").find(".pageNumber").removeClass("active");
+                            app.currentPage--;
+                            renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
+                        }
+                    }else if($(this).hasClass("pageNext")){
+                        if(app.currentPage < result.totalPages){
+                            $(".paging").find(".pageNumber").removeClass("active");
+                            app.currentPage++;
+                            renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
+                        }
+                    }else{
+                        app.currentPage = $(this).text().trim();
+                        renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
+                    }
+                });
 
                 //点击排序
                 // $("#editArea").find("tr").eq(0).find("td").click(function(){
@@ -244,7 +243,7 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
                     app.filterType = 'text';
                     var textResult = [];
                     for(var i=0;i<data.filterResult.length;i++) {
-                        if($.inArray(data.filterResult[i][targetText], textResult) === -1){
+                        if($.inArray(data.filterResult[i][targetText], textResult) == -1){
                             textResult.push(data.filterResult[i][targetText]);
                         }
                     }
@@ -453,10 +452,60 @@ define(['jquery','echarts','generateTableHtml','thenBy', 'jquery-confirm', 'jque
         option.toolbox = toolbox;
     };
 
+    var renderTableInPanel = function(dom, data, app){
+        var backupsData = data;
+        var xAxis = JSON.parse(data.buildModel).xAxis;
+        var yAxis = JSON.parse(data.buildModel).yAxis;
+        var allColumn = [];
+        for(var i=0;i<xAxis.length;i++){
+            allColumn.push(xAxis[i]);
+        }
+        for(var i=0;i<yAxis.length;i++){
+            allColumn.push(yAxis[i]);
+        }
+        $.ajax({
+            async: false,
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            url: 'render',
+            data: JSON.stringify({
+                'chartType': data.chartType,
+                'dataRecordId': data.sqlRecordingId,
+                'builderModel': JSON.parse(data.buildModel),
+                'page': app.currentPage,
+                'pageSize': 12,
+                'pageOrNo': "true"
+            }),
+            success: function(result){
+                generateTableHtml.render(dom, result.data, allColumn, result.totalPages, {}, result.totalCount, app);
+                //点击翻页
+                dom.find(".paging").find("li").click(function(){
+                    if($(this).hasClass("pagePre")){
+                        if(app.currentPage > 1){
+                            dom.find(".paging").find(".pageNumber").removeClass("active");
+                            app.currentPage--;
+                            renderTableInPanel(dom, backupsData, app);
+                        }
+                    }else if($(this).hasClass("pageNext")){
+                        if(app.currentPage < result.totalPages){
+                            dom.find(".paging").find(".pageNumber").removeClass("active");
+                            app.currentPage++;
+                            renderTableInPanel(dom, backupsData, app);
+                        }
+                    }else{
+                        app.currentPage = $(this).text().trim();
+                        renderTableInPanel(dom, backupsData, app);
+                    }
+                });
+            }
+        })
+    };
+
     return {
         renderChart : renderChart,
         renderTable : renderTable,
         getFilterResult : getFilterResult,
-        addToolBox : addToolBox
+        addToolBox : addToolBox,
+        renderTableInPanel : renderTableInPanel
     }
 });

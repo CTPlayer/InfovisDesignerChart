@@ -64,18 +64,30 @@
             position: absolute;
             display: inline-block;
         }
+
+        .paging {
+            text-align: center;
+        }
+
+        .container-fluid table {
+            height: 77%;
+        }
+
+        .container-fluid tr {
+            text-align: center;
+        }
+
+        #operate {
+            display: none;
+        }
+
+        td {
+            height: 25px;
+        }
     </style>
 </head>
 <body>
 <div class="container" id="app" style="width: 100%">
-    <%--<span class="glyphicon glyphicon-filter filterIcon" aria-hidden="true"></span>--%>
-
-    <%--<div class="loader-container text-center color-blue">--%>
-    <%--<div><i class="fa fa-spinner fa-pulse fa-3x"></i></div>--%>
-    <%--</div>--%>
-    <%--<div class="panel-group col-md-3" id="accordion" role="tablist" aria-multiselectable="true" style="z-index: 99999999">--%>
-    <%--</div>--%>
-
     <input type="hidden" value="${exportId}" id="exportId">
     <div class="container-fluid">
         <div v-for="item in widgets" style="overflow: auto" v-bind:style="{ width:item.width, height:item.height, transform: 'translate(' + item.datax + 'px,' + item.datay + 'px)' }" class="draggable" v-bind:chartType="item.chartType" v-bind:id="item.id" v-bind:chartId="item.chartId" v-bind:data-x="item.datax" v-bind:data-y="item.datay" >

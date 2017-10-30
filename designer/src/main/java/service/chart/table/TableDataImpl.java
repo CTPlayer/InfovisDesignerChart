@@ -54,8 +54,8 @@ public class TableDataImpl implements TableData {
         });
 
         map.put("data", data);
-//        map.put("totalPages", list.get(1));
-//        map.put("totalCount", list.get(2));
+        map.put("totalPages", list.get(1));
+        map.put("totalCount", list.get(2));
         return map;
     }
 }

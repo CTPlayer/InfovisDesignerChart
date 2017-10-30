@@ -30,12 +30,21 @@
     </select>
 
     <insert id="insert" parameterType="User" databaseId="oracle">
-        INSERT INTO R_USER (user_name, descride, user_type, password) VALUES (#{userName}, #{descride}, #{userType}, #{password})
+        <selectKey resultType="java.lang.String" order="BEFORE" keyProperty="userId">
+            SELECT sys_guid() FROM dual
+        </selectKey>
+        INSERT INTO R_USER (user_id, user_name, descride, user_type, password) VALUES (#{userId}, #{userName}, #{descride}, #{userType}, #{password})
     </insert>
-
 
     <insert id="insertAuthority" databaseId="oracle">
         INSERT INTO R_PRIVS VALUES (#{reporterId}, #{privsResourceId}, #{read}, #{write})
+    </insert>
+
+    <insert id="insertAuthorityForBatch" parameterType="java.util.List" useGeneratedKeys="false" databaseId="oracle">
+        INSERT INTO R_PRIVS(reporter_id, privs_resource_id, read, write)
+        <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+             SELECT #{item.reporterId}, #{item.privsResourceId}, #{item.read}, #{item.write} FROM DUAL
+        </foreach>
     </insert>
 
     <update id="update" parameterType="User" databaseId="oracle">
@@ -51,6 +60,19 @@
     </update>
 
     <update id="updateAuthority" databaseId="oracle">
-        UPDATE R_PRIVS SET write = 1 WHERE privs_resource_id = #{privsResourceId}
+        UPDATE R_PRIVS SET read = 1, write = 1 WHERE privs_resource_id = #{privsResourceId}
     </update>
+
+    <update id="updateAuthorityForBatch" databaseId="oracle">
+        <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+            UPDATE R_PRIVS SET
+            read = #{item.read},
+            write = #{item.write}
+            WHERE reporter_id = #{item.reporterId} AND privs_resource_id = #{item.privsResourceId}
+        </foreach>
+    </update>
+
+    <delete id="deleteOneUser" parameterType="User" databaseId="oracle">
+        DELETE FROM R_USER WHERE user_id = #{userId}
+    </delete>
 </mapper>

@@ -92,12 +92,12 @@
                                     <h4 class="username"><shiro:principal property="userName"/></h4>
                                     <p><shiro:principal property="descride"/></p>
                                     <div class="btn-group margin-bottom-2x" role="group">
-                                        <button type="button" class="btn btn-default"><i class="fa fa-user"></i>
+                                        <button type="button" class="btn btn-default">
                                             <shiro:hasRole name="consumer">
                                                 普通用户
                                             </shiro:hasRole>
                                             <shiro:hasRole name="admin">
-                                                超级管理员
+                                                超级用户
                                             </shiro:hasRole>
                                         </button>
                                         <a href="authority/logout"><button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> 登出</button></a>
@@ -454,24 +454,24 @@
                         <tr>
                             <td>作者</td><td colspan="2"><shiro:principal property="userName"/></td>
                         </tr>
-                        <%--<tr>--%>
-                            <%--<td>用户权限</td>--%>
-                            <%--<td style="height: 70px;">--%>
-                                <%--普通用户：--%>
-                                <%--<select class="form-control" v-model="authorityForConsumer">--%>
-                                    <%--<option value="">不可见</option>--%>
-                                    <%--<option value="read">可读权限</option>--%>
-                                    <%--<option value="write">可写权限</option>--%>
-                                <%--</select>--%>
-                            <%--</td>--%>
-                            <%--<td>--%>
-                                <%--超级用户：--%>
-                                <%--<select class="form-control" v-model="authorityForAdmin">--%>
-                                    <%--<option value="write">可写权限</option>--%>
-                                <%--</select>--%>
-                            <%--</td>--%>
-                        <%--</tr>--%>
-                        <tr>
+                        <tr style="font: normal 14px Verdana, Helvetica, Arial, sans-serif">
+                            <td>用户权限</td>
+                            <td style="height: 70px;">
+                                普通用户：
+                                <select class="form-control" v-model="authorityForConsumer">
+                                    <option value="none">不可见</option>
+                                    <option value="read">可读权限</option>
+                                    <option value="write">可写权限</option>
+                                </select>
+                            </td>
+                            <td>
+                                超级用户：
+                                <select class="form-control" v-model="authorityForAdmin">
+                                    <option value="write">可写权限</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr style="font: normal 14px Verdana, Helvetica, Arial, sans-serif">
                             <td rowspan="2">用户组权限</td>
                             <td>
                                 <div style="height: 150px;overflow: auto;margin-left: 10px" class="row">
@@ -487,7 +487,7 @@
                                 可读权限
                             </td>
                         </tr>
-                        <tr>
+                        <tr style="font: normal 14px Verdana, Helvetica, Arial, sans-serif">
                             <td>
                                 <div style="height: 150px;overflow: auto;margin-left: 10px" class="row">
                                     <div v-for="(item,index) in allGroups" class="checkbox3 checkbox-danger checkbox-inline checkbox-check  checkbox-circle checkbox-light" style="float: left">

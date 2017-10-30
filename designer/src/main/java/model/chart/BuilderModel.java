@@ -25,8 +25,12 @@ public class BuilderModel {
     private List<String> yAxis;
     // 标记模型
     private Mark mark;
-    // 过滤模型
+    // 过滤项模型
     private List<String> filter;
+    // table过滤模型
+    private List<FilterModel> filterModels;
+
+    private boolean filterOrNo;
 
     public List<String> getxAxis() {
         return xAxis;
@@ -58,6 +62,22 @@ public class BuilderModel {
 
     public void setFilter(List<String> filter) {
         this.filter = filter;
+    }
+
+    public List<FilterModel> getFilterModels() {
+        return filterModels;
+    }
+
+    public void setFilterModels(List<FilterModel> filterModels) {
+        this.filterModels = filterModels;
+    }
+
+    public boolean isFilterOrNo() {
+        return filterOrNo;
+    }
+
+    public void setFilterOrNo(boolean filterOrNo) {
+        this.filterOrNo = filterOrNo;
     }
 
     /**

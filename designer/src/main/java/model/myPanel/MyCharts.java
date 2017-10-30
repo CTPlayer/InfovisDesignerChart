@@ -16,7 +16,7 @@ public class MyCharts extends BaseModel{
     private String jsCode;
     private String chartName;
     private String isRealTime;
-    private Authority authority;
+    private String authority;
 
     public String getId() {
         return id;
@@ -74,11 +74,11 @@ public class MyCharts extends BaseModel{
         this.isRealTime = isRealTime;
     }
 
-    public Authority getAuthority() {
+    public String getAuthority() {
         return authority;
     }
 
-    public void setAuthority(Authority authority) {
+    public void setAuthority(String authority) {
         this.authority = authority;
     }
 }

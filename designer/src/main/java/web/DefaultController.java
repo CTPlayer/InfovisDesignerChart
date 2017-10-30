@@ -1,5 +1,6 @@
 package web;
 
+import com.alibaba.druid.support.json.JSONUtils;
 import common.util.TemplateUtil;
 import common.util.WebUtil;
 import model.authority.User;
@@ -60,7 +61,7 @@ public class DefaultController {
         String redirect = "redirect:index.page";
         try {
             subject.login(usernamePasswordToken);
-            redirect = "redirect:query.page";
+            redirect = "redirect:dashboard.page";
         }catch (final UnknownAccountException uae){
             redirectAttributes.addFlashAttribute("error_message", "身份认证失败,请确认用户名和密码是否正确！");
         }catch (final IncorrectCredentialsException ice) {
@@ -174,6 +175,11 @@ public class DefaultController {
         return "panel/index";
     }
 
+    @RequestMapping("/dashboard.page")
+    public Object dashboard() throws  Exception {
+        return "panel/dashboard";
+    }
+
     /**
      * 分页查询panel
      *
@@ -211,7 +217,7 @@ public class DefaultController {
      */
     @RequestMapping("/addCharts")
     @ResponseBody
-    public Object addCharts(@RequestBody MyCharts myCharts) throws  Exception{
+    public Object addCharts(MyCharts myCharts) throws  Exception{
         return myChartsService.insert(myCharts);
     }
 
@@ -223,7 +229,11 @@ public class DefaultController {
      */
     @RequestMapping("/updateChartInfo")
     @ResponseBody
-    public Object updateChartInfo(MyCharts myCharts) throws Exception {
+    public Object updateChartInfo(@RequestHeader(required = false) String imgBase64, MyCharts myCharts) throws Exception {
+        Map map = TemplateUtil.genObjFormJson(myCharts.getJsCode(), Map.class);
+        map.put("image", imgBase64);
+        myCharts.setJsCode(TemplateUtil.genJsonStr4Obj(map));
+        System.out.println(TemplateUtil.genJsonStr4Obj(myCharts));
         return myChartsService.update(myCharts);
     }
 
