@@ -1,13 +1,11 @@
 package web.authority;
 
-import freemarker.ext.beans.HashAdapter;
 import model.authority.Group;
 import model.authority.User;
 import model.myPanel.MyCharts;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import service.authority.UserService;
@@ -31,7 +29,7 @@ public class AuthorityController {
     public Object logout(){
         Subject currentUser = SecurityUtils.getSubject();
         currentUser.logout();
-        return "redirect:../login";
+        return "redirect:../index.page";
     }
 
     @RequestMapping("/userManage.page")

@@ -134,10 +134,23 @@ public class MyChartsServiceImpl implements MyChartsService{
 
         List<MyCharts> result = new ArrayList<>();
         myCharts.setStatmentId(NAMESPACE + ".selectOne");
-        for(String reporterId : reporterIdSet){
-            myCharts.setId(reporterId);
-            result.add(baseMapper.selectOne(myCharts));
+
+        Object[] reporterIds = reporterIdSet.toArray();
+        int pageSize = myCharts.getPageSize();
+        int page = myCharts.getPage();
+        int totalPage = (reporterIdSet.size() % pageSize) == 0 ? reporterIdSet.size() / pageSize : reporterIdSet.size() / pageSize + 1;
+        if(!(page < 0) && !(page > totalPage)){
+            int endSize = page * pageSize > reporterIds.length ? reporterIds.length : page * pageSize;
+            for(int i=(page - 1) * pageSize; i< endSize;i++){
+                myCharts.setId(reporterIds[i].toString());
+                result.add(baseMapper.selectOne(myCharts));
+            }
         }
+
+//        for(String reporterId : reporterIdSet){
+//            myCharts.setId(reporterId);
+//            result.add(baseMapper.selectOne(myCharts));
+//        }
         return result;
     }
 }

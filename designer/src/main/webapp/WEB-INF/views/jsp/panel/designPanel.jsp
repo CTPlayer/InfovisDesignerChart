@@ -213,7 +213,7 @@
         #myChart .thumbnail p{
             position: absolute;
             bottom:5px;
-            left:15px;
+            /*left:15px;*/
             color: rgba(70, 49, 49, 0.49);
             font-weight: bolder;
             width:180px;
@@ -347,15 +347,12 @@
                                 <div class="icon fa fa-desktop"></div>
                                 <div class="title">可视化图表设计器</div>
                             </a>
-                            <%--<button type="button" class="navbar-expand-toggle pull-right visible-xs">--%>
-                                <%--<i class="fa fa-times icon"></i>--%>
-                            <%--</button>--%>
                         </div>
                         <ul class="nav navbar-nav">
                             <li class="panel-default" @click="toggleSecondMenu(0)" v-bind:class="{active: 0 === currentActiveIndex}">
                                 <a href="dataAnalysis.page?exportId=${exportId}"><span class="icon fa fa-plus"></span><span class="title">新建图表</span></a>
                             </li>
-                            <li class="panel-default" @click="toggleSecondMenu(1);getAllCharts()" v-bind:class="{active: 1 === currentActiveIndex}">
+                            <li class="panel-default" @click="toggleSecondMenu(1);getAllCharts('init')" v-bind:class="{active: 1 === currentActiveIndex}">
                                 <a href="#" data-toggle="modal" data-target="#myChart"><span class="icon fa fa-area-chart"></span><span class="title">添加已有图表</span></a>
                             </li>
                             <li class="panel panel-default dropdown" @click="toggleSecondMenu(2)" v-bind:class="{active: 2 === currentActiveIndex}">
@@ -518,7 +515,7 @@
                             <li class="panel-default" @click="toggleSecondMenu(5)" v-bind:class="{active: 5 === currentActiveIndex}">
                                 <a href="#" data-toggle="modal" data-target="#subGroupModal"><span class="icon fa fa-cog"></span><span class="title">新建标题框</span></a>
                             </li>
-                            <li class="panel-default" @click="toggleSecondMenu(6);getAllCharts()" v-bind:class="{active: 6 === currentActiveIndex}">
+                            <li class="panel-default" @click="toggleSecondMenu(6);getAllCharts('init')" v-bind:class="{active: 6 === currentActiveIndex}">
                                 <a href="#" data-toggle="modal" data-target="#mySubGroup"><span class="icon fa fa-archive"></span><span class="title">我的标题框</span></a>
                             </li>
                         </ul>
@@ -577,7 +574,7 @@
                         <div>正在加载,请稍后...</div>
                     </div>
                     <div class="row">
-                        <div class="thumbnail" v-for="(chart, index) in myCharts" :key="chart.id" :data-cid="chart.chartId" @click="select(chart.chartId)" v-bind:class="{selected: chart.chartId == currentSelectedIndex}" style="width: 200px;height:150px;margin-left: 10px;float: left;position: relative">
+                        <div class="thumbnail" v-for="(chart, index) in myCharts" :key="chart.id" :data-cid="chart.chartId" @click="select(chart.chartId)" v-bind:class="{selected: chart.chartId == currentSelectedIndex}" style="width: 180px;height:150px;margin-left: 10px;float: left;position: relative">
                             <img style="height: 100px" :src="chart.imgSrc" alt="...">
                             <div class="arrow_top"></div>
                             <div class="glyphicon glyphicon-remove deleteOneChart"></div>
@@ -589,6 +586,7 @@
                             </p>
                         </div>
                     </div>
+                    <div style="margin-left: 47%"><a @click="getAllCharts()" href="javaScript:void(0)">更多图表...</a></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
@@ -637,10 +635,6 @@
                 <div class="modal-body">
                     <div v-html="hideImg" style="display: none"></div>
                     <div id="subGroupContainer" class="thumbnail" style="width:45%;height:410px;float:left;overflow: auto;border:1px dashed rgb(238,238,238);">
-                        <%--<div id="subGroupLoading" class="text-center color-black" v-bind:style="{display : isImgLoad}">--%>
-                            <%--<div><i class="fa fa-spinner fa-pulse fa-3x"></i></div>--%>
-                            <%--<div>正在加载图片...</div>--%>
-                        <%--</div>--%>
                     </div>
                     <div id="subGroupOptionPanel" style="width:50%;height:410px;float:left;margin-left:50px;">
                         <div class="col-xs-11" style="height:350px;overflow:auto;margin-top: 10px;" id="subGroupConfig">
@@ -712,6 +706,7 @@
                             </p>
                         </div>
                     </div>
+                    <div style="margin-left: 47%"><a @click="getAllCharts()" href="javaScript:void(0)">更多组件...</a></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>

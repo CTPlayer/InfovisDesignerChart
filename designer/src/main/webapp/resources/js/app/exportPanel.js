@@ -21,7 +21,8 @@ require.config({
         "generateTableHtml": "app/generateTableHtml",
         "spectrum": "lib/bootstrap/js/spectrum",
         "renderMenu" : 'app/renderMenu',
-        "tooltipster": "lib/gridly/tooltipster.bundle.min"
+        "tooltipster": "lib/gridly/tooltipster.bundle.min",
+        "nicescroll": "lib/nicescroll/jquery.nicescroll.min",
     },
     shim : {
         "bootstrap" : { "deps" :['jquery'] },
@@ -31,7 +32,7 @@ require.config({
 });
 
 require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady','theme','generateTableHtml','renderMenu',
-        'jrange', 'bootstrap'],
+        'jrange', 'bootstrap', 'nicescroll'],
     function($,CanvasTag,CanvasTagOfImage,echarts,vue,domReady,theme,generateTableHtml,renderMenu){
         domReady(function(){
             var app = new vue({
@@ -178,6 +179,7 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady','the
                                             option.image = $("#"+app.widgets[i].id).parent().find("img")[0];
                                             CanvasTagOfImage().render(containerIds[i],"",option,false);
                                         }
+                                        $("#" + containerIds[i]).niceScroll();
                                     }
                                     //theme
                                     app.changeTheme(themeName);

@@ -383,7 +383,8 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                     //每一个图表container的overflow属性
                     scrollType: 'visible',
                     tableCurrentPage: {},
-                    currentPage: 1
+                    currentPage: 1,
+                    allSubGroupPage: 0
                 },
                 methods: {
                     //背景样式切换
@@ -476,19 +477,27 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                         }
                     },
                     //获取所有图表和控件
-                    getAllCharts: function(){
+                    getAllCharts: function(tag){
+                        app.allSubGroupPage++;
                         //先置空以防止vue就地复用
-                        app.myCharts = [];
-                        app.mySubGroup = [];
+                        if(tag == 'init'){
+                            app.myCharts = [];
+                            app.mySubGroup = [];
+                            app.allSubGroupPage = 1;
+                        }
                         this.currentSelectedIndex = -1;
                         this.isChartsLoad = 'block';
                         $.ajax({
                             type: 'POST',
                             url: 'selectChartInfo',
+                            data: {
+                                page: app.allSubGroupPage,
+                                pageSize: 10
+                            },
                             success: function(response){
                                 app.isChartsLoad = 'none';
-                                var myCharts = [];
-                                var mySubGroup = [];
+                                // var myCharts = [];
+                                // var mySubGroup = [];
                                 for(var i=0;i<response.data.length;i++){
                                     var dataType;
                                     if(parseInt(response.data[i].isRealTime) == 0){
@@ -497,13 +506,13 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                         dataType = "实时获取";
                                     }
                                     if(response.data[i].chartType == 'text:subGroupOfImage'){
-                                        mySubGroup.push({ chartId: response.data[i].id, base64: "data:image/jpg;base64,"+JSON.parse(response.data[i].jsCode).image});
+                                        app.mySubGroup.push({ chartId: response.data[i].id, base64: "data:image/jpg;base64,"+JSON.parse(response.data[i].jsCode).image});
                                     }else if($.inArray(response.data[i].chartType,['bar','line','pie','table']) != -1){
-                                        myCharts.push({ chartId: response.data[i].id,chartType: response.data[i].chartType, chartName: response.data[i].chartName, dataType: dataType, imgSrc: "resources/img/"+response.data[i].chartType+"_chart.png" });
+                                        app.myCharts.push({ chartId: response.data[i].id,chartType: response.data[i].chartType, chartName: response.data[i].chartName, dataType: dataType, imgSrc: "resources/img/"+response.data[i].chartType+"_chart.png" });
                                     }
                                 }
-                                app.myCharts = myCharts;
-                                app.mySubGroup = mySubGroup;
+                                // app.myCharts = myCharts;
+                                // app.mySubGroup = mySubGroup;
                                 /**
                                  * 注册图表删除事件
                                  */

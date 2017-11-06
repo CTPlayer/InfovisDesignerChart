@@ -139,7 +139,9 @@ public class UserServiceImpl implements UserService{
             map.put("write", authority.getConsumerWrite());
             paramList.add(map);
         }
-        userRealmMapper.insertAuthorityForBatch(paramList);
+        if(paramList.size() > 0){
+            userRealmMapper.insertAuthorityForBatch(paramList);
+        }
         return findAllUsersInfo();
     }
 
@@ -218,10 +220,6 @@ public class UserServiceImpl implements UserService{
         List<Group> groups = groupMapper.queryByUserId(user);
         for(Group group : groups){
             list.add(group.getGroupName());
-//            Map<String, String> map = new HashMap<>();
-//            map.put("groupId", group.getGroupId());
-//            map.put("groupName", group.getGroupName());
-//            list.add(map);
         }
         return list;
     }
@@ -232,10 +230,6 @@ public class UserServiceImpl implements UserService{
         List<Group> groups = groupMapper.queryNoJoinGroup(user);
         for(Group group : groups){
             list.add(group.getGroupName());
-//            Map<String, String> map = new HashMap<>();
-//            map.put("groupId", group.getGroupId());
-//            map.put("groupName", group.getGroupName());
-//            list.add(map);
         }
         return list;
     }
@@ -272,7 +266,6 @@ public class UserServiceImpl implements UserService{
         myCharts.setId(chartId);
         myCharts.setStatmentId(NAMESPACE + ".selectOne");
         myCharts = baseMapper.selectOne(myCharts);
-        System.out.println(myCharts.getAuthority());
         Authority authority = TemplateUtil.genObjFormJson(myCharts.getAuthority(), Authority.class);
 
         if(authority.getConsumerRead() == 0){

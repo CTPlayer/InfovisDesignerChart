@@ -233,7 +233,6 @@ public class DefaultController {
         Map map = TemplateUtil.genObjFormJson(myCharts.getJsCode(), Map.class);
         map.put("image", imgBase64);
         myCharts.setJsCode(TemplateUtil.genJsonStr4Obj(map));
-        System.out.println(TemplateUtil.genJsonStr4Obj(myCharts));
         return myChartsService.update(myCharts);
     }
 

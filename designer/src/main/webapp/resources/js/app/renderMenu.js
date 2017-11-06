@@ -187,7 +187,6 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
                 // 'filterOrNo': false
             }),
             success: function(result){
-                console.log(result);
                 generateTableHtml.render(dom, result.data, allColumn, result.totalPages, {}, result.totalCount, app);
                 //点击翻页
                 dom.find(".paging").find("li").click(function(){
