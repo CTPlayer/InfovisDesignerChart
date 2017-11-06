@@ -78,6 +78,9 @@
                 <li class="dropdown" id="exportHtml">
                     <a href="#"  role="button" data-toggle="modal" data-target="#addPanelModal"><i class="glyphicon glyphicon-plus"></i>&nbsp;&nbsp;新建面板</a>
                 </li>
+                <li class="dropdown">
+                    <a href="dashboard.page"  role="button"><i class="glyphicon glyphicon-dashboard"></i>&nbsp;&nbsp;大屏系统</a>
+                </li>
                 <li class="dropdown profile">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><shiro:principal property="userName"/><span class="caret"></span></a>
                     <ul class="dropdown-menu animated fadeInDown">
