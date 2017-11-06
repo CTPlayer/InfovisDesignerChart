@@ -61,7 +61,7 @@ public class DefaultController {
         String redirect = "redirect:index.page";
         try {
             subject.login(usernamePasswordToken);
-            redirect = "redirect:dashboard.page";
+            redirect = "redirect:query.page";
         }catch (final UnknownAccountException uae){
             redirectAttributes.addFlashAttribute("error_message", "身份认证失败,请确认用户名和密码是否正确！");
         }catch (final IncorrectCredentialsException ice) {
