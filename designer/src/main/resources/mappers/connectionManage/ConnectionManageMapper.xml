@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="dao.mapper.connectionManage.ConnectionManageMapper">
-    <insert id="add" parameterType="ConnectionManage" databaseId="oracle">
+    <insert id="add" parameterType="ConnectionManage" databaseId="mysql">
         insert into T_DB_CONNECTION(ID,DBTYPE,DBNAME,DBHOST,DBPORT,DBURL,USERNAME,PASSWORD,CREATETIME)VALUES (#{id},#{dbType},#{dbName},#{dbHost},#{dbPort},#{dbUrl},#{userName},#{password},#{createTime})
     </insert>
-    <delete id="delete" parameterType="ConnectionManage" databaseId="oracle">
+    <delete id="delete" parameterType="ConnectionManage" databaseId="mysql">
         delete from T_DB_CONNECTION where id=#{id}
     </delete>
-    <select id="queryAsObject" parameterType="ConnectionManage" resultType="ConnectionManage" databaseId="oracle" >
+    <select id="queryAsObject" parameterType="ConnectionManage" resultType="ConnectionManage" databaseId="mysql" >
         SELECT ID,DBTYPE,DBNAME,DBHOST,DBPORT,DBURL,USERNAME,PASSWORD,CREATETIME, 'true' as isParent, ID as queryParam FROM T_DB_CONNECTION
         WHERE ID = #{id}
     </select>
-    <select id="query" parameterType="ConnectionManage" resultType="ConnectionManage" databaseId="oracle" >
-        SELECT ID,DBTYPE,DBNAME || '@' || DBHOST as DBNAME,DBHOST,DBURL,USERNAME,PASSWORD,CREATETIME, 'true' as isParent, 'database' as type, ID as queryParam FROM T_DB_CONNECTION
+    <select id="query" parameterType="ConnectionManage" resultType="ConnectionManage" databaseId="mysql" >
+        SELECT ID,DBTYPE,CONCAT(DBNAME, '@', DBHOST) as DBNAME,DBHOST,DBURL,USERNAME,PASSWORD,CREATETIME, 'true' as isParent, 'database' as type, ID as queryParam FROM T_DB_CONNECTION
     </select>
 </mapper>

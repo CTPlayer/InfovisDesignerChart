@@ -529,20 +529,9 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                         app.groupParam.groupFactor = app.groupFactor;
                         commonModule.renderTable(app.chartType,app.sqlRecordingId,app.filterParam,app.groupParam,app.currentPage,app.order,app);
                     }
-                },
-                getAllGroups: function(){
-                    $("body").loading('toggle');
-                    $(".loading-overlay").css("z-index", "100002");
-                    $.get('authority/getAllGroups',function (data) {
-                        app.allGroups = data;
-                        app.$nextTick(function(){
-                            $("body").loading('toggle');
-                        });
-                    })
                 }
             },
             mounted: function () {
-                this.getAllGroups();
                 //日期格式化方法
                 Date.prototype.Format = function(fmt)
                 {
@@ -583,7 +572,6 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                         app.builderModel = JSON.parse(data.buildModel);
                         if(parseInt(data.isRealTime) == 0){
                             if(app.chartType == 'table'){
-                                // $("#editArea").html(data.jsCode);
                                 commonModule.renderTableInPanel($("#editArea"), data, app)
                             }else {
                                 editChart.setOption(JSON.parse(data.jsCode));
@@ -629,19 +617,6 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 }
                             }
                         });
-                        //获取权限分组信息
-                        $.ajax({
-                            type: 'POST',
-                            url: 'authority/getChartGroup',
-                            data: {
-                                chartId: app.chartId
-                            },
-                            success: function(data){
-                                app.authorityForConsumer = data.authorityForConsumer;
-                                app.groupForRead = data.groupOfRead;
-                                app.groupForWrite = data.groupOfWrite;
-                            }
-                        })
                     }
                 });
                 //初始化插件
@@ -802,22 +777,6 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 $(form)[0].reset();
                                 $("#addChartModal").modal('toggle');
                                 top.window.location = "showPanel.page?exportId="+app.exportId;
-                            });
-
-                            $.ajax({
-                               type: 'POST',
-                               // contentType: "application/json; charset=utf-8",
-                               url: 'authority/updateChartGroup',
-                               data: {
-                                   'id': app.chartId,
-                                   // 'chartType': app.chartType,
-                                   // 'sqlRecordingId': app.sqlRecordingId,
-                                   // 'buildModel': JSON.stringify(app.builderModel),
-                                   // 'jsCode': jsCode,
-                                   // 'chartName': app.chartName,
-                                   // 'isRealTime' : app.dataSourcePicked,
-                                   'authority': JSON.stringify(authority)
-                               }
                             });
 
                             if(app.chartType != 'table'){

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="dao.mapper.authority.GroupMapper">
+    <!-- Oracle -->
     <select id="queryByUserId" parameterType="User" resultType="Group" databaseId="oracle" >
         SELECT * FROM R_GROUP WHERE group_id IN ( SELECT group_id FROM R_GROUP_RELATION WHERE c_user_id = #{ userId } AND R_GROUP_RELATION.group_id = R_GROUP.group_id)
     </select>

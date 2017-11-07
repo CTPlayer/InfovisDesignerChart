@@ -2,24 +2,24 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="model.myPanel.MyPanel">
 
-    <select id="selectOne" parameterType="MyPanel" resultType="MyPanel" databaseId="oracle">
+    <select id="selectOne" parameterType="MyPanel" resultType="MyPanel" databaseId="mysql">
         select PANEL_NAME,PANEL_REMARK,CREATE_TIME,UPDATE_TIME,HTML_CODE,JS_CODE,IMG,EXPORT_ID,BACKGROUND_CLASS
           from T_MY_PANEL
           where EXPORT_ID = #{exportId}
     </select>
 
-    <select id="selectList" resultType="MyPanel" parameterType="MyPanel" databaseId="oracle">
+    <select id="selectList" resultType="MyPanel" parameterType="MyPanel" databaseId="mysql">
         select ID,PANEL_NAME,PANEL_REMARK,CREATE_TIME,UPDATE_TIME,IMG,EXPORT_ID,BACKGROUND_CLASS
-          from T_MY_PANEL where C_USER_ID = #{cUserId}
+          from T_MY_PANEL
           order by UPDATE_TIME DESC
     </select>
 
-    <insert id="insert" parameterType="MyPanel" databaseId="oracle">
-        insert into T_MY_PANEL(PANEL_NAME,PANEL_REMARK,CREATE_TIME,UPDATE_TIME,HTML_CODE,JS_CODE,IMG,EXPORT_ID,BACKGROUND_CLASS, C_USER_ID)
-        values(#{panelName},#{panelRemark},#{createTime},#{updateTime},#{htmlCode},#{jsCode},#{img},#{exportId},#{backgroundClass}, #{cUserId})
+    <insert id="insert" parameterType="MyPanel" databaseId="mysql">
+        insert into T_MY_PANEL(PANEL_NAME,PANEL_REMARK,CREATE_TIME,UPDATE_TIME,HTML_CODE,JS_CODE,IMG,EXPORT_ID,BACKGROUND_CLASS)
+        values(#{panelName},#{panelRemark},#{createTime},#{updateTime},#{htmlCode},#{jsCode},#{img},#{exportId},#{backgroundClass})
     </insert>
 
-    <update id="update" parameterType="MyPanel" databaseId="oracle">
+    <update id="update" parameterType="MyPanel" databaseId="mysql">
         update T_MY_PANEL
           <set>
               <if test="panelName != null and panelName !=''">PANEL_NAME = #{panelName},</if>
@@ -31,12 +31,12 @@
               <if test="backgroundClass != null">BACKGROUND_CLASS = #{backgroundClass},</if>
           </set>
           <where>
-              EXPORT_ID = #{exportId} AND C_USER_ID = #{cUserId}
+              EXPORT_ID = #{exportId}
           </where>
     </update>
 
-    <delete id="delete" parameterType="MyPanel" databaseId="oracle">
-        delete from T_MY_PANEL where EXPORT_ID = #{exportId} AND C_USER_ID = #{cUserId}
+    <delete id="delete" parameterType="MyPanel" databaseId="mysql">
+        delete from T_MY_PANEL where EXPORT_ID = #{exportId}
     </delete>
 
 </mapper>

@@ -86,24 +86,11 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
 
             target.find('a').eq(2).click(function () {
                 var index = $(this).parent().parent().parent().attr("chartId");
-                $.ajax({
-                   type: 'POST',
-                   url: 'authority/checkUserAuthority',
-                   data: {
-                       chartId: index
-                   },
-                   success: function(data){
-                       if(data.haveAuthority == true){
-                           var exportId = $("#exportId").val();
-                           if (app.isSave == false) {
-                               app.saveCurrentPanel();
-                           }
-                           top.window.location = "dataAnalysis.page?chartId=" + index + "&exportId=" + exportId;
-                       }else if(data.haveAuthority == false){
-                           alert("您没有权限！");
-                       }
-                   }
-                });
+                var exportId = $("#exportId").val();
+                if (app.isSave == false) {
+                   app.saveCurrentPanel();
+                }
+                top.window.location = "dataAnalysis.page?chartId=" + index + "&exportId=" + exportId;
             });
         }else if(charttype.indexOf("text") >= 0) {
             target.find('#operate').find('a').eq(1).click(function () {
@@ -120,24 +107,11 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
         }else if(charttype == 'table'){
             target.find('#operate').find('a').eq(1).click(function () {
                 var index = $(this).parent().parent().parent().attr("chartId");
-                $.ajax({
-                    type: 'POST',
-                    url: 'authority/checkUserAuthority',
-                    data: {
-                        chartId: index
-                    },
-                    success: function(data){
-                        if(data.haveAuthority == true){
-                            var exportId = $("#exportId").val();
-                            if (app.isSave == false) {
-                                app.saveCurrentPanel();
-                            }
-                            top.window.location = "dataAnalysis.page?chartId=" + index + "&exportId=" + exportId;
-                        }else if(data.haveAuthority == false){
-                            alert("您没有权限！");
-                        }
-                    }
-                });
+                var exportId = $("#exportId").val();
+                if (app.isSave == false) {
+                    app.saveCurrentPanel();
+                }
+                top.window.location = "dataAnalysis.page?chartId=" + index + "&exportId=" + exportId;
             });
             target.find('#operate').find('a').eq(2).click(function () {
                 var table = target.find("table").tableExport({

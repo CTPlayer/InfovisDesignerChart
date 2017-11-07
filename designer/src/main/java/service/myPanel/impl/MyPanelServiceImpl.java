@@ -48,8 +48,6 @@ public class MyPanelServiceImpl implements MyPanelService {
 
     @Override
     public List<MyPanel> queryAsList(MyPanel myPanel) throws Exception {
-        User user = (User)SecurityUtils.getSubject().getPrincipal();
-        myPanel.setcUserId(user.getUserId());
         myPanel.setStatmentId(NAMESPACE + ".selectList");
         return baseMapper.selectList(myPanel);
     }
@@ -57,10 +55,8 @@ public class MyPanelServiceImpl implements MyPanelService {
 
     @Override
     public String insert(MyPanel myPanel) throws Exception {
-        User user = (User)SecurityUtils.getSubject().getPrincipal();
         String exportId = UUID.randomUUID().toString();
         myPanel.setExportId(exportId);
-        myPanel.setcUserId(user.getUserId());
         myPanel.setCreateTime(DateTime.now().toString("yyyyMMddHHmmss"));
         myPanel.setUpdateTime(DateTime.now().toString("yyyyMMddHHmmss"));
         myPanel.setStatmentId(NAMESPACE + ".insert");
@@ -71,8 +67,6 @@ public class MyPanelServiceImpl implements MyPanelService {
 
     @Override
     public int update(MyPanel myPanel) throws Exception {
-        User user = (User)SecurityUtils.getSubject().getPrincipal();
-        myPanel.setcUserId(user.getUserId());
         myPanel.setUpdateTime(DateTime.now().toString("yyyyMMddHHmmss"));
         myPanel.setStatmentId(NAMESPACE + ".update");
         return baseMapper.update(myPanel);
@@ -81,13 +75,11 @@ public class MyPanelServiceImpl implements MyPanelService {
 
     @Override
     public int delete(String exportId) throws Exception {
-        User user = (User)SecurityUtils.getSubject().getPrincipal();
         PanelChartsWrapper panelChartsWrapper = new PanelChartsWrapper();
         panelChartsWrapper.setExportId(exportId);
         panelChartsWrapperService.delete(panelChartsWrapper);
         MyPanel myPanel = new MyPanel();
         myPanel.setExportId(exportId);
-        myPanel.setcUserId(user.getUserId());
         myPanel.setStatmentId(NAMESPACE + ".delete");
         return baseMapper.delete(myPanel);
     }

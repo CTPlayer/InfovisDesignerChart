@@ -82,7 +82,7 @@
         }
 
         td {
-            height: 25px;
+            height: auto;
         }
     </style>
 </head>

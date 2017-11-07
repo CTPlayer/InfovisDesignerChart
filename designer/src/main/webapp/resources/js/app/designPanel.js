@@ -490,14 +490,10 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                         $.ajax({
                             type: 'POST',
                             url: 'selectChartInfo',
-                            data: {
-                                page: app.allSubGroupPage,
-                                pageSize: 10
-                            },
                             success: function(response){
                                 app.isChartsLoad = 'none';
-                                // var myCharts = [];
-                                // var mySubGroup = [];
+                                var myCharts = [];
+                                var mySubGroup = [];
                                 for(var i=0;i<response.data.length;i++){
                                     var dataType;
                                     if(parseInt(response.data[i].isRealTime) == 0){
@@ -506,13 +502,13 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                         dataType = "实时获取";
                                     }
                                     if(response.data[i].chartType == 'text:subGroupOfImage'){
-                                        app.mySubGroup.push({ chartId: response.data[i].id, base64: "data:image/jpg;base64,"+JSON.parse(response.data[i].jsCode).image});
+                                        mySubGroup.push({ chartId: response.data[i].id, base64: "data:image/jpg;base64,"+JSON.parse(response.data[i].jsCode).image});
                                     }else if($.inArray(response.data[i].chartType,['bar','line','pie','table']) != -1){
-                                        app.myCharts.push({ chartId: response.data[i].id,chartType: response.data[i].chartType, chartName: response.data[i].chartName, dataType: dataType, imgSrc: "resources/img/"+response.data[i].chartType+"_chart.png" });
+                                        myCharts.push({ chartId: response.data[i].id,chartType: response.data[i].chartType, chartName: response.data[i].chartName, dataType: dataType, imgSrc: "resources/img/"+response.data[i].chartType+"_chart.png" });
                                     }
                                 }
-                                // app.myCharts = myCharts;
-                                // app.mySubGroup = mySubGroup;
+                                app.myCharts = myCharts;
+                                app.mySubGroup = mySubGroup;
                                 /**
                                  * 注册图表删除事件
                                  */

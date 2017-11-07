@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="model.myPanel.MyCharts">
-    <insert id="insert" parameterType="MyCharts" databaseId="oracle">
-        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.String">
-            SELECT T_MY_CHARTS_SEQUENCE.NEXTVAL AS id FROM DUAL
-        </selectKey>
-        insert into T_MY_CHARTS(SQLRECORDING_ID,BUILD_MODEL,CHART_TYPE,JS_CODE,CHART_NAME,IS_REAL_TIME,AUTHORITY)
-        values (#{sqlRecordingId},#{buildModel},#{chartType},#{jsCode},#{chartName},#{isRealTime},#{authority})
+    <insert id="insert" parameterType="MyCharts" useGeneratedKeys="true" keyProperty="id" databaseId="mysql">
+        insert into T_MY_CHARTS(SQLRECORDING_ID,BUILD_MODEL,CHART_TYPE,JS_CODE,CHART_NAME,IS_REAL_TIME)
+        values (#{sqlRecordingId},#{buildModel},#{chartType},#{jsCode},#{chartName},#{isRealTime})
     </insert>
 
-    <update id="update" parameterType="MyCharts" databaseId="oracle">
+    <update id="update" parameterType="MyCharts" databaseId="mysql">
         update T_MY_CHARTS
         <set>
             <if test="sqlRecordingId != null">SQLRECORDING_ID = #{sqlRecordingId},</if>
@@ -25,15 +22,15 @@
         </where>
     </update>
 
-    <delete id="delete" parameterType="MyCharts" databaseId="oracle">
+    <delete id="delete" parameterType="MyCharts" databaseId="mysql">
         delete from T_MY_CHARTS where Id = #{id}
     </delete>
 
-    <select id="selectList" parameterType="myCharts" resultType="MyCharts" databaseId="oracle">
+    <select id="selectList" parameterType="myCharts" resultType="MyCharts" databaseId="mysql">
         select * from T_MY_CHARTS
     </select>
-    
-    <select id="selectOne" parameterType="MyCharts" resultType="MyCharts" databaseId="oracle">
+
+    <select id="selectOne" parameterType="MyCharts" resultType="MyCharts" databaseId="mysql">
         select * from T_MY_CHARTS where id = #{id}
     </select>
 </mapper>

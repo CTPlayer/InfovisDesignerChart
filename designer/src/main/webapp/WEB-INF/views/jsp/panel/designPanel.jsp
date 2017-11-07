@@ -308,31 +308,31 @@
                     <li class="dropdown" id="exportHtml" v-bind:class="{danger: dangerIndex == 1}" @mouseenter="topMenuMouseEnter(1)" @click="saveCurrentPanel" >
                         <a href="#"  role="button"><i class="glyphicon glyphicon-floppy-save"></i>&nbsp;&nbsp;保存</a>
                     </li>
-                    <li class="dropdown profile" v-bind:class="{danger: dangerIndex == 2}" @mouseenter="topMenuMouseEnter(2)">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><shiro:principal property="userName"/><span class="caret"></span></a>
-                        <ul class="dropdown-menu animated fadeInDown">
-                            <li class="profile-img">
-                                <img src="resources/js/lib/flatadmin/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img">
-                            </li>
-                            <li>
-                                <div class="profile-info">
-                                    <h4 class="username"><shiro:principal property="userName"/></h4>
-                                    <p><shiro:principal property="descride"/></p>
-                                    <div class="btn-group margin-bottom-2x" role="group">
-                                        <button type="button" class="btn btn-default">
-                                            <shiro:hasRole name="consumer">
-                                                普通用户
-                                            </shiro:hasRole>
-                                            <shiro:hasRole name="admin">
-                                                超级用户
-                                            </shiro:hasRole>
-                                        </button>
-                                        <a href="authority/logout"><button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> 登出</button></a>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </li>
+                    <%--<li class="dropdown profile" v-bind:class="{danger: dangerIndex == 2}" @mouseenter="topMenuMouseEnter(2)">--%>
+                        <%--<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><shiro:principal property="userName"/><span class="caret"></span></a>--%>
+                        <%--<ul class="dropdown-menu animated fadeInDown">--%>
+                            <%--<li class="profile-img">--%>
+                                <%--<img src="resources/js/lib/flatadmin/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img">--%>
+                            <%--</li>--%>
+                            <%--<li>--%>
+                                <%--<div class="profile-info">--%>
+                                    <%--<h4 class="username"><shiro:principal property="userName"/></h4>--%>
+                                    <%--<p><shiro:principal property="descride"/></p>--%>
+                                    <%--<div class="btn-group margin-bottom-2x" role="group">--%>
+                                        <%--<button type="button" class="btn btn-default">--%>
+                                            <%--<shiro:hasRole name="consumer">--%>
+                                                <%--普通用户--%>
+                                            <%--</shiro:hasRole>--%>
+                                            <%--<shiro:hasRole name="admin">--%>
+                                                <%--超级用户--%>
+                                            <%--</shiro:hasRole>--%>
+                                        <%--</button>--%>
+                                        <%--<a href="authority/logout"><button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> 登出</button></a>--%>
+                                    <%--</div>--%>
+                                <%--</div>--%>
+                            <%--</li>--%>
+                        <%--</ul>--%>
+                    <%--</li>--%>
                     <li class="dropdown" id="allScreen" @click="allScreen" v-bind:class="{danger: dangerIndex == 3}" @mouseenter="topMenuMouseEnter(3)">
                         <a href="#"  role="button"><i class="glyphicon glyphicon-fullscreen"></i>&nbsp;&nbsp;全屏</a>
                     </li>
@@ -586,7 +586,6 @@
                             </p>
                         </div>
                     </div>
-                    <div style="margin-left: 47%"><a @click="getAllCharts()" href="javaScript:void(0)">更多图表...</a></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
@@ -706,7 +705,6 @@
                             </p>
                         </div>
                     </div>
-                    <div style="margin-left: 47%"><a @click="getAllCharts()" href="javaScript:void(0)">更多组件...</a></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>

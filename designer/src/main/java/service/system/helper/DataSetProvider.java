@@ -123,6 +123,18 @@ public final class DataSetProvider {
 
         StringBuffer sb = new StringBuffer();
         String sql = jdbcProps.getSql();
+
+        if(!sql.contains("group by") && xAxis.size() > 0 && sql.contains("*")){
+            sql = sql + " group by ";
+            for(int i=0;i<xAxis.size();i++){
+                if(i == 0){
+                    sql = sql + xAxis.get(i);
+                }else {
+                    sql = sql + "," + xAxis.get(i);
+                }
+            }
+        }
+
         if (xAxis.size() > 0) {
             for (String xColumn : xAxis) {
                 allAxis.add(xColumn);

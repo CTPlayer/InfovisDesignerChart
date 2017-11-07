@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="model.myPanel.PanelChartsWrapper">
-    <insert id="insert" parameterType="PanelChartsWrapper" databaseId="oracle">
+    <insert id="insert" parameterType="PanelChartsWrapper" databaseId="mysql">
         insert into T_PANEL_CHARTS (EXPORT_ID,CHART_ID,ORDER_ID) values (#{exportId},#{chartId},#{orderId})
     </insert>
 
-    <delete id="delete" parameterType="PanelChartsWrapper" databaseId="oracle">
+    <delete id="delete" parameterType="PanelChartsWrapper" databaseId="mysql">
         delete from T_PANEL_CHARTS where EXPORT_ID = #{exportId}
     </delete>
 
-    <select id="selectList" parameterType="PanelChartsWrapper" resultType="PanelChartsWrapper" databaseId="oracle">
+    <select id="selectList" parameterType="PanelChartsWrapper" resultType="PanelChartsWrapper" databaseId="mysql">
         select EXPORT_ID,ORDER_ID from T_PANEL_CHARTS where CHART_ID = #{chartId}
     </select>
 </mapper>

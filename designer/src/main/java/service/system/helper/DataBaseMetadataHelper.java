@@ -398,16 +398,16 @@ public class DataBaseMetadataHelper {
         }
 
         //此部分为临时添加，后期需改进
-        if(!sql.contains("group") && xAxis.size() > 0 && sql.contains("*")){
-            sql = sql + " group by ";
-            for(int i=0;i<xAxis.size();i++){
-                if(i == 0){
-                    sql = sql + xAxis.get(i);
-                }else {
-                    sql = sql + "," + xAxis.get(i);
-                }
-            }
-        }
+//        if(!sql.contains("group by") && xAxis.size() > 0 && sql.contains("*")){
+//            sql = sql + " group by ";
+//            for(int i=0;i<xAxis.size();i++){
+//                if(i == 0){
+//                    sql = sql + xAxis.get(i);
+//                }else {
+//                    sql = sql + "," + xAxis.get(i);
+//                }
+//            }
+//        }
 
         if(jdbcProps.getPagingModel().getSidx() != null && !"".equals(jdbcProps.getPagingModel().getSidx())){
             sql = SqlDialetHelper.getOrderSql(sql, jdbcProps.getPagingModel().getSidx(), jdbcProps.getPagingModel().getSord());
