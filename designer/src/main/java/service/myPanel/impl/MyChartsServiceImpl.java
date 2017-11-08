@@ -1,17 +1,8 @@
 package service.myPanel.impl;
 
-import common.util.TemplateUtil;
 import dao.BaseMapper;
-import dao.mapper.authority.GroupMapper;
-import dao.mapper.authority.UserRealmMapper;
-import model.authority.Authority;
-import model.authority.Group;
-import model.authority.User;
 import model.myPanel.MyCharts;
-import org.apache.shiro.SecurityUtils;
-import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
 import org.springframework.stereotype.Service;
-import service.authority.UserService;
 import service.myPanel.MyChartsService;
 
 import javax.annotation.Resource;
