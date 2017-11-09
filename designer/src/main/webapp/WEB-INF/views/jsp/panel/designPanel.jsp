@@ -308,31 +308,6 @@
                     <li class="dropdown" id="exportHtml" v-bind:class="{danger: dangerIndex == 1}" @mouseenter="topMenuMouseEnter(1)" @click="saveCurrentPanel" >
                         <a href="#"  role="button"><i class="glyphicon glyphicon-floppy-save"></i>&nbsp;&nbsp;保存</a>
                     </li>
-                    <%--<li class="dropdown profile" v-bind:class="{danger: dangerIndex == 2}" @mouseenter="topMenuMouseEnter(2)">--%>
-                        <%--<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><shiro:principal property="userName"/><span class="caret"></span></a>--%>
-                        <%--<ul class="dropdown-menu animated fadeInDown">--%>
-                            <%--<li class="profile-img">--%>
-                                <%--<img src="resources/js/lib/flatadmin/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img">--%>
-                            <%--</li>--%>
-                            <%--<li>--%>
-                                <%--<div class="profile-info">--%>
-                                    <%--<h4 class="username"><shiro:principal property="userName"/></h4>--%>
-                                    <%--<p><shiro:principal property="descride"/></p>--%>
-                                    <%--<div class="btn-group margin-bottom-2x" role="group">--%>
-                                        <%--<button type="button" class="btn btn-default">--%>
-                                            <%--<shiro:hasRole name="consumer">--%>
-                                                <%--普通用户--%>
-                                            <%--</shiro:hasRole>--%>
-                                            <%--<shiro:hasRole name="admin">--%>
-                                                <%--超级用户--%>
-                                            <%--</shiro:hasRole>--%>
-                                        <%--</button>--%>
-                                        <%--<a href="authority/logout"><button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> 登出</button></a>--%>
-                                    <%--</div>--%>
-                                <%--</div>--%>
-                            <%--</li>--%>
-                        <%--</ul>--%>
-                    <%--</li>--%>
                     <li class="dropdown" id="allScreen" @click="allScreen" v-bind:class="{danger: dangerIndex == 3}" @mouseenter="topMenuMouseEnter(3)">
                         <a href="#"  role="button"><i class="glyphicon glyphicon-fullscreen"></i>&nbsp;&nbsp;全屏</a>
                     </li>
@@ -352,7 +327,7 @@
                             <li class="panel-default" @click="toggleSecondMenu(0)" v-bind:class="{active: 0 === currentActiveIndex}">
                                 <a href="dataAnalysis.page?exportId=${exportId}"><span class="icon fa fa-plus"></span><span class="title">新建图表</span></a>
                             </li>
-                            <li class="panel-default" @click="toggleSecondMenu(1);getAllCharts('init')" v-bind:class="{active: 1 === currentActiveIndex}">
+                            <li class="panel-default" @click="toggleSecondMenu(1);getAllCharts('charts','','init')" v-bind:class="{active: 1 === currentActiveIndex}">
                                 <a href="#" data-toggle="modal" data-target="#myChart"><span class="icon fa fa-area-chart"></span><span class="title">添加已有图表</span></a>
                             </li>
                             <li class="panel panel-default dropdown" @click="toggleSecondMenu(2)" v-bind:class="{active: 2 === currentActiveIndex}">
@@ -515,7 +490,7 @@
                             <li class="panel-default" @click="toggleSecondMenu(5)" v-bind:class="{active: 5 === currentActiveIndex}">
                                 <a href="#" data-toggle="modal" data-target="#subGroupModal"><span class="icon fa fa-cog"></span><span class="title">新建标题框</span></a>
                             </li>
-                            <li class="panel-default" @click="toggleSecondMenu(6);getAllCharts('init')" v-bind:class="{active: 6 === currentActiveIndex}">
+                            <li class="panel-default" @click="toggleSecondMenu(6);getAllCharts('subGroup','','init')" v-bind:class="{active: 6 === currentActiveIndex}">
                                 <a href="#" data-toggle="modal" data-target="#mySubGroup"><span class="icon fa fa-archive"></span><span class="title">我的标题框</span></a>
                             </li>
                         </ul>
@@ -586,6 +561,12 @@
                             </p>
                         </div>
                     </div>
+                    <nav aria-label="..." style="text-align: center;position:relative;bottom: 30px;">
+                        <ul class="pager">
+                            <li @click="getAllCharts('charts', 'prev')" v-bind:class="{disabled: allSubGroupCurrentPage === 1}"><a href="javascript:void(0);">上一页</a></li>
+                            <li @click="getAllCharts('charts', 'next')" v-bind:class="{disabled: allSubGroupCurrentPage === allSubGroupPage}"><a href="javascript:void(0);">下一页</a></li>
+                        </ul>
+                    </nav>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
@@ -705,6 +686,12 @@
                             </p>
                         </div>
                     </div>
+                    <nav aria-label="..." style="text-align: center;position:relative;bottom: 30px;">
+                        <ul class="pager">
+                            <li @click="getAllCharts('charts', 'prev')" v-bind:class="{disabled: allSubGroupCurrentPage === 1}"><a href="javascript:void(0);">上一页</a></li>
+                            <li @click="getAllCharts('charts', 'next')" v-bind:class="{disabled: allSubGroupCurrentPage === allSubGroupPage}"><a href="javascript:void(0);">下一页</a></li>
+                        </ul>
+                    </nav>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>

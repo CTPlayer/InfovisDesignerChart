@@ -26,8 +26,12 @@
         delete from T_MY_CHARTS where Id = #{id}
     </delete>
 
-    <select id="selectList" parameterType="myCharts" resultType="MyCharts" databaseId="mysql">
+    <select id="selectList" parameterType="MyCharts" resultType="MyCharts" databaseId="mysql">
         select * from T_MY_CHARTS
+        <where>
+            <if test="chartType != 'text:subGroupOfImage'">CHART_TYPE != 'text:subGroupOfImage'</if>
+            <if test="chartType == 'text:subGroupOfImage'">CHART_TYPE = #{chartType}</if>
+        </where>
     </select>
 
     <select id="selectOne" parameterType="MyCharts" resultType="MyCharts" databaseId="mysql">

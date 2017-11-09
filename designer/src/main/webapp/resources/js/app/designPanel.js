@@ -384,7 +384,8 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                     scrollType: 'visible',
                     tableCurrentPage: {},
                     currentPage: 1,
-                    allSubGroupPage: 0
+                    allSubGroupPage: 0,
+                    allSubGroupCurrentPage: 1
                 },
                 methods: {
                     //背景样式切换
@@ -477,19 +478,39 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                         }
                     },
                     //获取所有图表和控件
-                    getAllCharts: function(tag){
-                        app.allSubGroupPage++;
-                        //先置空以防止vue就地复用
-                        if(tag == 'init'){
-                            app.myCharts = [];
-                            app.mySubGroup = [];
-                            app.allSubGroupPage = 1;
+                    getAllCharts: function(tag, act, init){
+                        var chartTypeParam = '';
+                        if(tag == 'subGroup'){
+                            chartTypeParam = 'text:subGroupOfImage';
+                        }
+                        if(act == 'prev'){
+                            if(app.allSubGroupCurrentPage <= 1){
+                                app.allSubGroupCurrentPage = 1;
+                                return;
+                            }else {
+                                app.allSubGroupCurrentPage--;
+                            }
+                        }else if(act == 'next'){
+                            if(app.allSubGroupCurrentPage >= app.allSubGroupPage){
+                                app.allSubGroupCurrentPage = app.allSubGroupPage;
+                                return;
+                            }else {
+                                app.allSubGroupCurrentPage++;
+                            }
+                        }
+                        if(init == 'init'){
+                            app.allSubGroupCurrentPage = 1;
                         }
                         this.currentSelectedIndex = -1;
                         this.isChartsLoad = 'block';
                         $.ajax({
                             type: 'POST',
                             url: 'selectChartInfo',
+                            data: {
+                                chartType: chartTypeParam,
+                                page: app.allSubGroupCurrentPage,
+                                pageSize: 10
+                            },
                             success: function(response){
                                 app.isChartsLoad = 'none';
                                 var myCharts = [];
@@ -509,6 +530,7 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                 }
                                 app.myCharts = myCharts;
                                 app.mySubGroup = mySubGroup;
+                                app.allSubGroupPage = response.totalPages;
                                 /**
                                  * 注册图表删除事件
                                  */
@@ -1062,7 +1084,6 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                             if (parseInt(data[i].isRealTime) == 0) {
                                                 if(data[i].chartType == 'table'){
                                                     app.scrollType = 'auto';
-                                                    // $("#"+containerIds[i]).html(data[i].jsCode);
                                                     app.tableCurrentPage[data[i].id] = 1;
                                                     renderMenu.renderTableInPanel(target,data[i],app);
 

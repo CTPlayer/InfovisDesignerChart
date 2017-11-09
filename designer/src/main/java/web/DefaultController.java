@@ -186,8 +186,8 @@ public class DefaultController {
     @RequestMapping("/selectList")
     @ResponseBody
     public Object selectList(MyPanel myPanel) throws Exception {
-        myPanel.setPageSize(myPanel.getPageSize());
-        myPanel.setPage(myPanel.getPage());
+//        myPanel.setPageSize(myPanel.getPageSize());
+//        myPanel.setPage(myPanel.getPage());
         Map<String, Object> respMap = new HashMap<>();
         respMap.put("data", myPanelService.queryAsList(myPanel));
         respMap.put("totalPage", myPanel.getTotalPage());
@@ -227,9 +227,11 @@ public class DefaultController {
     @RequestMapping("/updateChartInfo")
     @ResponseBody
     public Object updateChartInfo(@RequestHeader(required = false) String imgBase64, MyCharts myCharts) throws Exception {
-        Map map = TemplateUtil.genObjFormJson(myCharts.getJsCode(), Map.class);
-        map.put("image", imgBase64);
-        myCharts.setJsCode(TemplateUtil.genJsonStr4Obj(map));
+        if(!"".equals(imgBase64) && imgBase64 != null){
+            Map map = TemplateUtil.genObjFormJson(myCharts.getJsCode(), Map.class);
+            map.put("image", imgBase64);
+            myCharts.setJsCode(TemplateUtil.genJsonStr4Obj(map));
+        }
         return myChartsService.update(myCharts);
     }
 
@@ -265,10 +267,11 @@ public class DefaultController {
      */
     @RequestMapping("/selectChartInfo")
     @ResponseBody
-    public Object selectList(MyCharts myCharts) throws  Exception {
-        myCharts.setPaging(false);
+    public Object selectListOfCharts(MyCharts myCharts) throws  Exception {
+        myCharts.setPaging(true);
         Map<String, Object> respMap = new HashMap<>();
-        respMap.put("data",myChartsService.selectChartInfo(myCharts));
+        respMap.put("data",myChartsService.queryAsList(myCharts));
+        respMap.put("totalPages", myCharts.getTotalPage());
         return respMap;
     }
 

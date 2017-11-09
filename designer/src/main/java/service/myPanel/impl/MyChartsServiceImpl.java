@@ -44,7 +44,7 @@ public class MyChartsServiceImpl implements MyChartsService{
     }
 
     @Override
-    public List<MyCharts> selectChartInfo(MyCharts myCharts) throws Exception {
+    public List<MyCharts> queryAsList(MyCharts myCharts) throws Exception {
         myCharts.setStatmentId(NAMESPACE + ".selectList");
         return baseMapper.selectList(myCharts);
     }

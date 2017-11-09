@@ -177,6 +177,8 @@ require(['jquery','CanvasTag','CanvasTagOfImage','echarts','vue','domReady','the
                                         }else{
                                             var option = JSON.parse(data[i].jsCode);
                                             option.image = $("#"+app.widgets[i].id).parent().find("img")[0];
+                                            option.width = app.widgets[i].width.replace('px','');
+                                            option.height = app.widgets[i].height.replace('px','');
                                             CanvasTagOfImage().render(containerIds[i],"",option,false);
                                         }
                                         $("#" + containerIds[i]).niceScroll();

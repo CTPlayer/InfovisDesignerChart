@@ -3,6 +3,7 @@ package service.myPanel;
 import model.myPanel.MyCharts;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ct on 2016/8/30.
@@ -31,5 +32,5 @@ public interface MyChartsService {
     /**
      * 查询所有图表的相关信息
      */
-    List<MyCharts> selectChartInfo(MyCharts myCharts) throws Exception;
+    List<MyCharts> queryAsList(MyCharts myCharts) throws Exception;
 }
