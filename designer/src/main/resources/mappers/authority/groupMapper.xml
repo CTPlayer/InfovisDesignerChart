@@ -40,4 +40,19 @@
     <delete id="deleteGroupAuthorityByChart" parameterType="String" databaseId="oracle">
         DELETE FROM R_PRIVS WHERE REPORTER_ID = #{ reporterId } AND PRIVS_RESOURCE_ID = #{ privsResourceId }
     </delete>
+
+    <delete id="delete" parameterType="Group" databaseId="oracle">
+        delete FROM R_GROUP WHERE GROUP_ID = #{ groupId }
+    </delete>
+
+    <update id="update" parameterType="Group" databaseId="oracle">
+        update R_GROUP
+        <set>
+            <if test="descride != null">DESCRIDE = #{ descride },</if>
+            <if test="groupName != null">GROUP_NAME = #{ groupName },</if>
+        </set>
+        <where>
+            GROUP_ID = #{ groupId }
+        </where>
+    </update>
 </mapper>

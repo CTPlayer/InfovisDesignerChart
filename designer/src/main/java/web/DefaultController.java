@@ -180,6 +180,11 @@ public class DefaultController {
         return "panel/dashboard";
     }
 
+    @RequestMapping("/groupManage.page")
+    public Object groupManage() throws  Exception {
+        return "panel/groupManage";
+    }
+
     /**
      * 分页查询panel
      *
@@ -229,10 +234,12 @@ public class DefaultController {
      */
     @RequestMapping("/updateChartInfo")
     @ResponseBody
-    public Object updateChartInfo(@RequestHeader(required = false) String imgBase64, MyCharts myCharts) throws Exception {
-        Map map = TemplateUtil.genObjFormJson(myCharts.getJsCode(), Map.class);
-        map.put("image", imgBase64);
-        myCharts.setJsCode(TemplateUtil.genJsonStr4Obj(map));
+    public Object updateChartInfo(MyCharts myCharts, @RequestHeader(required = false) String imgBase64) throws Exception {
+        if(!"".equals(imgBase64) && imgBase64 != null){
+            Map map = TemplateUtil.genObjFormJson(myCharts.getJsCode(), Map.class);
+            map.put("image", imgBase64);
+            myCharts.setJsCode(TemplateUtil.genJsonStr4Obj(map));
+        }
         return myChartsService.update(myCharts);
     }
 

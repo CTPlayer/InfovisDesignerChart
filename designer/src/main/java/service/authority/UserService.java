@@ -75,7 +75,7 @@ public interface UserService {
      * @param group
      * @return
      */
-    int addNewGroup(Group group);
+    List<Group> addNewGroup(Group group);
 
     /**
      * 将用户添加到用户分组
@@ -129,4 +129,8 @@ public interface UserService {
     void updateGroupAuthorityOfChart(MyCharts myCharts) throws Exception;
 
     List<Map<String, Object>> deleteOneUser(User user);
+
+    List<Group> deleteOneGroup(Group group);
+
+    List<Group> updateGroup(Group group);
 }

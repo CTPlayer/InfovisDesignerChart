@@ -806,16 +806,9 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
 
                             $.ajax({
                                type: 'POST',
-                               // contentType: "application/json; charset=utf-8",
                                url: 'authority/updateChartGroup',
                                data: {
                                    'id': app.chartId,
-                                   // 'chartType': app.chartType,
-                                   // 'sqlRecordingId': app.sqlRecordingId,
-                                   // 'buildModel': JSON.stringify(app.builderModel),
-                                   // 'jsCode': jsCode,
-                                   // 'chartName': app.chartName,
-                                   // 'isRealTime' : app.dataSourcePicked,
                                    'authority': JSON.stringify(authority)
                                }
                             });

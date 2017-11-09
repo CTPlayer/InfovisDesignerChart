@@ -54,4 +54,8 @@ public interface GroupMapper {
     List<String> queryGroupIdFromPrivs(@Param("reporterId")String reporterId, @Param("write")int write);
 
     int deleteGroupAuthorityByChart(@Param("reporterId")String reporterId, @Param("privsResourceId")String privsResourceId);
+
+    int delete(Group group);
+
+    int update(Group group);
 }

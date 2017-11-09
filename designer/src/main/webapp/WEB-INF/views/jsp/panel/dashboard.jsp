@@ -29,7 +29,7 @@
                         <option value="15">15分钟</option>
                     </select>
                 </a>
-                <a href="#ex1" rel="modal:open">新增系统</a>
+                <a href="groupManage.page">新增系统</a>
                 <a href="query.page">报表系统</a>
                 <a href="authority/userManage.page">用户管理</a>
                 <a href="authority/logout">退出登录</a>

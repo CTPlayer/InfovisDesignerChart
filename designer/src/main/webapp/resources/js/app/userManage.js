@@ -71,11 +71,6 @@ require(['jquery', 'domReady', 'vue', 'validate',
                        }
                    });
                },
-               addNewGroup: function(){
-                   $("#addGroupModal").find(".modal-dialog").loading('toggle');
-                   $(".loading-overlay").css("z-index", "100002");
-                   $("#addGroupForm").submit();
-               },
                getGroupInfo: function(index){
                    this.groupIndex = index;
                    this.joinedGroup = [];
@@ -328,60 +323,11 @@ require(['jquery', 'domReady', 'vue', 'validate',
                            top.window.location.href="../login";
                        });
                        deferred.fail(function(){
+                           $("#updateUserModal").find(".modal-dialog").loading('toggle');
                            $("#updateUserModal").modal('toggle');
                            $.alert({
                                title: '提示',
                                content: '修改失败!'
-                           });
-                       })
-                   }
-               });
-               $("#addGroupForm").validate({
-                   errorElement : 'div',
-                   errorClass : 'warning-block',
-                   focusInvalid : true,
-                   ignore : "",
-                   rules : {
-                       groupName : {
-                           required : true,
-                           remote: {
-                               url: 'checkGroup',
-                               type: 'POST',
-                               dataType: 'json',
-                               data: {
-                                   groupName: function() {
-                                       return $("input[name='groupName']").val();
-                                   }
-                               }
-                           }
-                       }
-                   },
-                   messages : {
-                       groupName : {
-                           required : "分组名为必填项",
-                           remote: "此名称已被使用"
-                       }
-                   },
-                   submitHandler : function(form){
-                       var deferred = $.ajax({
-                           type: 'POST',
-                           url: 'addNewGroup',
-                           data : $(form).serialize()
-                       });
-                       deferred.done(function(data){
-                           $("#addGroupModal").find(".modal-dialog").loading('toggle');
-                           $(form)[0].reset();
-                           $("#addGroupModal").modal('toggle');
-                           $.dialog({
-                               title: '提示',
-                               content: '添加成功!'
-                           });
-                       });
-                       deferred.fail(function(){
-                           $("#addGroupModal").modal('toggle');
-                           $.dialog({
-                               title: '提示',
-                               content: '添加失败!'
                            });
                        })
                    }

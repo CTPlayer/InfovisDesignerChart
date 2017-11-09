@@ -121,14 +121,14 @@ public class MyChartsServiceImpl implements MyChartsService{
         User currentUser = (User)SecurityUtils.getSubject().getPrincipal();
 
         User paramUser = userRealmMapper.queryAsObject(currentUser.getUserName());
-        paramUser.setUserId("US"+currentUser.getUserId());
         //当前用户所在的用户组
         List<String> groupIds = groupMapper.queryGroupIdFromRelation(paramUser.getUserId());
 
+        paramUser.setUserId("US"+currentUser.getUserId());
         List<String> reporterIds1 = userRealmMapper.queryReporterIdByUser(paramUser);
         reporterIdSet.addAll(reporterIds1);
         for(String groupId : groupIds){
-            List<String> reporterIds2 = userRealmMapper.queryReporterIdByGroupId(groupId);
+            List<String> reporterIds2 = userRealmMapper.queryReporterIdByGroupId("GR"+groupId);
             reporterIdSet.addAll(reporterIds2);
         }
 

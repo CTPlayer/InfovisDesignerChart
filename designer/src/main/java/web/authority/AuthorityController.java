@@ -165,4 +165,16 @@ public class AuthorityController {
     public Object deleteOneUser(User user){
         return userService.deleteOneUser(user);
     }
+
+    @RequestMapping("/deleteOneGroup")
+    @ResponseBody
+    public Object deleteOneGroup(Group group){
+        return userService.deleteOneGroup(group);
+    }
+
+    @RequestMapping("/updateGroup")
+    @ResponseBody
+    public Object updateGroup(Group group){
+        return userService.updateGroup(group);
+    }
 }

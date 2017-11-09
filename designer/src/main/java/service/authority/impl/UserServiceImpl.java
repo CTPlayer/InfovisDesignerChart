@@ -182,8 +182,12 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public int addNewGroup(Group group) {
-        return groupMapper.addGroup(group);
+    public List<Group> addNewGroup(Group group) {
+        if("".equals(group.getDescride()) || group.getDescride() == null){
+            group.setDescride("未添加描述");
+        }
+        groupMapper.addGroup(group);
+        return groupMapper.query();
     }
 
     @Override
@@ -245,14 +249,15 @@ public class UserServiceImpl implements UserService{
         User currentUser = (User)SecurityUtils.getSubject().getPrincipal();
 
         User paramUser = userRealmMapper.queryAsObject(currentUser.getUserName());
-        paramUser.setUserId("US"+currentUser.getUserId());
         //当前用户所在的用户组
         List<String> groupIds = groupMapper.queryGroupIdFromRelation(paramUser.getUserId());
+        System.out.println("所在用户组："+groupIds);
 
+        paramUser.setUserId("US"+currentUser.getUserId());
         List<String> reporterIds1 = userRealmMapper.queryReporterIdOfWriteByUser(paramUser.getUserId());
         reporterIdSet.addAll(reporterIds1);
         for(String groupId : groupIds){
-            List<String> reporterIds2 = userRealmMapper.queryReporterIdOfWriteByGroup(groupId);
+            List<String> reporterIds2 = userRealmMapper.queryReporterIdOfWriteByGroup("GR"+groupId);
             reporterIdSet.addAll(reporterIds2);
         }
         return reporterIdSet;
@@ -329,5 +334,17 @@ public class UserServiceImpl implements UserService{
     public List<Map<String, Object>> deleteOneUser(User user) {
         userRealmMapper.deleteOneUser(user);
         return findAllUsersInfo();
+    }
+
+    @Override
+    public List<Group> deleteOneGroup(Group group) {
+        groupMapper.delete(group);
+        return groupMapper.query();
+    }
+
+    @Override
+    public List<Group> updateGroup(Group group) {
+        groupMapper.update(group);
+        return groupMapper.query();
     }
 }

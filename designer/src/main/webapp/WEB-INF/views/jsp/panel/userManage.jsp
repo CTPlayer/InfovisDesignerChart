@@ -111,7 +111,6 @@
                                 <div class="title" style="width: 100%;font-size: 23px;">系统用户
                                     <shiro:hasRole name="admin">
                                         <a href="#"  role="button" data-toggle="modal" data-target="#addUserModal"><button type="button" class="btn btn-danger">新增用户</button></a>
-                                        <a href="#"  role="button" data-toggle="modal" data-target="#addGroupModal"><button type="button" class="btn btn-warning">新增用户组</button></a>
                                     </shiro:hasRole>
                                     <a href="#"  role="button" data-toggle="modal" data-target="#updateUserModal"><button type="button" class="btn btn-success">修改密码</button></a>
                                 </div>
@@ -242,36 +241,6 @@
             </div>
         </div>
     </div>
-    <div class="modal fade modal-success" id="addGroupModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">新增用户组</h4>
-                </div>
-                <div class="modal-body">
-                    <form class="form-horizontal" id="addGroupForm" method="post">
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">分组名称</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" name="groupName">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">描述</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" name="descride">
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-success" @click="addNewGroup()">确认</button>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="modal fade modal-success" id="groupManageModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -314,6 +283,9 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-dismiss="modal">确认</button>
                 </div>
             </div>
         </div>
