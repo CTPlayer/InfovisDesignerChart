@@ -37,8 +37,28 @@
         delete from R_GROUP_RELATION where c_user_id = #{ userId,jdbcType=VARCHAR } AND group_id = #{ groupId,jdbcType=VARCHAR }
     </delete>
 
+    <delete id="deleteRelationByGroup" parameterType="Group" databaseId="oracle">
+        delete from R_GROUP_RELATION where group_id = #{ groupId }
+    </delete>
+
+    <delete id="deleteRelationByUser" parameterType="User" databaseId="oracle">
+        delete from R_GROUP_RELATION where c_user_id = #{ userId }
+    </delete>
+
     <delete id="deleteGroupAuthorityByChart" parameterType="String" databaseId="oracle">
         DELETE FROM R_PRIVS WHERE REPORTER_ID = #{ reporterId } AND PRIVS_RESOURCE_ID = #{ privsResourceId }
+    </delete>
+
+    <delete id="deletePrivsByChart" parameterType="String" databaseId="oracle">
+        DELETE FROM R_PRIVS WHERE REPORTER_ID = #{ reporterId }
+    </delete>
+
+    <delete id="deletePrivsByGroup" parameterType="Group" databaseId="oracle">
+        DELETE FROM R_PRIVS WHERE PRIVS_RESOURCE_ID = #{ groupId }
+    </delete>
+
+    <delete id="deletePrivsByUser" parameterType="User" databaseId="oracle">
+        DELETE FROM R_PRIVS WHERE PRIVS_RESOURCE_ID = #{ userId }
     </delete>
 
     <delete id="delete" parameterType="Group" databaseId="oracle">

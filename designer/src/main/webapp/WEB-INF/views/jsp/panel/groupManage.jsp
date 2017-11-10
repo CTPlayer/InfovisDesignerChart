@@ -184,7 +184,7 @@
                     <form class="form-horizontal" id="updateGroupForm" method="post">
                         <input type="hidden" class="form-control" name="groupId" v-model="updateGroupId">
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">分组名称</label>
+                            <label class="col-sm-2 control-label">系统名称</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" name="groupName" v-model="updateGroupName">
                             </div>

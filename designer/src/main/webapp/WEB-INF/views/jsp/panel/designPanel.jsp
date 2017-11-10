@@ -261,6 +261,7 @@
 
         td {
             height: auto;
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
         }
 
         .tableexport-caption {

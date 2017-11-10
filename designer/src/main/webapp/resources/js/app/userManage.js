@@ -29,10 +29,10 @@ require(['jquery', 'domReady', 'vue', 'validate',
            el: '#app',
            data: {
                userInfo: [],
-               userName: '',
-               password: '',
+               // userName: '',
+               // password: '',
                userType: 0,
-               describe: '',
+               // describe: '',
                noJoinGroup: [],
                joinedGroup: [],
                isShow: 'none',
@@ -257,8 +257,8 @@ require(['jquery', 'domReady', 'vue', 'validate',
                        deferred.done(function(data){
                            $("#addUserModal").find(".modal-dialog").loading('toggle');
                            $(form)[0].reset();
-                           app.userInfo = data;
                            $("#addUserModal").modal('toggle');
+                           app.userInfo = data;
                        })
                    }
                });

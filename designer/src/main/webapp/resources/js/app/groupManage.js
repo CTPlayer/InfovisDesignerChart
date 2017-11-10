@@ -154,6 +154,7 @@ require(['jquery', 'domReady', 'vue', 'validate',
                                 title: '提示',
                                 content: '添加成功!'
                             });
+                            app.groups = data;
                         });
                         deferred.fail(function(){
                             $("#addGroupModal").find(".modal-dialog").loading('toggle');

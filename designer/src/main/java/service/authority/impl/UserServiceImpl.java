@@ -247,11 +247,10 @@ public class UserServiceImpl implements UserService{
     public Set<String> getAllChartsOfWriteByUser() {
         HashSet<String> reporterIdSet = new HashSet<>();
         User currentUser = (User)SecurityUtils.getSubject().getPrincipal();
-
+        //当前用户
         User paramUser = userRealmMapper.queryAsObject(currentUser.getUserName());
         //当前用户所在的用户组
         List<String> groupIds = groupMapper.queryGroupIdFromRelation(paramUser.getUserId());
-        System.out.println("所在用户组："+groupIds);
 
         paramUser.setUserId("US"+currentUser.getUserId());
         List<String> reporterIds1 = userRealmMapper.queryReporterIdOfWriteByUser(paramUser.getUserId());
@@ -333,12 +332,20 @@ public class UserServiceImpl implements UserService{
     @Override
     public List<Map<String, Object>> deleteOneUser(User user) {
         userRealmMapper.deleteOneUser(user);
+        groupMapper.deleteRelationByUser(user);
+        String userId = user.getUserId();
+        user.setUserId("US"+userId);
+        groupMapper.deletePrivsByUser(user);
         return findAllUsersInfo();
     }
 
     @Override
     public List<Group> deleteOneGroup(Group group) {
         groupMapper.delete(group);
+        groupMapper.deleteRelationByGroup(group);
+        String groupId = group.getGroupId();
+        group.setGroupId("GR"+groupId);
+        groupMapper.deletePrivsByGroup(group);
         return groupMapper.query();
     }
 

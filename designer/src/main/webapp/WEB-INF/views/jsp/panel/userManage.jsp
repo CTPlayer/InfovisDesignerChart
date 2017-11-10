@@ -161,13 +161,13 @@
                         <div class="form-group">
                             <label class="col-sm-2 control-label">用户名</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="userName" v-model="userName">
+                                <input type="text" class="form-control" name="userName">
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-2 control-label">密码</label>
                             <div class="col-sm-10">
-                                <input type="password" id="password" class="form-control" name="password" v-model="password">
+                                <input type="password" id="password" class="form-control" name="password">
                             </div>
                         </div>
                         <div class="form-group">
@@ -193,7 +193,7 @@
                         <div class="form-group">
                             <label class="col-sm-2 control-label">描述</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="descride" v-model="describe">
+                                <input type="text" class="form-control" name="descride">
                             </div>
                         </div>
                     </form>

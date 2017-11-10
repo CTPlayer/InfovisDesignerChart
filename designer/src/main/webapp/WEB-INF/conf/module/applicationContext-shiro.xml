@@ -55,6 +55,7 @@
                 /dataAnalysis.page=authc
                 /sqlClient.page=authc
                 /index.page=authc
+                /groupManage.page=authc
                 /selectList=authc
                 /deleteOne=authc
                 /addCharts=authc

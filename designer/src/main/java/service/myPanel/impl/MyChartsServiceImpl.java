@@ -70,7 +70,9 @@ public class MyChartsServiceImpl implements MyChartsService{
                 paramList.add(map);
             }
             //添加超级用户对于该表的权限
-            userRealmMapper.insertAuthorityForBatch(paramList);
+            if(paramList.size() > 0) {
+                userRealmMapper.insertAuthorityForBatch(paramList);
+            }
             paramList.clear();
             for(User user : admins){
                 Map<String, Object> map = new HashMap<>();
@@ -80,7 +82,9 @@ public class MyChartsServiceImpl implements MyChartsService{
                 map.put("write", 1);
                 paramList.add(map);
             }
-            userRealmMapper.insertAuthorityForBatch(paramList);
+            if(paramList.size() > 0) {
+                userRealmMapper.insertAuthorityForBatch(paramList);
+            }
             //添加有读权限分组
             for(String groupId : groupsForRead){
                 userRealmMapper.insertAuthority(Integer.toString(reporterId),"GR"+groupId,1,0);
@@ -106,7 +110,8 @@ public class MyChartsServiceImpl implements MyChartsService{
     @Override
     public int delete(MyCharts myCharts) throws Exception {
         myCharts.setStatmentId(NAMESPACE + ".delete");
-        return baseMapper.delete(myCharts);
+        baseMapper.delete(myCharts);
+        return groupMapper.deletePrivsByChart(myCharts.getId());
     }
 
     @Override
@@ -120,6 +125,7 @@ public class MyChartsServiceImpl implements MyChartsService{
         HashSet<String> reporterIdSet = new HashSet<>();
         User currentUser = (User)SecurityUtils.getSubject().getPrincipal();
 
+        //当前用户
         User paramUser = userRealmMapper.queryAsObject(currentUser.getUserName());
         //当前用户所在的用户组
         List<String> groupIds = groupMapper.queryGroupIdFromRelation(paramUser.getUserId());
@@ -147,10 +153,6 @@ public class MyChartsServiceImpl implements MyChartsService{
             }
         }
 
-//        for(String reporterId : reporterIdSet){
-//            myCharts.setId(reporterId);
-//            result.add(baseMapper.selectOne(myCharts));
-//        }
         return result;
     }
 }

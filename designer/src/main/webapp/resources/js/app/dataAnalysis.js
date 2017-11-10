@@ -350,9 +350,10 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                                 for(var item in this.filter){
                                     filterText.push(this.filter[item].targetNodeText);
                                 }
+                                console.log(this.corner);
                                 if($.inArray(targetNodeText,filterText) == -1 && ($.inArray(targetNodeText,this.xAxis) >= 0 ||
-                                    $.inArray(targetNodeText,this.yAxis) >= 0 || $.inArray(targetNodeText,this.color) >= 0 ||
-                                    $.inArray(targetNodeText,this.corner) >= 0)){
+                                    $.inArray(targetNodeText,this.yAxis) >= 0 || targetNodeText == this.color[0].targetNodeText ||
+                                    targetNodeText == this.corner[0].targetNodeText)){
                                     this.filter.push({targetNodeText: targetNodeText, dragDataType: dragDataType});
                                     app.$nextTick(function(){
                                         var height = target.height();

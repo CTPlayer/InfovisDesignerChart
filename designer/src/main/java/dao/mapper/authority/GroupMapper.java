@@ -58,4 +58,14 @@ public interface GroupMapper {
     int delete(Group group);
 
     int update(Group group);
+
+    int deletePrivsByChart(@Param("reporterId")String reporterId);
+
+    int deleteRelationByGroup(Group group);
+
+    int deletePrivsByGroup(Group group);
+
+    int deleteRelationByUser(User user);
+
+    int deletePrivsByUser(User user);
 }
