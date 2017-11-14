@@ -60,6 +60,10 @@
         tr:first-child {
             display: none;
         }
+
+        td {
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
     </style>
 </head>
 
