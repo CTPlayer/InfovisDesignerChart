@@ -462,7 +462,7 @@
                             <td>用户权限</td>
                             <td style="height: 70px;">
                                 普通用户：
-                                <select class="form-control" v-model="authorityForConsumer">
+                                <select class="form-control" v-model="authorityForConsumer" style="width: 45%;">
                                     <option value="none">不可见</option>
                                     <option value="read">可读权限</option>
                                     <option value="write">可写权限</option>
@@ -470,7 +470,7 @@
                             </td>
                             <td>
                                 超级用户：
-                                <select class="form-control" v-model="authorityForAdmin">
+                                <select class="form-control" v-model="authorityForAdmin" style="width: 45%;">
                                     <option value="write">可写权限</option>
                                 </select>
                             </td>
