@@ -376,7 +376,7 @@ public class DataBaseMetadataHelper {
      * @return
      * @throws Exception
      */
-    public ArrayList prepareDataSetForTable(JdbcProps jdbcProps, List<String> xAxis) throws Exception {
+    public ArrayList prepareDataSetForTable(JdbcProps jdbcProps) throws Exception {
         Connection conn = null;
         PreparedStatement st = null;
         ResultSet cRs = null;
@@ -386,28 +386,28 @@ public class DataBaseMetadataHelper {
         dynamicDataSource.selectDataSource(jdbcProps.getUrl(), jdbcProps.getUsername(), jdbcProps.getPassword());
         conn = dynamicDataSource.getConnection();
         String sql = jdbcProps.getSql();
-        if(jdbcProps.isFilterOrNo() && sql.contains("*")){
-            sql = sql + " where";
-            List<FilterModel> filterModels = jdbcProps.getFilterModels();
-            for(int i=0;i<filterModels.size();i++){
-                sql = SqlDialetHelper.getFilterSql(sql, filterModels.get(i).getColumn(), filterModels.get(i).getColumnType(), filterModels.get(i).getValue(), filterModels.get(i).getMin(), filterModels.get(i).getMax());
-                if(i < filterModels.size() -1){
-                    sql = sql + " and";
-                }
-            }
-        }
+//        if(jdbcProps.isFilterOrNo() && sql.contains("*")){
+//            sql = sql + " where";
+//            List<FilterModel> filterModels = jdbcProps.getFilterModels();
+//            for(int i=0;i<filterModels.size();i++){
+//                sql = SqlDialetHelper.getFilterSql(sql, filterModels.get(i).getColumn(), filterModels.get(i).getColumnType(), filterModels.get(i).getValue(), filterModels.get(i).getMin(), filterModels.get(i).getMax());
+//                if(i < filterModels.size() -1){
+//                    sql = sql + " and";
+//                }
+//            }
+//        }
 
         //此部分为临时添加，后期需改进
-        if(!sql.contains("group") && xAxis.size() > 0 && sql.contains("*")){
-            sql = sql + " group by ";
-            for(int i=0;i<xAxis.size();i++){
-                if(i == 0){
-                    sql = sql + xAxis.get(i);
-                }else {
-                    sql = sql + "," + xAxis.get(i);
-                }
-            }
-        }
+//        if(!sql.contains("group") && xAxis.size() > 0 && sql.contains("*")){
+//            sql = sql + " group by ";
+//            for(int i=0;i<xAxis.size();i++){
+//                if(i == 0){
+//                    sql = sql + xAxis.get(i);
+//                }else {
+//                    sql = sql + "," + xAxis.get(i);
+//                }
+//            }
+//        }
 
         if(jdbcProps.getPagingModel().getSidx() != null && !"".equals(jdbcProps.getPagingModel().getSidx())){
             sql = SqlDialetHelper.getOrderSql(sql, jdbcProps.getPagingModel().getSidx(), jdbcProps.getPagingModel().getSord());

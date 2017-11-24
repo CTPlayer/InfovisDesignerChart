@@ -114,7 +114,7 @@ require(['jquery', 'domReady', 'vue', 'echarts','commonModule','ztree','validate
                 chartName: '',
                 sqlRecordingId: 0,
                 startTime: '',
-                selectedPeriod: '',
+                selectedPeriod: 'month',
                 isShowJobSetting: true,
                 isShowUpdateCheck: true,
                 dataSourcePicked: 0,

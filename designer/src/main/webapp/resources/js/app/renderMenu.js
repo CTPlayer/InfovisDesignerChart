@@ -15,8 +15,8 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
                 '<span style="display:none;">' +
                 '<span id="chartTitle">'+chartName+'</span>' +
                 '<a href="#"><i class="glyphicon glyphicon-remove" style="color: white"></i></a>' +
-                '<a href="#" data-toggle="modal" data-target="#optionModal"><i class="glyphicon glyphicon-pencil" style="color: white"></i></a>' +
-                '<a href="#"><i class="fa fa-cog" style="color: white"></i></a>' +
+                '<a href="#" data-toggle="modal" data-target="#optionModal"><i class="fa fa-cog" style="color: white"></i></a>' +
+                '<a href="#"><i class="glyphicon glyphicon-pencil" style="color: white"></i></a>' +
                 '</span>' +
                 '</div>');
         }else if(charttype.indexOf("text") >= 0){
@@ -24,7 +24,7 @@ define(['jquery', 'formatData', 'zrender', 'CanvasTag', 'CanvasTagOfImage', 'ech
                 '<span style="display:none;">' +
                 '<span id="chartTitle">'+chartName+'</span>' +
                 '<a href="#"><i class="glyphicon glyphicon-remove" style="color: white"></i></a>' +
-                '<a href="#" data-toggle="modal" data-target="#textOptionModal"><i class="glyphicon glyphicon-pencil" style="color: white"></i></a>' +
+                '<a href="#" data-toggle="modal" data-target="#textOptionModal"><i class="fa fa-cog" style="color: white"></i></a>' +
                 '</span>' +
                 '</div>');
         }else if(charttype == 'table'){

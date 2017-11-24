@@ -178,7 +178,7 @@
                     </a>
                 </div>
                 <div class="col-lg-1">
-                    <a href="#" data-toggle="modal" data-target="#addChartModal"><button class="btn btn-info saveChartInfo" type="submit"><span class="glyphicon glyphicon-floppy-saved"></span> 保存</button></a>
+                    <a href="#" data-toggle="modal" data-target="#addChartModal" ><button class="btn btn-info saveChartInfo" type="submit"><span class="glyphicon glyphicon-floppy-saved"></span> 保存</button></a>
                 </div>
             </div>
             <div class="row content-container">

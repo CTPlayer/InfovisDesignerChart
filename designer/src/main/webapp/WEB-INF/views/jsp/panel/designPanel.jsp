@@ -350,9 +350,11 @@
                             </a>
                         </div>
                         <ul class="nav navbar-nav">
+                            <shiro:hasRole name="admin">
                             <li class="panel-default" @click="toggleSecondMenu(0)" v-bind:class="{active: 0 === currentActiveIndex}">
                                 <a href="dataAnalysis.page?exportId=${exportId}"><span class="icon fa fa-plus"></span><span class="title">新建图表</span></a>
                             </li>
+                            </shiro:hasRole>
                             <li class="panel-default" @click="toggleSecondMenu(1);getAllCharts('init')" v-bind:class="{active: 1 === currentActiveIndex}">
                                 <a href="#" data-toggle="modal" data-target="#myChart"><span class="icon fa fa-area-chart"></span><span class="title">添加已有图表</span></a>
                             </li>

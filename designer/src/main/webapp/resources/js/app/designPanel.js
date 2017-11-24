@@ -83,9 +83,11 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             tooltipFontSize: '',
                             tooltipFontWeight: '',
                             tooltipFontColor: '',
-                            backgroundOpacity: ''
+                            backgroundOpacity: '',
                             // xRotate: '',
                             // yAxisContent: ''
+                            legendLeft: 195,
+                            legendTop: ''
                         }
                     }
                 },
@@ -163,6 +165,8 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                 backgroundOpacity: JSON.stringify(this.chartOption.backgroundColor).split(",")[3].replace(')"','')*100,
                                 // xRotate: this.chartOption.xAxis[0].axisLabel.rotate ? this.chartOption.xAxis[0].axisLabel.rotate : 0,
                                 // yAxisContent: ''
+                                legendLeft: this.chartOption.legend[0].left,
+                                legendTop: this.chartOption.legend[0].top
                             };
                             this.optionSetting = settings;
                         }
@@ -202,6 +206,8 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             }
                             // this.chartOption.xAxis[0].axisLabel.rotate = this.optionSetting.xRotate;
                             // this.chartOption.yAxis[0].name = this.optionSetting.yAxisContent;
+                            this.chartOption.legend[0].left = this.optionSetting.legendLeft;
+                            this.chartOption.legend[0].top = this.optionSetting.legendTop;
                             if(this.myChart != ''){
                                 this.myChart.setOption(this.option,true);
                             }
@@ -759,11 +765,15 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                             domOption = instance.getOption();
                         }
                         if(this.chartType.indexOf('subGroupOfImage') >= 0 || this.chartType.indexOf('chart') >= 0){
+                            var imageBase64 = '';
+                            if(this.chartType.indexOf('subGroupOfImage') >= 0){
+                                imageBase64 = domOption.image.currentSrc.split(',')[1];
+                            }
                             $.ajax({
                                 type: 'POST',
                                 url: 'updateChartInfo',
                                 headers: {
-                                    imgBase64: domOption.image.currentSrc.split(',')[1]
+                                    imgBase64: imageBase64
                                 },
                                 data: {
                                     'id': $("#"+this.domId).attr("chartId"),
@@ -1158,9 +1168,9 @@ require(['jquery','domReady','vue','CanvasTagOfImage','renderMenu','echarts','in
                                                 renderMenu.renderTableInPanel($("#"+app.order),data,app);
                                             }else {
                                                 echarts.init($("#"+app.order)[0]).setOption(JSON.parse(data.jsCode));
-                                                setTimeout(function(){
+                                                // setTimeout(function(){
                                                     renderMenu.renderMenu($("#"+app.order),data.chartName,app);
-                                                }, 0);
+                                                // }, 0);
                                             }
                                         }else if(parseInt(data.isRealTime) == 1){
                                             $.ajax({

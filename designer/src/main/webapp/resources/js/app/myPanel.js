@@ -3,30 +3,53 @@ require.config({
     paths: {
         "jquery": "lib/bootstrap/js/jquery-2.1.4.min",
         "bootstrap": "lib/bootstrap/js/bootstrap.min",
-        "validate": "lib/jquery.validate.min"
+        "validate": "lib/jquery.validate.min",
+        "jquery-confirm": "lib/confirm/jquery-confirm.min",
+        "confirmModal": "lib/confirm/confirm-bootstrap"
     },
     shim : {
-        "bootstrap" : { "deps" :['jquery'] }
+        "bootstrap" : { "deps" :['jquery'] },
+        "jquery-confirm" : { "deps" :['jquery', 'bootstrap'] },
+        "confirmModal" : { "deps" :['jquery'] }
     },
     waitSeconds: 30
 });
 
 //panel删除函数
 function dropMyPanel(exportId,obj){
-    $.ajax({
-        type: 'POST',
-        url: 'deleteOne',
-        data: 'exportId='+exportId,
-        success: function(){
-            $(obj).parent().parent().parent().remove();
-        },
-        error: function(){
-            alert("删除出错，请重试");
+    $.confirm({
+        title: '警告!',
+        content: '确认删除此面板？',
+        buttons: {
+            '确认': function(){
+                $.ajax({
+                    type: 'POST',
+                    url: 'deleteOne',
+                    data: 'exportId='+exportId,
+                    success: function(){
+                        $(obj).parent().parent().parent().remove();
+                        $.dialog({
+                            title: '提示',
+                            content: '操作成功！'
+                        });
+                    },
+                    error: function(){
+                        alert("删除出错，请重试");
+                        $.dialog({
+                            title: '提示',
+                            content: '操作失败！'
+                        });
+                    }
+                });
+            },
+            '取消': function(){
+
+            }
         }
-    })
+    });
 }
 
-require(['jquery'], function ($) {
+require(['jquery','jquery-confirm', 'confirmModal'], function ($) {
     var currentPage = 1;
     $(function() {
         onScroll();
