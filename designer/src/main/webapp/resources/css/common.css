@@ -22,7 +22,7 @@ body {
     height: 96px;
     position: relative;
     color: white;
-    background-color: #638dfb;
+    background-color: #016cb8;
 }
 
 .titleContent .logo {
@@ -162,7 +162,7 @@ body {
 }
 
 .leftContent .title_bg{
-    background-color: #638dfb;
+    background-color: #2b8bd0;
     width: 480px;
     height: 40px;
     border-top-left-radius: 15px;
@@ -198,15 +198,15 @@ body {
 .icon {
     position: relative;
     display: inline-block;
-    width: 94px;
-    height: 94px;
-    padding: 8px;
-    margin-top: 10px;
+    width: 100px;
+    height: 100px;
+    padding: 5px;
+    margin-top: 1px;
 }
 
 .icon .icon_back {
-    width: 94px;
-    height: 94px;
+    width: 100px;
+    height: 100px;
     display: inline-block;
     border-radius: 18px;
     cursor:pointer;
@@ -264,6 +264,7 @@ body {
     width: 490px;
     height: 944px;
     margin-left:10px;
+    margin-top: -12px;
 }
 
 .rightContent .waring_type_line{
@@ -276,7 +277,7 @@ body {
 }
 
 .rightContent .title_bg{
-    background-color: #638dfb;
+    background-color: #2b8bd0;
     width: 490px;
     height: 40px;
     border-top-left-radius: 15px;
@@ -332,6 +333,10 @@ body {
     margin-top: 37px;
 }
 
+.waring_type_line_chart_block .title_bg{
+    margin-top: 50px;
+}
+
 #waring_type_line_chart {
     width: 510px;
     height: 340px;
@@ -339,14 +344,14 @@ body {
 
 #ex1 input{
     background-color: white;
-    border:1px solid #0062b2;
+    border:1px solid #2b8bd0;
     width:280px;
     height: 25px;
 }
 
 #ex1 button{
     margin-left:10px;
-    background-color: #0062b2;
+    background-color: #2b8bd0;
     color: white;
     padding: 8px 16px 8px 16px;
     font-size: 12px;
@@ -355,7 +360,7 @@ body {
 }
 
 #ex1 button:hover {
-    background-color: #56aaef;
+    background-color: #2b8bd0;
 }
 
 .no_data{
@@ -392,7 +397,7 @@ table.table th{
 }
 
 .headerTable table thead{
-    background-color: #638dfb;
+    background-color: #2b8bd0;
 }
 
 .headerTable table thead th{
@@ -401,8 +406,7 @@ table.table th{
 }
 
 .detailTable{
-    margin-top: -230px;
-    height: 900px;
+    margin-top: -20px;
 }
 
 
@@ -422,7 +426,3 @@ table.table th{
     background-color: #FFFFFF;
     cursor: pointer;
 }
-
-
-
-

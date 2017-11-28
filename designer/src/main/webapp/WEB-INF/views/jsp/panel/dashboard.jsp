@@ -14,7 +14,7 @@
         <div class="titleContent">
              <span class="logo">
                  <img src="resources/img/monitor/taiping-logo.png">
-             </span>8
+             </span>
             <span class="title">太平监控大屏展示系统</span>
             <span id="datetime"></span>
             <div class="dropdown">

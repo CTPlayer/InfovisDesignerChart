@@ -5,7 +5,7 @@
 <html>
 
 <head>
-    <title>Infovis-Designer</title>
+    <title>太平监控报表系统</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Fonts -->
@@ -22,12 +22,12 @@
 
 <body class="flat-blue login-page">
     <div class="container" id="app">
-        <div class="login-box">
+        <div class="login-box" style="margin-left:500px;">
             <div>
-                <div class="login-form row">
+                <div class="login-form row" >
                     <div class="col-sm-12 text-center login-header">
-                        <i class="login-logo fa fa-connectdevelop fa-5x"></i>
-                        <h4 class="login-title">Infovis-designer</h4>
+                       
+                     <h2 class="login-title">太平监控报表系统</h2>
                     </div>
                     <div class="col-sm-12">
                         <div class="login-body">
@@ -39,10 +39,10 @@
                             <form action="login" method="post">
                                 <span style="color: red">${ error_message }</span>
                                 <div class="control">
-                                    <input type="text" class="form-control" name="userName" placeholder="请填写账号"/>
+                                    账号:<input type="text" class="form-control" style="float:left" name="userName" placeholder="请填写账号"/>
                                 </div>
                                 <div class="control">
-                                    <input type="password" class="form-control" name="password" placeholder="请填写密码"/>
+                                    密码:<input type="password" class="form-control" name="password" placeholder="请填写密码"/>
                                 </div>
                                 <div class="login-button text-center">
                                     <input type="submit" class="btn btn-primary" value="登录">

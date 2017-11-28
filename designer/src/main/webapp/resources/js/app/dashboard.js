@@ -25,7 +25,7 @@ require(['jquery', 'echarts', 'clolck','domReady','modal'],
                 clolck.digitalClock('datetime');
             }, 1000);
 
-            var apiURL = "http://localhost:8080/DashBoard/";
+            var apiURL = "http://10.211.55.2:8080/DashBoard/";
             // var uname = 'admin';
             var uname = $("#userName").text().trim();
 
@@ -43,6 +43,33 @@ require(['jquery', 'echarts', 'clolck','domReady','modal'],
 
             var appWarnDetail = function (systemId) {
                 alert(systemId);
+            };
+
+            var initFoldLineData = function(time){
+				jsonpAjaxCall('foldline?uname='+uname+'&time='+time,function (response) {
+                    line_option.xAxis[0].data = [];
+                    line_option.series[0].data = [];
+                    if(response.result && response.result.length >0){
+                        $('.waring_type_line_chart_block .no_data').hide();
+                        $.each(response.result,function (index,item) {
+                            line_option.xAxis[0].data.push(item.alarmtime);
+                            line_option.series[0].data.push(item.alarmnum);
+                        });
+                        myChart3.dispose();
+                        myChart3 = echarts.init(document.getElementById('waring_type_line_chart'));
+
+                        myChart3.setOption(line_option);
+                        console.log(myChart3);
+                    }else{
+                        $("#waring_type_line_chart").html("");
+                        $('.waring_type_line_chart_block .no_data').show();
+                        $('.waring_type_line_chart_block .response_error_data').hide();
+                    }
+                },function () {
+                    $("#waring_type_line_chart").html("");
+                    $('.waring_type_line_chart_block .no_data').hide();
+                    $('.waring_type_line_chart_block .response_error_data').show();
+                });
             }
 
             var initData = function () {
@@ -132,6 +159,8 @@ require(['jquery', 'echarts', 'clolck','domReady','modal'],
                             option.xAxis[0].data.push(item.alertgroup);
                             option.series[0].data.push(item.alarmnum);
                         });
+                        myChart.dispose();
+                        myChart = echarts.init(document.getElementById('waring_type_column_chart'));
                         myChart.setOption(option);
                     }else{
                         $('#waring_type_column_chart').html("");
@@ -142,27 +171,6 @@ require(['jquery', 'echarts', 'clolck','domReady','modal'],
                     $('#waring_type_column_chart').html("");
                     $('.waring_type_column .no_data').hide();
                     $('.waring_type_column .response_error_data').show();
-                });
-
-                jsonpAjaxCall('foldline?uname='+uname+'&time=1',function (response) {
-                    line_option.xAxis[0].data = [];
-                    line_option.series[0].data = [];
-                    if(response.result && response.result.length >0){
-                        $('.waring_type_line_chart_block .no_data').hide();
-                        $.each(response.result,function (index,item) {
-                            line_option.xAxis[0].data.push(item.alarmtime);
-                            line_option.series[0].data.push(item.alarmnum);
-                        });
-                        myChart3.setOption(line_option);
-                    }else{
-                        $("#waring_type_line_chart").html("");
-                        $('.waring_type_line_chart_block .no_data').show();
-                        $('.waring_type_line_chart_block .response_error_data').hide();
-                    }
-                },function () {
-                    $("#waring_type_line_chart").html("");
-                    $('.waring_type_line_chart_block .no_data').hide();
-                    $('.waring_type_line_chart_block .response_error_data').show();
                 });
 
                 jsonpAjaxCall('pie_chart?uname='+uname,function (response) {
@@ -177,6 +185,8 @@ require(['jquery', 'echarts', 'clolck','domReady','modal'],
                                 }
                             );
                         });
+                        myChart2.dispose();
+                        myChart2 = echarts.init(document.getElementById('system_waring_number_chart'));
                         myChart2.setOption(pieOption);
                     }else{
                         $('#system_waring_number_chart').html("");
@@ -189,7 +199,13 @@ require(['jquery', 'echarts', 'clolck','domReady','modal'],
                     $('.system_waring_number .response_error_data').show();
                 });
 
+                if(!localStorage.time){
+                	localStorage.time=1
+                }
 
+                $('#foldlineTime').val(localStorage.time);
+
+                initFoldLineData(localStorage.time);
 
                 jsonpAjaxCall('categoryNum?uname='+uname,function (response) {
                     var circleHtml = '';
@@ -227,33 +243,16 @@ require(['jquery', 'echarts', 'clolck','domReady','modal'],
             initData();
 
             //选择时间周期 显示折线图
-            $(document).ready(function(){  
-　　　　        $('#foldlineTime').change(function(){  
-				//获取select的值
+      
+　　　　        $('#foldlineTime').change(function(){
+				//获取select的值 有两个???? 两套?对啊 这就要你帮忙了```真不会..而且现在有个问题是在页面刷新的时候会折线图会默认选这1天
+				//可能是我默认选择了1天吧 帮忙弄一下呗.对你来说就分分钟的事啦,,这你一看 还有什么难度吗`就几分钟 谢谢哈
 				var time=$(this).children('option:selected').val();
-				 jsonpAjaxCall('foldline?uname='+uname+'&time='+time,function (response) {
-                    line_option.xAxis[0].data = [];
-                    line_option.series[0].data = [];
-                    if(response.result && response.result.length >0){
-                        $('.waring_type_line_chart_block .no_data').hide();
-                        $.each(response.result,function (index,item) {
-                            line_option.xAxis[0].data.push(item.alarmtime);
-                            line_option.series[0].data.push(item.alarmnum);
-                        });
-                        myChart3.setOption(line_option);
-                    }else{
-                        $("#waring_type_line_chart").html("");
-                        $('.waring_type_line_chart_block .no_data').show();
-                        $('.waring_type_line_chart_block .response_error_data').hide();
-                    }
-                },function () {
-                    $("#waring_type_line_chart").html("");
-                    $('.waring_type_line_chart_block .no_data').hide();
-                    $('.waring_type_line_chart_block .response_error_data').show();
-                });
+				localStorage.time  = time;
+				initFoldLineData(localStorage.time);
 
 　　　   　    })  
-            })  
+
 
 
             //点击系统方块,显示该系统具体告警内容
